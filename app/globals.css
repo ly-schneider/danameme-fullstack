@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700;800;900;1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  background: rgb(97,64,64);
+  background: linear-gradient(135deg, #463030 0%, #5E5B5B 50%, #361F1F 100%);
+}
