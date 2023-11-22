@@ -8,7 +8,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { faBell } from "@fortawesome/free-regular-svg-icons";
 
-function Navigation() {
+export default function Navigation() {
   function renderNotifications() {
     console.log("Clicked");
   }
@@ -23,8 +23,8 @@ function Navigation() {
 
   return (
     <nav className="bg-background w-full items-center inline-flex flex-row">
-      <div className="items-center inline-flex flex-row flex-grow justify-center py-2">
-        <div className="w-1/3 flex justify-center">
+      <div className="items-center inline-flex flex-row flex-grow justify-around py-2">
+        <div className="w-1/3 flex justify-start">
           <Link href="/">
             <div className="inline-flex flex-row items-center ms-8">
               <img
@@ -36,34 +36,7 @@ function Navigation() {
             </div>
           </Link>
         </div>
-        <div className="w-1/3 flex justify-center">
-          <div className="inline-flex justify-center w-full">
-            <form className="max-w-lg w-full ">
-              <label
-                htmlFor="default-search"
-                className="mb-2 text-sm font-medium text-textAccent sr-only"
-              >
-                Search
-              </label>
-              <div className="relative focus:outline-none">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pb-[1px] pointer-events-none">
-                  <FontAwesomeIcon
-                    icon={faMagnifyingGlass}
-                    className="mt-0.5 text-textAccent"
-                  />
-                </div>
-                <input
-                  type="search"
-                  id="default-search"
-                  className="outline-none block w-full text-sm py-2 px-10 border border-transparent text-textAccent rounded-[1.25em] bg-[#504949] placeholder:text-textAccent"
-                  placeholder="Suchen"
-                  required
-                />
-              </div>
-            </form>
-          </div>
-        </div>
-        <div className="w-1/3 flex justify-start">
+        <div className="w-1/3 flex justify-end">
           <div className="inline-flex justify-start mx-8 items-center text-textSecondary fill-textSecondary text-xl">
             <a
               onClick={renderNotifications}
@@ -114,5 +87,3 @@ function Navigation() {
     </nav>
   );
 }
-
-export default Navigation;

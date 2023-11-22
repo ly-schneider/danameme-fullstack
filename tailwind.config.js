@@ -25,7 +25,8 @@ module.exports = {
       },
       fontFamily: {
         nunito: ["Nunito", "sans-serif"],
-        gabarito: ["Gabarito", "sans-serif"]
+        gabarito: ["Gabarito", "sans-serif"],
+        montserrat: ["Montserrat", "sans-serif"],
       }
     },
   },
