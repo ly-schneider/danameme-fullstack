@@ -1,36 +1,83 @@
-import React from "react";
+"use client";
+
+import { faPlusSquare } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSquarePlus } from "@fortawesome/free-regular-svg-icons";
+import { useState } from "react";
 
 export default function CreatePost() {
+  const [file, setFile] = useState(null);
+  const [title, setTitle] = useState("");
+  const [desc, setDesc] = useState("");
+
+  const handleFileChange = (event) => {
+    const input = event.target;
+    if (input.files.length > 0) {
+      setFile(input.files[0]);
+    } else {
+      setFile(null);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    console.log(title);
+    console.log(desc);
+    console.log(file);
+  };
   return (
-    <>
-      <div className="flex flex-row w-full justify-between mt-7 items-center">
-        <div className="justify-start flex flex-inline items-center">
-          <img
-            src="/profile-image-default.png"
-            alt="No image"
-            className="h-9 w-9 rounded-full"
-          />
-          <h3 className="ms-3 text-textSecondary font-montserrat font-bold text-lg">
-            lyschneider
-          </h3>
+    <div className="mt-6">
+      <div className="flex flex-row items-center">
+        <img src="/default-pp.png" className="h-11 w-11 " />
+        <p className="ms-3 text-textSecondary font-bold font-montserrat text-lg">
+          lyschneider
+        </p>
+      </div>
+      <form onSubmit={(e) => handleSubmit(e)}>
+        <input
+          onChange={(e) => setTitle(e.target.value)}
+          type="text"
+          placeholder="Titel"
+          required
+          className="w-full mt-6 py-3 px-3 rounded-[15px] bg-backgroundAccent font-montserrat font-semibold focus:outline-none border-none focus:shadow-none placeholder:text-textAccent placeholder:font-bold"
+        ></input>
+        <textarea
+          onChange={(e) => setDesc(e.target.value)}
+          placeholder="Beschreibung"
+          required
+          className="w-full mt-2 py-3 px-3 rounded-[15px] bg-backgroundAccent font-nunito font-semibold resize-none outline-none border-none shadow-none placeholder:text-textAccent placeholder:font-bold"
+          rows={5}
+        ></textarea>
+        <div className="flex flex-row justify-between mt-2">
+          <div className="flex flex-row items-center">
+            <label
+              htmlFor="fileInput"
+              className="inline-block cursor-pointer border-none bg-backgroundAccent px-5 py-2 font-nunito font-semibold rounded-buttons text-xs"
+            >
+              <FontAwesomeIcon icon={faPlusSquare} className="h-3 w-3 me-1" />
+              Bild anhängen
+              <input
+                type="file"
+                id="fileInput"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+            </label>
+            <span
+              className="ms-2.5 text-xs font-nunito font-semibold"
+              id="fileName"
+            >
+              {file ? file.name : ""}
+            </span>
+          </div>
+          <button
+            type="submit"
+            className="border-none bg-backgroundAccent px-5 py-2 font-nunito font-semibold rounded-buttons text-xs"
+          >
+            Post
+          </button>
         </div>
-      </div>
-      <input className="w-full mt-6 py-3 px-3 rounded-[15px] bg-gradient-to-r from-[#251F1F] to-[#353434] font-gabarito"></input>
-      <textarea
-        className="w-full mt-6 py-3 px-3 rounded-[15px] bg-gradient-to-r from-[#251F1F] to-[#353434] font-gabarito"
-        rows={5}
-      ></textarea>
-      <div className="flex flex-row w-full justify-between mt-2 items-center">
-        <button className="py-1.5 px-8 rounded-buttons font-nunito font-bold bg-background text-sm">
-          <FontAwesomeIcon icon={faSquarePlus} className="me-1.5 text-sm" />
-          Bild anhängen
-        </button>
-        <button className="py-1.5 px-8 rounded-buttons font-nunito font-bold bg-background text-sm">
-          Posten
-        </button>
-      </div>
-    </>
+      </form>
+    </div>
   );
 }

@@ -1,25 +1,8 @@
-"use client";
-
 import React from "react";
-import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faMagnifyingGlass,
-} from "@fortawesome/free-solid-svg-icons";
 import { faBell } from "@fortawesome/free-regular-svg-icons";
 
 export default function Navigation() {
-  function renderNotifications() {
-    console.log("Clicked");
-  }
-
-  function createPost() {
-    console.log("Clicked");
-  }
-
-  function handleSignOut() {
-    console.log("Clicked");
-  }
 
   return (
     <nav className="bg-background w-full items-center inline-flex flex-row">

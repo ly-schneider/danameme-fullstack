@@ -12,5 +12,25 @@ body {
   margin: 0;
   padding: 0;
   background: rgb(97,64,64);
-  background: linear-gradient(135deg, #463030 0%, #5E5B5B 50%, #361F1F 100%);
+  background: linear-gradient(135deg, #442F2F 0%, #5E5B5B 50%, #361F1F 100%);
+}
+
+input[type="file"] {
+  display: none;
+}
+
+/* Style the custom button */
+.custom-file-input {
+  display: inline-block;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Style the file name text */
+.file-name {
+  margin-left: 10px;
 }
