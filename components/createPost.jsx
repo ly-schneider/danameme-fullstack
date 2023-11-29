@@ -2,12 +2,16 @@
 
 import { faPlusSquare } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function CreatePost() {
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
+
+  const [profile, setProfile] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
 
   const handleFileChange = (event) => {
     const input = event.target;
@@ -18,9 +22,20 @@ export default function CreatePost() {
     }
   };
 
+  useEffect(() => {
+    async function getProfile() {
+      const profile = await JSON.parse(localStorage.getItem("profile"));
+      console.log(profile);
+      setProfile(profile);
+      setUsername(profile.username);
+      setProfileImage(profile.profileimage);
+    }
+    getProfile();
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     console.log(title);
     console.log(desc);
     console.log(file);
@@ -28,9 +43,12 @@ export default function CreatePost() {
   return (
     <div className="mt-6">
       <div className="flex flex-row items-center">
-        <img src="/default-pp.png" className="h-11 w-11 " />
+        <img
+          src={profileImage ? profileImage : "/default-pp.png"}
+          className="h-11 w-11 "
+        />
         <p className="ms-3 text-textSecondary font-bold font-montserrat text-lg">
-          lyschneider
+          {username && (username)}
         </p>
       </div>
       <form onSubmit={(e) => handleSubmit(e)}>
