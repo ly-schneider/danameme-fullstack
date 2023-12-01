@@ -1,9 +1,10 @@
+import Footer from "@/components/footer";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 
 export const metadata = {
     title: "DANAMEME",
-    description: "",
+    description: "DANAMEME, die Plattform für Campus-Releated Memes!",
 };
 
 export default function RootLayout({ children }) {
@@ -14,6 +15,7 @@ export default function RootLayout({ children }) {
                 <main className="justify-center mx-auto container max-w-xl">
                     <div className="mx-auto">{children}</div>
                 </main>
+                <Footer />
             </body>
         </html>
     );

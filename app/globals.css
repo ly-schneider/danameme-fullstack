@@ -1,18 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700;800;900;1000&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .title {
+    @apply text-3xl font-poppins font-extrabold text-text;
+  }
+
+  .input {
+    @apply text-xs font-lato font-semibold text-text border-[3px] border-primary bg-background rounded-form px-4 py-2 placeholder:text-xs placeholder:text-placeholder;
+  }
+}
+
 body {
-  color: #ffffff;
   margin: 0;
   padding: 0;
-  background: rgb(97,64,64);
-  background: linear-gradient(135deg, #442F2F 0%, #5E5B5B 50%, #361F1F 100%);
 }
 
 input[type="file"] {
@@ -24,7 +29,7 @@ input[type="file"] {
   display: inline-block;
   padding: 8px 12px;
   cursor: pointer;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: #fff;
   border: none;
   border-radius: 4px;

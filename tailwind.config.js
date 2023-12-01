@@ -9,25 +9,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#504949",
-        backgroundAccent: "#393131",
-
-        textPrimary: "#FFFFFF",
-        textSecondary: "#B5B1B1",
-        textAccent: "#787878",
-
-        linePrimary: "#4A4A4A",
+        background: "#131313",
+        text: "#EFF6F2",
+        primary: "#315955",
+        secondary: "#28121F",
+        accent: "#9E575D",
+        placeholder: "#545454",
+        muted: "#545454",
+        accentBackground: "#080808"
       },
       borderRadius: {
-        posts: "3px",
-        bars: "15px",
-        buttons: "20px",
-        images: "20px",
+        form: "10px",
+        button: "10px",
       },
       fontFamily: {
-        nunito: ["Nunito", "sans-serif"],
-        gabarito: ["Gabarito", "sans-serif"],
-        montserrat: ["Montserrat", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
+        lato: ["Lato", "sans-serif"],
       }
     },
   },
