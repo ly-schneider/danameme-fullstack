@@ -9,7 +9,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#474040",
+        background: "#504949",
+        backgroundAccent: "#393131",
 
         textPrimary: "#FFFFFF",
         textSecondary: "#B5B1B1",
@@ -25,7 +26,8 @@ module.exports = {
       },
       fontFamily: {
         nunito: ["Nunito", "sans-serif"],
-        gabarito: ["Gabarito", "sans-serif"]
+        gabarito: ["Gabarito", "sans-serif"],
+        montserrat: ["Montserrat", "sans-serif"],
       }
     },
   },

@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700;800;900;1000&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 
 @tailwind base;
 @tailwind components;
@@ -10,5 +12,25 @@ body {
   margin: 0;
   padding: 0;
   background: rgb(97,64,64);
-  background: linear-gradient(135deg, #463030 0%, #5E5B5B 50%, #361F1F 100%);
+  background: linear-gradient(135deg, #442F2F 0%, #5E5B5B 50%, #361F1F 100%);
+}
+
+input[type="file"] {
+  display: none;
+}
+
+/* Style the custom button */
+.custom-file-input {
+  display: inline-block;
+  padding: 8px 12px;
+  cursor: pointer;
+  background-color: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Style the file name text */
+.file-name {
+  margin-left: 10px;
 }
