@@ -11,7 +11,7 @@
   }
 
   .input {
-    @apply text-xs font-lato font-semibold text-text border-[3px] border-primary bg-background rounded-form px-4 py-2 placeholder:text-xs placeholder:text-placeholder;
+    @apply text-sm font-lato font-medium text-text border-[3px] border-primary bg-background rounded-form px-4 py-2 placeholder:text-sm placeholder:text-placeholder;
   }
 }
 

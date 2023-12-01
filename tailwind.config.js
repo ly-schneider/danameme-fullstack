@@ -16,7 +16,9 @@ module.exports = {
         accent: "#9E575D",
         placeholder: "#545454",
         muted: "#545454",
-        accentBackground: "#080808"
+        accentBackground: "#080808",
+        error: "#ff4141",
+        success: "#47db47",
       },
       borderRadius: {
         form: "10px",
@@ -25,7 +27,7 @@ module.exports = {
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
         lato: ["Lato", "sans-serif"],
-      }
+      },
     },
   },
   plugins: [require("flowbite/plugin")],
