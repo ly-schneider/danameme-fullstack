@@ -1,6 +1,6 @@
 import Footer from "@/components/footer";
 import "./globals.css";
-import Navigation from "@/components/Navigation";
+import Navigation from "@/components/navigation";
 
 export const metadata = {
   title: "DANAMEME",
