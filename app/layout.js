@@ -1,6 +1,7 @@
 import Footer from "@/components/footer";
 import "./globals.css";
 import Navigation from "@/components/navigation";
+import Container from "@/components/container";
 
 export const metadata = {
   title: "DANAMEME",
@@ -12,9 +13,7 @@ export default function RootLayout({ children }) {
     <html lang="de">
       <body className="bg-background flex min-h-screen flex-col items-center">
         <Navigation />
-        <main className="justify-center mx-auto container max-w-xl mb-16">
-          <div className="mx-auto">{children}</div>
-        </main>
+        <Container>{children}</Container>
         <Footer />
       </body>
     </html>

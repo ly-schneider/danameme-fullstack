@@ -35,9 +35,9 @@ export default function Home() {
   return (
     <>
       <div className="px-4">
-        <div className="mt-8">
+        <div>
           <h1 className="title text-2xl">DANAMEME</h1>
-          <div className="font-lato font-medium text-base text-text space-y-4 mt-2">
+          <div className="text space-y-4 mt-2">
             <p>
               DANAMEME ist eine Open-Source Social-Media-Plattform, welche
               selbständig entwickelt worden ist.
@@ -55,7 +55,7 @@ export default function Home() {
         </div>
         <div className="mt-12">
           <h1 className="title text-2xl">Werde informiert</h1>
-          <div className="font-lato font-medium text-base text-text space-y-4 mt-2">
+          <div className="text space-y-4 mt-2">
             <p>
               Um den Launch von DANAMEME nicht zu verpassen und einen
               einzigartigen Badge zu erhalten, füge deine E-Mail-Adresse hinzu,
