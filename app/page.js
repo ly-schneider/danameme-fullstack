@@ -45,11 +45,11 @@ export default function Home() {
             <p>
               Die Idee hinter DANAMEME ist es, eine Plattform zu schaffen, auf
               der der gesamte Campus Campus-bezogene Memes oder IT-Memes posten
-              kann. Ursprünglich entstand DANAMEME aus der Idee, 8einen
-              Subreddit zu erstellen. Da uns (Team DANAMIKE) dies jedoch
-              untersagt wurde, habe ich mich entschieden, eine eigene Plattform
-              zu entwickeln. Ich habe mich sofort an die Arbeit gemacht, um dies
-              zu realisieren.
+              kann. Ursprünglich entstand DANAMEME aus der Idee, einen Subreddit
+              zu erstellen. Da uns (Team DANAMIKE) dies jedoch untersagt wurde,
+              habe ich mich entschieden, eine eigene Plattform zu entwickeln.
+              Ich habe mich sofort an die Arbeit gemacht, um dies zu
+              realisieren.
             </p>
           </div>
         </div>
