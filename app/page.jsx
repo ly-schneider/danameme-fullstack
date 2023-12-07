@@ -169,6 +169,23 @@ export default function Home() {
     }
   }
 
+  function generateTitle(post) {
+    let title = post.title;
+    let newTitle = title
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "");
+
+    if (newTitle.substring(newTitle.length - 1) == "-") {
+      newTitle = newTitle.substring(0, newTitle.length - 1);
+    }
+
+    if (newTitle.length > 20) {
+      newTitle = newTitle.substring(0, 20);
+    }
+    return newTitle + "-" + post.id_post;
+  }
+
   return (
     <>
       <div className="space-y-24">
@@ -195,8 +212,12 @@ export default function Home() {
               </div>
             </div>
             <div className="w-full mt-3">
-              <h1 className="title text-2xl font-bold">{post.title}</h1>
-              {post.content && <p className="text text-base">{post.content}</p>}
+              <Link href={`/post/${generateTitle(post)}`}>
+                <h1 className="title text-2xl font-bold">{post.title}</h1>
+                {post.content && (
+                  <p className="text text-base">{post.content}</p>
+                )}
+              </Link>
             </div>
             {post.asset && (
               <div className="w-full mt-3">
@@ -218,11 +239,13 @@ export default function Home() {
                 />
               </div>
               <div className="flex items-center">
-                <FontAwesomeIcon
-                  icon={faComment}
-                  className="text text-2xl me-1"
-                />
-                <p className="text text-base">{post.comments}</p>
+                <Link href={`/post/${generateTitle(post)}`} className="flex">
+                  <FontAwesomeIcon
+                    icon={faComment}
+                    className="text text-2xl me-1"
+                  />
+                  <p className="text text-base">{post.comments}</p>
+                </Link>
               </div>
               <div>
                 <FontAwesomeIcon
