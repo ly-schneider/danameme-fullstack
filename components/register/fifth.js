@@ -166,7 +166,12 @@ export default function Fifth({ formData, setFormData, page, setPage }) {
           />
         </div>
         <button
-          className={"rounded-button text-text text-sm ms-4 h-[42px]" + (buttonDisabled ? " btn-secondary" : " btn-primary")}
+          className={
+            "rounded-button text-text text-sm ms-4 h-[42px] border-[3px] border-primary " +
+            (buttonDisabled
+              ? " btn-secondary pointer-events-none cursor-default"
+              : " btn-primary")
+          }
           type="button"
           onClick={addCode}
         >

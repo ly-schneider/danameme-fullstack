@@ -25,6 +25,7 @@ module.exports = {
         button: "10px",
         div: "10px",
         badge: "5px",
+        image: "20px",
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],

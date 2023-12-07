@@ -71,6 +71,7 @@ async function insertUser(formData) {
   });
 
   if (error) {
+    console.log(error);
     return "Es gab einen Fehler beim schreiben in die Datenbank!";
   }
 
@@ -85,6 +86,7 @@ async function getUser(formData) {
     .single();
 
   if (error) {
+    console.log(error);
     return "Es gab einen Fehler beim lesen aus der Datenbank!";
   }
 
@@ -100,6 +102,7 @@ async function insertProfileInto(id_account, formData) {
     .single();
 
   if (getError) {
+    console.log(getError);
     return "Es gab einen Fehler beim lesen aus der Datenbank!";
   }
 
@@ -136,6 +139,7 @@ async function getProfile(formData) {
     .single();
 
   if (error) {
+    console.log(error);
     return "Es gab einen Fehler beim lesen aus der Datenbank!";
   }
 
@@ -158,6 +162,7 @@ async function insertBadgeInto(id_profile, badgeList, userCount) {
     });
 
     if (error) {
+      console.log(error);
       errorText = "Es gab einen Fehler beim schreiben in die Datenbank!";
     }
   });
