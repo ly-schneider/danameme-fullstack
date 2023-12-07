@@ -18,11 +18,21 @@ export default function Fifth({ formData, setFormData, page, setPage }) {
 
   const [error, setError] = useState("");
 
+  const [buttonDisabled, setButtonDisabled] = useState(true);
+
   useEffect(() => {
     if (formData.code != 0) {
       addCodeWithCode(formData.code);
     }
   }, []);
+
+  useEffect(() => {
+    if (code.length == 6) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [code]);
 
   useEffect(() => {
     if (errorCode != "") {
@@ -156,7 +166,7 @@ export default function Fifth({ formData, setFormData, page, setPage }) {
           />
         </div>
         <button
-          className="bg-primary rounded-button px-6 py-2 text-text text-sm ms-4 h-[42px]"
+          className={"rounded-button text-text text-sm ms-4 h-[42px]" + (buttonDisabled ? " btn-secondary" : " btn-primary")}
           type="button"
           onClick={addCode}
         >

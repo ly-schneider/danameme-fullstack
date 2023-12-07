@@ -8,7 +8,7 @@ import Third from "@/components/register/third";
 import { useState } from "react";
 
 export default function RegisterPage() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(5);
 
   const [formData, setFormData] = useState({
     email: "",
