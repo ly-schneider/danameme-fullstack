@@ -1,36 +1,38 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import supabase from "@/components/supabase";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisH } from "@fortawesome/free-solid-svg-icons";
 import { faComment, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
-import Icon from "@mdi/react";
+import { faArrowLeft, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  mdiArrowBottomLeftBoldOutline,
-  mdiArrowBottomRightBoldOutline,
   mdiArrowDownBold,
   mdiArrowDownBoldOutline,
   mdiArrowUpBold,
   mdiArrowUpBoldOutline,
 } from "@mdi/js";
-import { useRouter } from "next/navigation";
+import Icon from "@mdi/react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
-export default function Home() {
-  const router = useRouter();
-  const [posts, setPosts] = useState([]);
+export default function PostPage({ params }) {
+  const [post, setPost] = useState([]);
+  const [comments, setComments] = useState([]);
   const [profileId, setProfileId] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function getData() {
       const session = await checkSession();
+      console.log(session);
       if (session) {
         const accountId = await getAccount(session);
+        console.log(accountId);
         if (accountId) {
           const profileId = await getProfile(accountId);
+          console.log(profileId);
           if (profileId) {
-            await fetchPosts(profileId);
+            const postId = await fetchPost(profileId);
+            await fetchComments(postId, profileId);
           }
         }
       }
@@ -85,13 +87,16 @@ export default function Home() {
     return data.id_profile;
   }
 
-  async function fetchPosts(profileId) {
+  async function fetchPost(profileId) {
+    const id = params.url.substr(params.url.length - 1, params.url.length);
+    console.log(id);
+
     const { data: postsData, error: postsError } = await supabase
       .from("post")
       .select(
         "id_post, title, content, asset, createdat, profile_id, profile (username, profileimage, id_profile)"
       )
-      .order("createdat", { ascending: false });
+      .eq("id_post", id);
 
     if (postsError) {
       console.log(postsError);
@@ -123,7 +128,7 @@ export default function Home() {
       })
     );
 
-    const countComments = await Promise.all(
+    const checkRated = await Promise.all(
       calcLikes.map(async (post) => {
         const { data: commentData, error } = await supabase
           .from("comment")
@@ -158,8 +163,76 @@ export default function Home() {
       })
     );
 
-    console.log(countComments);
-    setPosts(countComments);
+    console.log(checkRated);
+    setPost(checkRated[0]);
+    return checkRated[0].id_post;
+  }
+
+  async function fetchComments(postId, profileId) {
+    const { data: commentData, error: commentError } = await supabase
+      .from("comment")
+      .select(
+        "id_comment, text, createdat, profile_id, answer_id, profile (username, profileimage, id_profile)"
+      )
+      .eq("post_id", postId);
+
+    if (commentError) {
+      console.log(commentError);
+      return;
+    }
+
+    const calcComments = await Promise.all(
+      commentData.map(async (comment) => {
+        const { data: ratingData, error } = await supabase
+          .from("rating_comment")
+          .select("*")
+          .eq("comment_id", comment.id_comment);
+
+        let count = 0;
+        ratingData.map((rating) => {
+          if (rating.type == true) {
+            count++;
+          } else {
+            count--;
+          }
+        });
+
+        if (error) {
+          console.log(error);
+          return { ...comment, likes: 0 };
+        }
+
+        return { ...comment, likes: count };
+      })
+    );
+
+    const checkRated = await Promise.all(
+      calcComments.map(async (comment) => {
+        let { data: ratingData, error: ratingError } = await supabase
+          .from("rating_comment")
+          .select("*")
+          .eq("comment_id", comment.id_comment)
+          .eq("profile_id", profileId);
+
+        console.log(ratingData);
+
+        if (ratingError) {
+          console.log(ratingError);
+          return { ...comment, comments: commentData.length, rating: null };
+        }
+
+        if (ratingData.length == 0) {
+          ratingData = null;
+        } else {
+          ratingData = ratingData[0].type;
+        }
+
+        return { ...comment, comments: commentData.length, rating: ratingData };
+      })
+    );
+
+    console.log(checkRated);
+    setComments(checkRated[0]);
   }
 
   function calcTimeDifference(date) {
@@ -192,87 +265,27 @@ export default function Home() {
     }
   }
 
-  function generateTitle(post) {
-    let title = post.title;
-    let newTitle = title
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
-
-    if (newTitle.substring(newTitle.length - 1) == "-") {
-      newTitle = newTitle.substring(0, newTitle.length - 1);
-    }
-
-    if (newTitle.length > 20) {
-      newTitle = newTitle.substring(0, 20);
-    }
-    return newTitle + "-" + post.id_post;
-  }
-
-  async function handleVote(postId, type) {
-    const { data, error } = await supabase
-      .from("rating_post")
-      .select("*")
-      .eq("post_id", postId)
-      .eq("profile_id", profileId);
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    console.log(data)
-
-    if (data.length == 0) {
-      const { error } = await supabase.from("rating_post").insert({
-        post_id: postId,
-        profile_id: profileId,
-        type: type,
-      });
-
-      if (error) {
-        console.log(error);
-        return;
-      }
-    } else {
-      if (data[0].type == type) {
-        const { error } = await supabase
-          .from("rating_post")
-          .delete()
-          .eq("id_ratingpost", data[0].id_ratingpost);
-
-        if (error) {
-          console.log(error);
-          return;
-        }
-      } else {
-        const { error } = await supabase
-          .from("rating_post")
-          .update({ type: type })
-          .eq("id_ratingpost", data[0].id_ratingpost);
-
-        if (error) {
-          console.log(error);
-          return;
-        }
-      }
-    }
-
-    await fetchPosts(profileId);
-  }
-
   return (
     <>
-      <div className="space-y-24">
-        {posts.map((post) => (
+      {post.length != 0 && (
+        <>
           <div key={post.id_post}>
-            <div className="flex flex-row items-center justify-between">
+            <Link href={"/"}>
+              <button className="btn-secondary border-accent items-center flex">
+                <FontAwesomeIcon
+                  icon={faArrowLeft}
+                  className="text text-sm me-2"
+                />
+                Zurück
+              </button>
+            </Link>
+            <div className="flex flex-row items-center justify-between mt-8">
               <div className="flex items-center">
                 <img
                   src={post.profile.profileimage}
-                  className="rounded-full border-[3px] border-accent h-14 w-14"
+                  className="rounded-full border-[3px] border-accent h-16 w-16"
                 />
-                <h1 className="text-text font-bold text-xl font-poppins ms-4">
+                <h1 className="text-text font-bold text-xl font-poppins ms-2">
                   {post.profile.username}
                 </h1>
               </div>
@@ -287,12 +300,8 @@ export default function Home() {
               </div>
             </div>
             <div className="w-full mt-3">
-              <Link href={`/post/${generateTitle(post)}`}>
-                <h1 className="title text-2xl font-bold">{post.title}</h1>
-                {post.content && (
-                  <p className="text text-base">{post.content}</p>
-                )}
-              </Link>
+              <h1 className="title text-2xl font-bold">{post.title}</h1>
+              {post.content && <p className="text text-base">{post.content}</p>}
             </div>
             {post.asset && (
               <div className="w-full mt-3">
@@ -322,13 +331,11 @@ export default function Home() {
                 />
               </div>
               <div className="flex items-center">
-                <Link href={`/post/${generateTitle(post)}`} className="flex">
-                  <FontAwesomeIcon
-                    icon={faComment}
-                    className="text text-2xl me-1"
-                  />
-                  <p className="text text-base">{post.comments}</p>
-                </Link>
+                <FontAwesomeIcon
+                  icon={faComment}
+                  className="text text-2xl me-1"
+                />
+                <p className="text text-base">{post.comments}</p>
               </div>
               <div>
                 <FontAwesomeIcon
@@ -338,8 +345,11 @@ export default function Home() {
               </div>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="w-full mt-8">
+
+          </div>
+        </>
+      )}
     </>
   );
 }
