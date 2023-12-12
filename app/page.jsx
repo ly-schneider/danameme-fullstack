@@ -8,8 +8,6 @@ import { faEllipsisH } from "@fortawesome/free-solid-svg-icons";
 import { faComment, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import Icon from "@mdi/react";
 import {
-  mdiArrowBottomLeftBoldOutline,
-  mdiArrowBottomRightBoldOutline,
   mdiArrowDownBold,
   mdiArrowDownBoldOutline,
   mdiArrowUpBold,
@@ -221,7 +219,7 @@ export default function Home() {
       return;
     }
 
-    console.log(data)
+    console.log(data);
 
     if (data.length == 0) {
       const { error } = await supabase.from("rating_post").insert({
