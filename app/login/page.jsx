@@ -110,7 +110,7 @@ export default function LoginPage() {
         </div>
         <div className="flex justify-between mt-5">
           <Link href="/register">
-            <button className="btn-secondary text text-sm" type="submit">
+            <button className="btn-secondary text text-sm" type="button">
               Registrieren
             </button>
           </Link>
