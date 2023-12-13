@@ -1,5 +1,17 @@
 "use client";
 
+import { getAccount } from "@/components/auth/getAccount";
+import { getProfile } from "@/components/auth/getProfile";
+import { getSession } from "@/components/auth/getSession";
+import { addComment } from "@/components/comment/addComment";
+import { handleCommentDelete } from "@/components/comment/handleDelete";
+import { handleCommentReport } from "@/components/comment/handleReport";
+import { handleCommentVote } from "@/components/comment/handleVote";
+import { saveAnswerComment } from "@/components/comment/saveAnswer";
+import { calcTimeDifference } from "@/components/post/calcTimeDifference";
+import { handlePostDelete } from "@/components/post/handleDelete";
+import { handlePostReport } from "@/components/post/handleReport";
+import { handleVote } from "@/components/post/handleVote";
 import supabase from "@/components/supabase";
 import {
   faComment,
@@ -11,6 +23,7 @@ import {
   faCheckCircle,
   faEllipsisH,
   faReply,
+  faRotateRight,
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -32,28 +45,32 @@ export default function PostPage({ params }) {
   const [post, setPost] = useState([]);
   const [comments, setComments] = useState([]);
 
-  const [profileId, setProfileId] = useState(null);
   const [profile, setProfile] = useState(null);
 
   const [commentText, setCommentText] = useState("");
 
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState("");
 
   const [error, setError] = useState("");
 
   useEffect(() => {
     async function getData() {
-      const session = await checkSession();
-      console.log(session);
+      const session = await getSession();
       if (session) {
-        const accountId = await getAccount(session);
-        console.log(accountId);
-        if (accountId) {
-          const profileId = await getProfile(accountId);
-          console.log(profileId);
-          if (profileId) {
-            const postId = await fetchPost(profileId);
-            await fetchComments(postId, profileId);
+        const account = await getAccount(session.session.user.email);
+        if (account) {
+          const profile = await getProfile(account.id_account);
+          if (profile) {
+            setProfile(profile);
+            const post = await fetchPost(profile.id_profile);
+            setPost(post);
+            if (post != null) {
+              const comments = await fetchComments(
+                post.id_post,
+                profile.id_profile
+              );
+              setComments(comments);
+            }
           }
         }
       }
@@ -61,56 +78,9 @@ export default function PostPage({ params }) {
     getData();
   }, []);
 
-  async function checkSession() {
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    if (data.session == null) {
-      router.push("/login");
-      return;
-    }
-
-    return data.session.user.email;
-  }
-
-  async function getAccount(email) {
-    const { data, error } = await supabase
-      .from("account")
-      .select("id_account")
-      .eq("email", email)
-      .single();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    return data.id_account;
-  }
-
-  async function getProfile(accountId) {
-    const { data, error } = await supabase
-      .from("profile")
-      .select("*")
-      .eq("account_id", accountId)
-      .single();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    setProfileId(data.id_profile);
-    setProfile(data);
-    return data.id_profile;
-  }
-
   async function fetchPost(profileId) {
-    const id = params.url.substr(params.url.length - 1, params.url.length);
+    let id = params.url.split("-");
+    id = id[id.length - 1];
     console.log(id);
 
     const { data: postsData, error: postsError } = await supabase
@@ -123,6 +93,11 @@ export default function PostPage({ params }) {
     if (postsError) {
       console.log(postsError);
       return;
+    }
+
+    if (postsData.length == 0) {
+      setPost([]);
+      return null;
     }
 
     const calcLikes = await Promise.all(
@@ -185,9 +160,7 @@ export default function PostPage({ params }) {
       })
     );
 
-    console.log(checkRated);
-    setPost(checkRated[0]);
-    return checkRated[0].id_post;
+    return checkRated[0];
   }
 
   async function fetchComments(postId, profileId) {
@@ -273,170 +246,7 @@ export default function PostPage({ params }) {
     const commentsWithoutInserted = removeInsertedComments(commentsWithAnswers);
 
     console.log(commentsWithoutInserted);
-    setComments(commentsWithoutInserted);
-  }
-
-  function calcTimeDifference(date) {
-    const targetDateTime = new Date(date);
-    const currentDateTime = new Date();
-
-    const timeDifference = currentDateTime - targetDateTime;
-
-    const secondsDifference = Math.floor(timeDifference / 1000);
-
-    if (secondsDifference < 60) {
-      return `vor ${secondsDifference} Sekunde${
-        secondsDifference !== 1 ? "n" : ""
-      }`;
-    } else if (secondsDifference < 3600) {
-      const minutes = Math.floor(secondsDifference / 60);
-      return `vor ${minutes} Minute${minutes !== 1 ? "n" : ""}`;
-    } else if (secondsDifference < 86400) {
-      const hours = Math.floor(secondsDifference / 3600);
-      return `vor ${hours} Stude${hours !== 1 ? "n" : ""}`;
-    } else if (secondsDifference < 604800) {
-      const days = Math.floor(secondsDifference / 86400);
-      return `vor ${days} Tag${days !== 1 ? "en" : ""}`;
-    } else if (secondsDifference < 2419200) {
-      const weeks = Math.floor(secondsDifference / 604800);
-      return `vor ${weeks} Woche${weeks !== 1 ? "n" : ""}`;
-    } else if (secondsDifference < 29030400) {
-      const months = Math.floor(secondsDifference / 2419200);
-      return `vor ${months} Monat${months !== 1 ? "en" : ""}`;
-    }
-  }
-
-  async function handleVote(id, type) {
-    const { data, error } = await supabase
-      .from("rating_post")
-      .select("*")
-      .eq("post_id", id)
-      .eq("profile_id", profileId);
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    if (data.length == 0) {
-      const { data, error } = await supabase
-        .from("rating_post")
-        .insert({ post_id: id, profile_id: profileId, type: type });
-      if (error) {
-        console.log(error);
-        return;
-      }
-    } else {
-      const { data, error } = await supabase
-        .from("rating_post")
-        .update({ type: type })
-        .eq("post_id", id)
-        .eq("profile_id", profileId);
-      if (error) {
-        console.log(error);
-        return;
-      }
-    }
-  }
-
-  async function handleCommentVote(id, type) {
-    const { data, error } = await supabase
-      .from("rating_comment")
-      .select("*")
-      .eq("comment_id", id)
-      .eq("profile_id", profileId);
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    if (data.length == 0) {
-      const { data, error } = await supabase
-        .from("rating_comment")
-        .insert({ comment_id: id, profile_id: profileId, type: type });
-      if (error) {
-        console.log(error);
-        return;
-      }
-    } else {
-      const { data, error } = await supabase
-        .from("rating_comment")
-        .update({ type: type })
-        .eq("comment_id", id)
-        .eq("profile_id", profileId);
-      if (error) {
-        console.log(error);
-        return;
-      }
-    }
-
-    await fetchComments(post.id_post, profileId);
-  }
-
-  async function saveAnswerComment(commentId, postId, text) {
-    const { data: answerData, error: answerError } = await supabase
-      .from("comment")
-      .insert({
-        text: text,
-        profile_id: profileId,
-        post_id: postId,
-        answer_id: commentId,
-      });
-
-    if (answerError) {
-      console.log(answerError);
-      return;
-    }
-
-    await fetchComments(postId, profileId);
-  }
-
-  async function handleDelete(id) {
-    const { data, error } = await supabase
-      .from("comment")
-      .delete()
-      .eq("id_comment", id);
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    await fetchComments(post.id_post, profileId);
-  }
-
-  async function handleReport(id) {
-    const { error } = await supabase
-      .from("report")
-      .insert({ comment_id: id, reason: "Reported" });
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    setSuccess(true);
-    setTimeout(() => {
-      setSuccess(false);
-    }, 3000);
-  }
-
-  async function addComment(postId, text) {
-    const { error: commentError } = await supabase.from("comment").insert({
-      text: text,
-      profile_id: profileId,
-      post_id: postId,
-    });
-
-    if (commentError) {
-      console.log(commentError);
-      return;
-    }
-
-    setCommentText("");
-
-    await fetchComments(postId, profileId);
+    return commentsWithoutInserted;
   }
 
   function ReplyForm({ onReplySubmit }) {
@@ -488,19 +298,27 @@ export default function PostPage({ params }) {
   function Comment({ comment }) {
     const [showReplyForm, setShowReplyForm] = useState(false);
 
-    const handleToggleReplyForm = () => {
+    function handleToggleReplyForm() {
       setShowReplyForm(!showReplyForm);
-    };
+    }
 
-    const handleReplySubmit = (replyText) => {
+    async function handleReplySubmit(replyText) {
       console.log(replyText);
       if (replyText == false) {
         setShowReplyForm(false);
         return;
       }
-      // Implement the logic to submit the reply, e.g., using an API call
-      saveAnswerComment(comment.id_comment, comment.post_id, replyText);
-    };
+
+      saveAnswerComment(
+        comment.id_comment,
+        comment.post_id,
+        replyText,
+        profile.id_profile
+      );
+
+      const newComments = await fetchComments(post.id_post, profile.id_profile);
+      setComments(newComments);
+    }
 
     return (
       <div
@@ -532,10 +350,17 @@ export default function PostPage({ params }) {
                   />
                 )}
               >
-                {profileId == comment.profile.id_profile ? (
+                {profile.id_profile == comment.profile.id_profile ? (
                   <Dropdown.Item
                     className="text text-sm hover:bg-accentBackground"
-                    onClick={() => handleDelete(comment.id_comment)}
+                    onClick={async () => {
+                      await handleCommentDelete(comment.id_comment);
+                      const newComments = await fetchComments(
+                        post.id_post,
+                        profile.id_profile
+                      );
+                      setComments(newComments);
+                    }}
                   >
                     <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
                     Delete
@@ -543,7 +368,14 @@ export default function PostPage({ params }) {
                 ) : (
                   <Dropdown.Item
                     className="text text-sm hover:bg-accentBackground"
-                    onClick={() => handleReport(comment.id_comment)}
+                    onClick={async () => {
+                      handleCommentReport(comment.id_comment);
+
+                      setSuccess("Kommentar wurde gemeldet!");
+                      setTimeout(() => {
+                        setSuccess("");
+                      }, 3000);
+                    }}
                   >
                     <FontAwesomeIcon icon={faFlag} className="me-1.5" />
                     Report
@@ -562,7 +394,18 @@ export default function PostPage({ params }) {
               }
               size={1.22}
               className="text text-2xl hover:cursor-pointer"
-              onClick={() => handleCommentVote(comment.id_comment, true)}
+              onClick={async () => {
+                await handleCommentVote(
+                  comment.id_comment,
+                  true,
+                  profile.id_profile
+                );
+                const newComment = await fetchComments(
+                  post.id_post,
+                  profile.id_profile
+                );
+                setComments(newComment);
+              }}
             />
             <p className="text text-base mx-0.5">{comment.likes}</p>
             <Icon
@@ -573,7 +416,18 @@ export default function PostPage({ params }) {
               }
               size={1.22}
               className="text text-2xl hover:cursor-pointer"
-              onClick={() => handleCommentVote(comment.id_comment, false)}
+              onClick={async () => {
+                await handleCommentVote(
+                  comment.id_comment,
+                  false,
+                  profile.id_profile
+                );
+                const newComment = await fetchComments(
+                  post.id_post,
+                  profile.id_profile
+                );
+                setComments(newComment);
+              }}
             />
           </div>
           <div
@@ -597,47 +451,88 @@ export default function PostPage({ params }) {
 
   return (
     <>
-      {success && (
+      {success != "" && (
         <Toast className="bg-accentBackground fixed z-20 w-auto top-5 left-[calc(50vw_-_117.5px)]">
           <div className="flex items-center">
             <FontAwesomeIcon
               icon={faCheckCircle}
               className="text text-xl me-2"
             />
-            <p className="text text-sm">Kommentar wurde gemeldet</p>
+            <p className="text text-sm">{success}</p>
           </div>
         </Toast>
       )}
-      {post.length != 0 && (
+      {post.length != 0 ? (
         <>
           <div key={post.id_post}>
-            <Link href={"/"}>
-              <button className="btn-secondary items-center flex">
-                <FontAwesomeIcon
-                  icon={faArrowLeft}
-                  className="text text-sm me-2"
-                />
-                Zurück
-              </button>
-            </Link>
+            <button
+              className="btn-secondary items-center flex"
+              onClick={() => router.back()}
+            >
+              <FontAwesomeIcon
+                icon={faArrowLeft}
+                className="text text-sm me-2"
+              />
+              Zurück
+            </button>
             <div className="flex flex-row items-center justify-between mt-8">
               <div className="flex items-center">
-                <img
-                  src={post.profile.profileimage}
-                  className="rounded-full border-[3px] border-accent h-16 w-16"
-                />
-                <h1 className="text-text font-bold text-xl font-poppins ms-2">
-                  {post.profile.username}
-                </h1>
+                <Link href={`/p/${post.profile.username}`} passHref>
+                  <img
+                    src={post.profile.profileimage}
+                    className="rounded-full border-[3px] border-accent h-16 w-16"
+                  />
+                </Link>
+                <Link href={`/p/${post.profile.username}`} passHref>
+                  <h1 className="text-text font-bold text-xl font-poppins ms-2">
+                    {post.profile.username}
+                  </h1>
+                </Link>
               </div>
               <div className="flex items-center">
                 <p className="text-muted text text-sm">
                   {calcTimeDifference(post.createdat)}
                 </p>
-                <FontAwesomeIcon
-                  icon={faEllipsisH}
-                  className="ms-4 text-muted text-2xl"
-                />
+                <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md">
+                  <Dropdown
+                    dismissOnClick={false}
+                    label=""
+                    renderTrigger={() => (
+                      <FontAwesomeIcon
+                        icon={faEllipsisH}
+                        className="ms-4 text-muted text-2xl hover:cursor-pointer"
+                      />
+                    )}
+                  >
+                    {profile.id_profile == post.profile.id_profile ? (
+                      <Dropdown.Item
+                        className="text text-sm hover:bg-accentBackground"
+                        onClick={async () => {
+                          await handlePostDelete(post.id_post);
+                          router.push("/");
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
+                        Delete
+                      </Dropdown.Item>
+                    ) : (
+                      <Dropdown.Item
+                        className="text text-sm hover:bg-accentBackground"
+                        onClick={async () => {
+                          handlePostReport(post.id_post);
+
+                          setSuccess("Beitrag wurde gemeldet!");
+                          setTimeout(() => {
+                            setSuccess("");
+                          }, 3000);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faFlag} className="me-1.5" />
+                        Report
+                      </Dropdown.Item>
+                    )}
+                  </Dropdown>
+                </div>
               </div>
             </div>
             <div className="w-full mt-3">
@@ -657,7 +552,11 @@ export default function PostPage({ params }) {
                   }
                   size={1.22}
                   className="text text-2xl hover:cursor-pointer"
-                  onClick={() => handleVote(post.id_post, true)}
+                  onClick={async () => {
+                    await handleVote(post.id_post, true, profile.id_profile);
+                    const postNew = await fetchPost(profile.id_profile);
+                    setPost(postNew);
+                  }}
                 />
                 <p className="text text-base mx-0.5">{post.likes}</p>
                 <Icon
@@ -668,7 +567,12 @@ export default function PostPage({ params }) {
                   }
                   size={1.22}
                   className="text text-2xl hover:cursor-pointer"
-                  onClick={() => handleVote(post.id_post, false)}
+                  onClick={async () => {
+                    console.log(post.id_post);
+                    await handleVote(post.id_post, false, profile.id_profile);
+                    const postNew = await fetchPost(profile.id_profile);
+                    setPost(postNew);
+                  }}
                 />
               </div>
               <div className="flex items-center">
@@ -707,11 +611,22 @@ export default function PostPage({ params }) {
                             ? "btn-primary border-[3px] border-primary"
                             : "btn-secondary text-muted"
                         }
-                        onClick={() => addComment(post.id_post, commentText)}
+                        onClick={() =>
+                          addComment(
+                            post.id_post,
+                            commentText,
+                            profile.id_profile
+                          )
+                        }
                       >
                         Kommentieren
                       </button>
                     </div>
+                  </div>
+                )}
+                {comments.length == 0 && (
+                  <div className="w-full flex justify-start">
+                    <p className="text text-muted">Keine Kommentare</p>
                   </div>
                 )}
                 {comments.map((comment) => (
@@ -721,6 +636,25 @@ export default function PostPage({ params }) {
             </div>
           </div>
         </>
+      ) : (
+        <div className="w-full justify-center">
+          <h1 className="title text-center text-lg">
+            Beitrag konnte nicht gefunden werden!
+          </h1>
+          <div className="flex justify-between items-center mx-[105px] mt-6">
+            <button
+              className="btn-primary border-[3px] border-primary"
+              onClick={() => router.back()}
+            >
+              <FontAwesomeIcon icon={faArrowLeft} className="me-1.5" />
+              Zurück
+            </button>
+            <button className="btn-secondary" onClick={() => router.refresh()}>
+              <FontAwesomeIcon icon={faRotateRight} className="me-1.5" />
+              Aktualisieren
+            </button>
+          </div>
+        </div>
       )}
     </>
   );

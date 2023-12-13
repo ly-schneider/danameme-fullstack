@@ -2,10 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import supabase from "@/components/supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH } from "@fortawesome/free-solid-svg-icons";
-import { faComment, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+import {
+  faCheckCircle,
+  faComment,
+  faFlag,
+  faPaperPlane,
+  faTrashCan,
+} from "@fortawesome/free-regular-svg-icons";
 import Icon from "@mdi/react";
 import {
   mdiArrowDownBold,
@@ -13,275 +18,121 @@ import {
   mdiArrowUpBold,
   mdiArrowUpBoldOutline,
 } from "@mdi/js";
+import { Dropdown, Toast } from "flowbite-react";
+import { getSession } from "@/components/auth/getSession";
+import { getAccount } from "@/components/auth/getAccount";
+import { getProfile } from "@/components/auth/getProfile";
+import { fetchPosts } from "@/components/post/fetchPosts";
+import { calcTimeDifference } from "@/components/post/calcTimeDifference";
+import { handleVote } from "@/components/post/handleVote";
+import { handlePostDelete } from "@/components/post/handleDelete";
+import { handlePostReport } from "@/components/post/handleReport";
+import { generateTitle } from "@/components/post/generateTitle";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const [profileId, setProfileId] = useState(null);
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
     async function getData() {
-      const session = await checkSession();
+      const session = await getSession();
       if (session) {
-        const accountId = await getAccount(session);
+        const accountId = await getAccount(session.session.user.email);
         if (accountId) {
-          const profileId = await getProfile(accountId);
+          const profileId = await getProfile(accountId.id_account);
           if (profileId) {
-            await fetchPosts(profileId);
+            setProfileId(profileId.id_profile);
+            const posts = await fetchPosts(profileId.id_profile);
+            setPosts(posts);
           }
         }
+      } else {
+        router.push("/login");
       }
     }
     getData();
   }, []);
 
-  async function checkSession() {
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    if (data.session == null) {
-      router.push("/login");
-      return;
-    }
-
-    return data.session.user.email;
-  }
-
-  async function getAccount(email) {
-    const { data, error } = await supabase
-      .from("account")
-      .select("id_account")
-      .eq("email", email)
-      .single();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    return data.id_account;
-  }
-
-  async function getProfile(accountId) {
-    const { data, error } = await supabase
-      .from("profile")
-      .select("id_profile")
-      .eq("account_id", accountId)
-      .single();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    setProfileId(data.id_profile);
-    return data.id_profile;
-  }
-
-  async function fetchPosts(profileId) {
-    const { data: postsData, error: postsError } = await supabase
-      .from("post")
-      .select(
-        "id_post, title, content, asset, createdat, profile_id, profile (username, profileimage, id_profile)"
-      )
-      .order("createdat", { ascending: false });
-
-    if (postsError) {
-      console.log(postsError);
-      return;
-    }
-
-    const calcLikes = await Promise.all(
-      postsData.map(async (post) => {
-        const { data: ratingData, error } = await supabase
-          .from("rating_post")
-          .select("*")
-          .eq("post_id", post.id_post);
-
-        let count = 0;
-        ratingData.map((rating) => {
-          if (rating.type == true) {
-            count++;
-          } else {
-            count--;
-          }
-        });
-
-        if (error) {
-          console.log(error);
-          return { ...post, likes: 0 };
-        }
-
-        return { ...post, likes: count };
-      })
-    );
-
-    const countComments = await Promise.all(
-      calcLikes.map(async (post) => {
-        const { data: commentData, error } = await supabase
-          .from("comment")
-          .select("*")
-          .eq("post_id", post.id_post);
-
-        if (error) {
-          console.log(error);
-          return { ...post, comments: 0 };
-        }
-
-        let { data: ratingData, error: ratingError } = await supabase
-          .from("rating_post")
-          .select("*")
-          .eq("post_id", post.id_post)
-          .eq("profile_id", profileId);
-
-        console.log(ratingData);
-
-        if (ratingError) {
-          console.log(ratingError);
-          return { ...post, comments: commentData.length, rating: null };
-        }
-
-        if (ratingData.length == 0) {
-          ratingData = null;
-        } else {
-          ratingData = ratingData[0].type;
-        }
-
-        return { ...post, comments: commentData.length, rating: ratingData };
-      })
-    );
-
-    console.log(countComments);
-    setPosts(countComments);
-  }
-
-  function calcTimeDifference(date) {
-    const targetDateTime = new Date(date);
-    const currentDateTime = new Date();
-
-    const timeDifference = currentDateTime - targetDateTime;
-
-    const secondsDifference = Math.floor(timeDifference / 1000);
-
-    if (secondsDifference < 60) {
-      return `vor ${secondsDifference} Sekunde${
-        secondsDifference !== 1 ? "n" : ""
-      }`;
-    } else if (secondsDifference < 3600) {
-      const minutes = Math.floor(secondsDifference / 60);
-      return `vor ${minutes} Minute${minutes !== 1 ? "n" : ""}`;
-    } else if (secondsDifference < 86400) {
-      const hours = Math.floor(secondsDifference / 3600);
-      return `vor ${hours} Stude${hours !== 1 ? "n" : ""}`;
-    } else if (secondsDifference < 604800) {
-      const days = Math.floor(secondsDifference / 86400);
-      return `vor ${days} Tag${days !== 1 ? "en" : ""}`;
-    } else if (secondsDifference < 2419200) {
-      const weeks = Math.floor(secondsDifference / 604800);
-      return `vor ${weeks} Woche${weeks !== 1 ? "n" : ""}`;
-    } else if (secondsDifference < 29030400) {
-      const months = Math.floor(secondsDifference / 2419200);
-      return `vor ${months} Monat${months !== 1 ? "en" : ""}`;
-    }
-  }
-
-  function generateTitle(post) {
-    let title = post.title;
-    let newTitle = title
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
-
-    if (newTitle.substring(newTitle.length - 1) == "-") {
-      newTitle = newTitle.substring(0, newTitle.length - 1);
-    }
-
-    if (newTitle.length > 20) {
-      newTitle = newTitle.substring(0, 20);
-    }
-    return newTitle + "-" + post.id_post;
-  }
-
-  async function handleVote(postId, type) {
-    const { data, error } = await supabase
-      .from("rating_post")
-      .select("*")
-      .eq("post_id", postId)
-      .eq("profile_id", profileId);
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    console.log(data);
-
-    if (data.length == 0) {
-      const { error } = await supabase.from("rating_post").insert({
-        post_id: postId,
-        profile_id: profileId,
-        type: type,
-      });
-
-      if (error) {
-        console.log(error);
-        return;
-      }
-    } else {
-      if (data[0].type == type) {
-        const { error } = await supabase
-          .from("rating_post")
-          .delete()
-          .eq("id_ratingpost", data[0].id_ratingpost);
-
-        if (error) {
-          console.log(error);
-          return;
-        }
-      } else {
-        const { error } = await supabase
-          .from("rating_post")
-          .update({ type: type })
-          .eq("id_ratingpost", data[0].id_ratingpost);
-
-        if (error) {
-          console.log(error);
-          return;
-        }
-      }
-    }
-
-    await fetchPosts(profileId);
-  }
-
   return (
     <>
-      <div className="space-y-24">
+      {success != "" && (
+        // Goofy ahh way to center the toast
+        <Toast className="bg-accentBackground fixed z-20 w-auto top-5 left-[calc(50vw_-_140.7px)]">
+          <div className="flex items-center">
+            <FontAwesomeIcon
+              icon={faCheckCircle}
+              className="text text-xl me-2"
+            />
+            <p className="text text-sm">{success}</p>
+          </div>
+        </Toast>
+      )}
+      <div className="space-y-16">
         {posts.map((post) => (
           <div key={post.id_post}>
             <div className="flex flex-row items-center justify-between">
               <div className="flex items-center">
-                <img
-                  src={post.profile.profileimage}
-                  className="rounded-full border-[3px] border-accent h-14 w-14"
-                />
-                <h1 className="text-text font-bold text-xl font-poppins ms-4">
-                  {post.profile.username}
-                </h1>
+                <Link href={`/p/${post.profile.username}`} passHref>
+                  <img
+                    src={post.profile.profileimage}
+                    className="rounded-full border-[3px] border-accent h-14 w-14"
+                  />
+                </Link>
+                <Link href={`/p/${post.profile.username}`} passHref>
+                  <h1 className="text-text font-bold text-xl font-poppins ms-4">
+                    {post.profile.username}
+                  </h1>
+                </Link>
               </div>
               <div className="flex items-center">
                 <p className="text-muted text text-sm">
                   {calcTimeDifference(post.createdat)}
                 </p>
-                <FontAwesomeIcon
-                  icon={faEllipsisH}
-                  className="ms-4 text-muted text-2xl"
-                />
+                <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md">
+                  <Dropdown
+                    dismissOnClick={false}
+                    label=""
+                    renderTrigger={() => (
+                      <FontAwesomeIcon
+                        icon={faEllipsisH}
+                        className="ms-4 text-muted text-2xl hover:cursor-pointer"
+                      />
+                    )}
+                  >
+                    {profileId == post.profile.id_profile ? (
+                      <Dropdown.Item
+                        className="text text-sm hover:bg-accentBackground"
+                        onClick={async () => {
+                          await handlePostDelete(post.id_post);
+                          const newPosts = await fetchPosts(profileId);
+                          setPosts(newPosts);
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
+                        Delete
+                      </Dropdown.Item>
+                    ) : (
+                      <Dropdown.Item
+                        className="text text-sm hover:bg-accentBackground"
+                        onClick={async () => {
+                          const status = await handlePostReport(post.id_post);
+                          if (status == true) {
+                            setSuccess("Beitrag wurde erfolgreich gemeldet!");
+                            setTimeout(() => {
+                              setSuccess("");
+                            }, 3000);
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faFlag} className="me-1.5" />
+                        Report
+                      </Dropdown.Item>
+                    )}
+                  </Dropdown>
+                </div>
               </div>
             </div>
             <div className="w-full mt-3">
@@ -305,7 +156,11 @@ export default function Home() {
                   }
                   size={1.22}
                   className="text text-2xl hover:cursor-pointer"
-                  onClick={() => handleVote(post.id_post, true)}
+                  onClick={async () => {
+                    await handleVote(post.id_post, true, profileId);
+                    const posts = await fetchPosts(profileId);
+                    setPosts(posts);
+                  }}
                 />
                 <p className="text text-base mx-0.5">{post.likes}</p>
                 <Icon
@@ -316,7 +171,11 @@ export default function Home() {
                   }
                   size={1.22}
                   className="text text-2xl hover:cursor-pointer"
-                  onClick={() => handleVote(post.id_post, false)}
+                  onClick={async () => {
+                    await handleVote(post.id_post, false, profileId);
+                    const posts = await fetchPosts(profileId);
+                    setPosts(posts);
+                  }}
                 />
               </div>
               <div className="flex items-center">

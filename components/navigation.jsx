@@ -6,67 +6,34 @@ import ProfileButton from "./buttons/profileButton";
 import AddPostButton from "./buttons/addPostButton";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import supabase from "./supabase";
 import { useRouter } from "next/navigation";
+import { getSession } from "./auth/getSession";
+import { getAccount } from "./auth/getAccount";
+import { getProfile } from "./auth/getProfile";
 
 export default function Navigation() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const [profile, setProfile] = useState([]);
+
   useEffect(() => {
     async function getData() {
-      const session = await checkSession();
+      const session = await getSession();
+      console.log(session);
       if (session) {
+        const account = await getAccount(session.session.user.email);
+        if (account) {
+          const profile = await getProfile(account.id_account);
+          if (profile) {
+            setProfile(profile);
+            console.log(profile)
+          }
+        }
       }
     }
     getData();
   }, []);
-
-  async function checkSession() {
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    if (data.session == null) {
-      router.push("/login");
-      return;
-    }
-
-    return data.session.user.email;
-  }
-
-  async function getAccount(email) {
-    const { data, error } = await supabase
-      .from("account")
-      .select("id_account")
-      .eq("email", email)
-      .single();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    return data.id_account;
-  }
-
-  async function getProfile(accountId) {
-    const { data, error } = await supabase
-      .from("profile")
-      .select("username")
-      .eq("account_id", accountId)
-      .single();
-
-    if (error) {
-      console.log(error);
-      return;
-    }
-
-    return data.username;
-  }
 
   return (
     <nav className="bg-background w-full items-center inline-flex flex-row">
@@ -77,9 +44,9 @@ export default function Navigation() {
           </Link>
         </div>
         <div className="flex space-x-4">
-          <AddPostButton selected={pathname == "/create"} />
+          {profile.length != 0 && <AddPostButton selected={pathname == "/create"} />}
           <HomeButton selected={pathname == "/"} />
-          <ProfileButton />
+          {profile.length != 0 && <ProfileButton />}
         </div>
       </div>
     </nav>

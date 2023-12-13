@@ -1,6 +1,7 @@
 "use client";
 
 import supabase from "@/components/supabase";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -107,7 +108,12 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <div className="flex justify-start mt-5">
+        <div className="flex justify-between mt-5">
+          <Link href="/register">
+            <button className="btn-secondary text text-sm" type="submit">
+              Registrieren
+            </button>
+          </Link>
           <button className="btn-primary text text-sm" type="submit">
             Anmelden
           </button>
