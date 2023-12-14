@@ -127,7 +127,7 @@ export default function Fifth({ formData, setFormData, page, setPage }) {
     }
 
     console.log(data);
-    router.push("/");
+    location.href = "/";
   }
 
   return (

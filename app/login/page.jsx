@@ -42,7 +42,7 @@ export default function LoginPage() {
         return false;
       }
 
-      router.push("/");
+      location.href = "/";
     }
   }
 
