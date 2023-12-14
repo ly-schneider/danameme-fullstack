@@ -389,7 +389,6 @@ export default function ProfilePage({ params }) {
           <div className="flex flex-wrap gap-4 mt-3">
             {Object.keys(badges).map((badge) => {
               const item = badges[badge];
-              const badgesForUsers = [1, 2, 6, 7, 8, 9];
               let text = item.text;
               if (text == null) {
                 text = "#" + profile.userCount;
@@ -403,93 +402,9 @@ export default function ProfilePage({ params }) {
                   key={item.key}
                 >
                   <p className="text-text text text-sm">{text}</p>
-                  {profile.id_profile == profileSession.id_profile && (
-                    <>
-                      {!badgesForUsers.includes(parseInt(item.key)) && (
-                        <FontAwesomeIcon
-                          icon={faXmark}
-                          className="text-text text text-sm ms-2 hover:cursor-pointer"
-                          onClick={() => handleRemoveBadge(item.key)}
-                        />
-                      )}
-                    </>
-                  )}
                 </div>
               );
             })}
-            {addBadge ? (
-              <>
-                {profile.id_profile == profileSession.id_profile && (
-                  <div className="flex w-1/2">
-                    <form
-                      className="w-full"
-                      onSubmit={(e) => addBadgeToProfile(e)}
-                    >
-                      <label
-                        className={
-                          "text text-sm ms-1.5 px-3 py-1 rounded-t-form" +
-                          (errorCode != ""
-                            ? " bg-error opacity-50"
-                            : " bg-primary ")
-                        }
-                        htmlFor="code"
-                      >
-                        Code
-                      </label>
-                      {errorCode != "" && (
-                        <div className="bg-error rounded-t-div px-3 py-2 text-text text text-sm">
-                          {errorCode}
-                        </div>
-                      )}
-                      <input
-                        className={
-                          "input w-full" +
-                          (errorCode != ""
-                            ? " border-error rounded-b-form rounded-t-none"
-                            : "")
-                        }
-                        id="code"
-                        type="number"
-                        autoComplete="off"
-                        required
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                      />
-                      <div className="flex w-full justify-between mt-4 space-x-4">
-                        <button
-                          type="button"
-                          onClick={() => setAddBadge(false)}
-                          className="btn-secondary text text-xs hover:bg-background hover:text-text hover:border-text transition-all duration-500"
-                        >
-                          Abbrechen
-                        </button>
-                        <button
-                          type="submit"
-                          className="btn-primary text text-xs border-[3px] border-primary hover:bg-background hover:text-text hover:border-text transition-all duration-500"
-                        >
-                          Hinzufügen
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {profile.id_profile == profileSession.id_profile && (
-                  <div
-                    className={
-                      "bg-muted px-5 py-1.5 rounded-badge hover:cursor-pointer"
-                    }
-                    onClick={() => setAddBadge(true)}
-                  >
-                    <p className="text-text text text-sm">
-                      <FontAwesomeIcon icon={faPlus} />
-                    </p>
-                  </div>
-                )}
-              </>
-            )}
           </div>
           <p className="text mt-3 font-semibold mb-8">{biography}</p>
           <hr className="seperator" />
@@ -655,6 +570,13 @@ export default function ProfilePage({ params }) {
                 </div>
               </div>
             ))}
+            {posts.length == 0 && (
+              <div className="flex flex-col items-center w-full">
+                <h1 className="text text-muted text-base font-bold">
+                  Keine Beiträge
+                </h1>
+              </div>
+            )}
           </div>
         </div>
       ) : (

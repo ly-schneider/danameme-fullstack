@@ -192,7 +192,7 @@ export default function Home() {
                   icon={faPaperPlane}
                   className="text text-2xl hover:cursor-pointer"
                   onClick={() => {
-                    const url = window.location.origin
+                    const url = window.location.origin;
                     navigator.clipboard.writeText(
                       `${url}/post/${generateTitle(post)}`
                     );
@@ -206,6 +206,12 @@ export default function Home() {
             </div>
           </div>
         ))}
+        {posts.length == 0 && (
+          <div className="flex flex-col items-center w-full">
+            <h1 className="text text-2xl font-extrabold">Keine Beiträge</h1>
+            <p className="text text-base">Erstelle den ersten Beitrag!</p>
+          </div>
+        )}
       </div>
     </>
   );
