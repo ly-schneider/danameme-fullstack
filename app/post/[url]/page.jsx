@@ -271,7 +271,7 @@ export default function PostPage({ params }) {
         <div className="flex items-center">
           <img
             src={profile.profileimage}
-            className="rounded-full border-[3px] border-accent w-12 h-12"
+            className="rounded-full border-[3px] border-accent w-12 h-12 object-cover"
           />
           <h1 className="title text-base ms-2">{profile.username}</h1>
         </div>
@@ -333,7 +333,7 @@ export default function PostPage({ params }) {
             <Link href={`/p/${comment.profile.username}`} passHref>
               <img
                 src={comment.profile.profileimage}
-                className="rounded-full border-[3px] border-accent w-12 h-12"
+                className="rounded-full border-[3px] border-accent w-12 h-12 object-cover"
               />
             </Link>
             <Link href={`/p/${comment.profile.username}`} passHref>
@@ -487,7 +487,7 @@ export default function PostPage({ params }) {
                 <Link href={`/p/${post.profile.username}`} passHref>
                   <img
                     src={post.profile.profileimage}
-                    className="rounded-full border-[3px] border-accent h-16 w-16"
+                    className="rounded-full border-[3px] border-accent h-16 w-16 object-cover"
                   />
                 </Link>
                 <Link href={`/p/${post.profile.username}`} passHref>

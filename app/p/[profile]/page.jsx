@@ -372,7 +372,7 @@ export default function ProfilePage({ params }) {
           <div className="flex items-center">
             <img
               src={profile.profileimage}
-              className="rounded-full border-[5px] border-accent h-24 w-24"
+              className="rounded-full border-[5px] border-accent h-24 w-24 object-cover"
             />
             <h1 className="text-text font-bold text-3xl font-poppins ms-4">
               {profile.username}
@@ -491,48 +491,7 @@ export default function ProfilePage({ params }) {
               </>
             )}
           </div>
-          {editBiography ? (
-            <form className="w-full mt-3">
-              <textarea
-                className="w-full rounded-input input"
-                value={biography}
-                onChange={(e) => setBiography(e.target.value)}
-                rows={5}
-              />
-              <div className="w-full flex justify-end mt-2 mb-8 space-x-4">
-                <button
-                  onClick={() => setEditBiography(false)}
-                  className="btn-secondary text text-xs hover:bg-background hover:text-text hover:border-text transition-all duration-500"
-                >
-                  Abbrechen
-                </button>
-                <button
-                  onClick={async () => {
-                    await handleUpdateBiography();
-                    setEditBiography(false);
-                  }}
-                  className="btn-primary text text-xs border-[3px] border-primary hover:bg-background hover:text-text hover:border-text transition-all duration-500"
-                >
-                  Speichern
-                </button>
-              </div>
-            </form>
-          ) : (
-            <>
-              <p className="text mt-3 font-semibold mb-8">{biography}</p>
-              {profileSession &&
-                profileSession.id_profile == profile.id_profile && (
-                  <div className="w-full flex justify-end">
-                    <button
-                      onClick={() => setEditBiography(true)}
-                      className="mt-8 mb-3 bg-primary text-xs text-white py-2 px-2.5 rounded-full border-2 border-transparent hover:bg-background hover:text-text hover:border-text transition-all duration-500"
-                    >
-                      <FontAwesomeIcon icon={faPen} />
-                    </button>
-                  </div>
-                )}
-            </>
-          )}
+          <p className="text mt-3 font-semibold mb-8">{biography}</p>
           <hr className="seperator" />
           <div className="mt-8 space-y-16">
             {posts.map((post) => (
@@ -541,7 +500,7 @@ export default function ProfilePage({ params }) {
                   <div className="flex items-center">
                     <img
                       src={post.profile.profileimage}
-                      className="rounded-full border-[3px] border-accent h-14 w-14"
+                      className="rounded-full border-[3px] border-accent h-14 w-14 object-cover"
                     />
                     <h1 className="text-text font-bold text-xl font-poppins ms-4">
                       {post.profile.username}

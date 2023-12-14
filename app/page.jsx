@@ -78,7 +78,7 @@ export default function Home() {
                 <Link href={`/p/${post.profile.username}`} passHref>
                   <img
                     src={post.profile.profileimage}
-                    className="rounded-full border-[3px] border-accent h-14 w-14"
+                    className="rounded-full border-[3px] border-accent h-14 w-14 object-cover"
                   />
                 </Link>
                 <Link href={`/p/${post.profile.username}`} passHref>

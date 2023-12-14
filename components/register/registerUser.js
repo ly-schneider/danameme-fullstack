@@ -94,12 +94,12 @@ async function getUser(formData) {
 }
 
 async function insertProfileInto(id_account, formData) {
-  const { data: userCount, error: getError } = await supabase
+  const { data: userCountData, error: getError } = await supabase
     .from("profile")
     .select("userCount")
-    .order("userCount", { ascending: false })
-    .limit(1)
-    .single();
+    .order("userCount", { ascending: false });
+
+    console.log(userCountData)
 
   if (getError) {
     console.log(getError);
@@ -116,10 +116,20 @@ async function insertProfileInto(id_account, formData) {
   const randomIndex = Math.floor(Math.random() * defaultProfileImages.length);
   const randomImage = defaultProfileImages[randomIndex];
 
+  let userCount = userCountData;
+  console.log(userCount)
+  if (userCount.length == 0) {
+    userCount = 1;
+  } else {
+    userCount = userCountData[0].userCount + 1;
+  }
+
+  console.log(userCount)
+
   const { error } = await supabase.from("profile").insert({
     username: formData.username,
     account_id: id_account,
-    userCount: userCount.userCount + 1,
+    userCount: userCount,
     profileimage: randomImage,
   });
 

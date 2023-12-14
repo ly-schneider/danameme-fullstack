@@ -27,11 +27,13 @@ export default function Navigation() {
           const profile = await getProfile(account.id_account);
           if (profile) {
             setProfile(profile);
-            console.log(profile)
+            console.log(profile);
           }
         }
       } else {
-        router.push("/login");
+        if (pathname != "/login" && pathname != "/register") {
+          router.push("/login");
+        }
       }
     }
     getData();
@@ -46,7 +48,9 @@ export default function Navigation() {
           </Link>
         </div>
         <div className="flex space-x-4">
-          {profile.length != 0 && <AddPostButton selected={pathname == "/create"} />}
+          {profile.length != 0 && (
+            <AddPostButton selected={pathname == "/create"} />
+          )}
           <HomeButton selected={pathname == "/"} />
           {profile.length != 0 && <ProfileButton />}
         </div>

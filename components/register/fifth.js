@@ -214,6 +214,7 @@ export default function Fifth({ formData, setFormData, page, setPage }) {
       <div className="flex justify-between mt-20">
         <button
           className="btn-secondary text text-sm"
+          type="button"
           onClick={() => setPage(4)}
         >
           Zurück

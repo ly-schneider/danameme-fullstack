@@ -117,7 +117,7 @@ export default function CreatePostPage() {
       <div className="flex items-center">
         <img
           src={profile.profileimage}
-          className="w-16 h-16 rounded-full me-4"
+          className="w-16 h-16 rounded-full me-4 object-cover"
         />
         <h1 className="title font-bold">{profile.username}</h1>
       </div>

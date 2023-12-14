@@ -99,6 +99,7 @@ export default function Fourth({ formData, setFormData, page, setPage }) {
       <div className="flex justify-between mt-5">
         <button
           className="btn-secondary text text-sm"
+          type="button"
           onClick={() => setPage(3)}
         >
           Zurück
