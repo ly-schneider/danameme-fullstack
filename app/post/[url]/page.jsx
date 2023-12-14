@@ -9,6 +9,7 @@ import { handleCommentReport } from "@/components/comment/handleReport";
 import { handleCommentVote } from "@/components/comment/handleVote";
 import { saveAnswerComment } from "@/components/comment/saveAnswer";
 import { calcTimeDifference } from "@/components/post/calcTimeDifference";
+import { generateTitle } from "@/components/post/generateTitle";
 import { handlePostDelete } from "@/components/post/handleDelete";
 import { handlePostReport } from "@/components/post/handleReport";
 import { handleVote } from "@/components/post/handleVote";
@@ -591,7 +592,17 @@ export default function PostPage({ params }) {
               <div>
                 <FontAwesomeIcon
                   icon={faPaperPlane}
-                  className="text text-2xl"
+                  className="text text-2xl hover:cursor-pointer"
+                  onClick={() => {
+                    const url = window.location.origin;
+                    navigator.clipboard.writeText(
+                      `${url}/post/${generateTitle(post)}`
+                    );
+                    setSuccess("Link wurde kopiert!");
+                    setTimeout(() => {
+                      setSuccess("");
+                    }, 3000);
+                  }}
                 />
               </div>
             </div>

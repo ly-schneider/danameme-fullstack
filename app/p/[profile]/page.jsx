@@ -13,6 +13,7 @@ import { handleVote } from "@/components/post/handleVote";
 import supabase from "@/components/supabase";
 import { faComment, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import {
+  faCheckCircle,
   faEllipsisH,
   faFlag,
   faPen,
@@ -29,7 +30,7 @@ import {
   mdiArrowUpBoldOutline,
 } from "@mdi/js";
 import Icon from "@mdi/react";
-import { Dropdown } from "flowbite-react";
+import { Dropdown, Toast } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -679,7 +680,17 @@ export default function ProfilePage({ params }) {
                   <div>
                     <FontAwesomeIcon
                       icon={faPaperPlane}
-                      className="text text-2xl"
+                      className="text text-2xl hover:cursor-pointer"
+                      onClick={() => {
+                        const url = window.location.origin;
+                        navigator.clipboard.writeText(
+                          `${url}/post/${generateTitle(post)}`
+                        );
+                        setSuccess("Link wurde kopiert!");
+                        setTimeout(() => {
+                          setSuccess("");
+                        }, 3000);
+                      }}
                     />
                   </div>
                 </div>

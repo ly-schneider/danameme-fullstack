@@ -190,7 +190,17 @@ export default function Home() {
               <div>
                 <FontAwesomeIcon
                   icon={faPaperPlane}
-                  className="text text-2xl"
+                  className="text text-2xl hover:cursor-pointer"
+                  onClick={() => {
+                    const url = window.location.origin
+                    navigator.clipboard.writeText(
+                      `${url}/post/${generateTitle(post)}`
+                    );
+                    setSuccess("Link wurde kopiert!");
+                    setTimeout(() => {
+                      setSuccess("");
+                    }, 3000);
+                  }}
                 />
               </div>
             </div>
