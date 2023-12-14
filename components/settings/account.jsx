@@ -3,8 +3,12 @@ import supabase from "../supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrashCan, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { faEye, faEyeSlash } from "@fortawesome/free-regular-svg-icons";
+import { getSession } from "../auth/getSession";
+import deleteAccountAuth from "../auth/deleteAccountAuth";
+import { useRouter } from "next/navigation";
 
 export default function AccountSettings({ account }) {
+  const router = useRouter();
   const [email, setEmail] = useState(account.email);
   const [errorEmail, setErrorEmail] = useState("");
 
@@ -19,13 +23,25 @@ export default function AccountSettings({ account }) {
   const [lastnameError, setLastnameError] = useState("");
   const [lastnameSuccess, setLastnameSuccess] = useState("");
 
-  const [deleteAccount, setDeleteAccount] = useState(true);
+  const [deleteAccount, setDeleteAccount] = useState(false);
   const [accountDeleteEmail, setAccountDeleteEmail] = useState("");
+  const [deleteAccountError, setDeleteAccountError] = useState("");
+
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
     setEmail(account.email);
     setFirstname(account.firstname);
     setLastname(account.lastname);
+
+    async function getData() {
+      const status = await getSession();
+      if (status) {
+        setSession(status);
+        console.log(status);
+      }
+    }
+    getData();
   }, [account]);
 
   async function handleUpdateEmail() {
@@ -138,6 +154,34 @@ export default function AccountSettings({ account }) {
 
     console.log(data);
     setLastnameSuccess("Nachname wurde aktualisiert.");
+  }
+
+  async function handleAccountDelete() {
+    if (accountDeleteEmail != email) {
+      return false;
+    }
+
+    const { data, error } = await supabase
+      .from("account")
+      .delete()
+      .eq("id_account", account.id_account);
+
+    if (error) {
+      setDeleteAccountError("Ein Fehler ist aufgetreten.");
+      return false;
+    }
+
+    console.log(data);
+
+    const status = await deleteAccountAuth(session.session.user.id);
+    console.log(status);
+
+    if (status == false) {
+      setDeleteAccountError("Ein Fehler ist aufgetreten.");
+      return false;
+    }
+
+    router.push("/login");
   }
 
   return (
@@ -290,30 +334,64 @@ export default function AccountSettings({ account }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-row w-full justify-start mt-8">
+      <div className="flex flex-row w-full justify-end mt-8">
         <button
           className="btn-secondary border-error text-muted hover:btn-primary hover:bg-error hover:border-error hover:text-text transition-all duration-300"
-          onClick={() => setDeleteAccount(!deleteAccount)}
+          onClick={() => {setDeleteAccount(!deleteAccount); setAccountDeleteEmail("")}}
         >
           <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
           Account löschen
         </button>
       </div>
       {deleteAccount && (
-        <div className="flex flex-col w-full mt-8">
+        <div className="flex flex-col w-full mt-8 px-28">
           <h1 className="title text-xl font-semibold text-center text-error">
             Account löschen
           </h1>
           <div>
+            {deleteAccountError != "" && (
+              <div className="bg-error font-bold my-2 rounded-div px-3 py-2 text-text text text-sm flex flex-row justify-between items-center">
+                <span>{deleteAccountError}</span>
+                <FontAwesomeIcon
+                  icon={faXmark}
+                  onClick={() => setFirstnameError("")}
+                  className="hover:cursor-pointer"
+                />
+              </div>
+            )}
             <p className="text-sm text-error mt-3">
               Gibe <span className="font-bold">{account.email}</span> ein um den
               Account zu löschen.
             </p>
+            <p className="text-sm text-error mt-3">
+              Dieser Vorgang kann nicht rückgängig gemacht werden.
+            </p>
             <input
               type="email"
-              className="input text text-sm w-1/2 text-text mt-2 border-error"
+              className="input text text-sm w-full text-text mt-2 border-error"
               onChange={(e) => setAccountDeleteEmail(e.target.value)}
             />
+            <div className="flex flex-row justify-between items-center mt-2 space-x-4">
+              <button
+                onClick={() => {setDeleteAccount(!deleteAccount); setAccountDeleteEmail("")}}
+                className={
+                  "w-full mt-4 border-[3px] btn-primary bg-error border-error text-text"
+                }
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleAccountDelete}
+                className={
+                  "w-full mt-4 border-[3px] transition-all duration-300" +
+                  (accountDeleteEmail == email
+                    ? " btn-primary bg-error border-error text-text"
+                    : " btn-secondary border-error text-muted pointer-events-none hover:cursor-default")
+                }
+              >
+                Account löschen
+              </button>
+            </div>
           </div>
         </div>
       )}

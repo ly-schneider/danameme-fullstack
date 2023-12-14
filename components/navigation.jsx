@@ -30,6 +30,8 @@ export default function Navigation() {
             console.log(profile)
           }
         }
+      } else {
+        router.push("/login");
       }
     }
     getData();

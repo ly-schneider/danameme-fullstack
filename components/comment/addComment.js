@@ -11,4 +11,6 @@ export async function addComment(postId, text, profileId) {
     console.log(commentError);
     return;
   }
+
+  return true;
 }

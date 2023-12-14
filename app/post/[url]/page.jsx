@@ -329,11 +329,17 @@ export default function PostPage({ params }) {
         <a className="block absolute top-[48px] left-0 w-[12px] h-[calc(100%-50px)] border-x-[4px] bg-primary border-transparent bg-clip-padding ms-4"></a>
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <img
-              src={comment.profile.profileimage}
-              className="rounded-full border-[3px] border-accent w-12 h-12"
-            />
-            <h1 className="title text-base ms-2">{comment.profile.username}</h1>
+            <Link href={`/p/${comment.profile.username}`} passHref>
+              <img
+                src={comment.profile.profileimage}
+                className="rounded-full border-[3px] border-accent w-12 h-12"
+              />
+            </Link>
+            <Link href={`/p/${comment.profile.username}`} passHref>
+              <h1 className="title text-base ms-2">
+                {comment.profile.username}
+              </h1>
+            </Link>
           </div>
           <div className="flex items-center">
             <p className="text-muted text-sm ms-2">
@@ -611,13 +617,26 @@ export default function PostPage({ params }) {
                             ? "btn-primary border-[3px] border-primary"
                             : "btn-secondary text-muted"
                         }
-                        onClick={() =>
-                          addComment(
+                        onClick={async () => {
+                          const status = await addComment(
                             post.id_post,
                             commentText,
                             profile.id_profile
-                          )
-                        }
+                          );
+                          setCommentText("");
+                          if (!status) {
+                            setError("Ein Fehler ist aufgetreten!");
+                            setTimeout(() => {
+                              setError("");
+                            }, 3000);
+                            return;
+                          }
+                          const newComments = await fetchComments(
+                            post.id_post,
+                            profile.id_profile
+                          );
+                          setComments(newComments);
+                        }}
                       >
                         Kommentieren
                       </button>

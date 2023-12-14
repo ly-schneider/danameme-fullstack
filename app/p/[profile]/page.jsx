@@ -1,5 +1,9 @@
 "use client";
 
+import { getAccount } from "@/components/auth/getAccount";
+import { getProfile } from "@/components/auth/getProfile";
+import { getSession } from "@/components/auth/getSession";
+import CodeToBadge from "@/components/codeToBadge";
 import { calcTimeDifference } from "@/components/post/calcTimeDifference";
 import { fetchPosts } from "@/components/post/fetchPosts";
 import { generateTitle } from "@/components/post/generateTitle";
@@ -8,15 +12,30 @@ import { handlePostReport } from "@/components/post/handleReport";
 import { handleVote } from "@/components/post/handleVote";
 import supabase from "@/components/supabase";
 import { faComment, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
-import { faEllipsisH, faFlag, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEllipsisH,
+  faFlag,
+  faPen,
+  faPlus,
+  faSpinner,
+  faTrashCan,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { mdiArrowDownBold, mdiArrowDownBoldOutline, mdiArrowUpBold, mdiArrowUpBoldOutline } from "@mdi/js";
+import {
+  mdiArrowDownBold,
+  mdiArrowDownBoldOutline,
+  mdiArrowUpBold,
+  mdiArrowUpBoldOutline,
+} from "@mdi/js";
 import Icon from "@mdi/react";
 import { Dropdown } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export default function ProfilePage({ params }) {
+  const [profileSession, setProfileSession] = useState(null);
+
   const [profile, setProfile] = useState({});
   const [badges, setBadges] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -24,11 +43,38 @@ export default function ProfilePage({ params }) {
 
   const [success, setSuccess] = useState("");
 
-  const [profileGotFound, setProfileGotFound] = useState(true);
+  const [profileGotFound, setProfileGotFound] = useState(false);
+
+  const [editBiography, setEditBiography] = useState(false);
+  const [biography, setBiography] = useState("");
+
+  const [addBadge, setAddBadge] = useState(false);
+
+  const [code, setCode] = useState("");
+  const [errorCode, setErrorCode] = useState("");
 
   useEffect(() => {
     async function loadData() {
-      const profile = await getProfile();
+      const session = await getSession();
+      if (session == false) {
+        setProfileSession(false);
+        return false;
+      }
+
+      const accountSession = await getAccount(session.session.user.email);
+      if (accountSession == false) {
+        setProfileSession(false);
+        return false;
+      }
+
+      const profileSession = await getProfile(accountSession.id_account);
+      if (profileSession == false) {
+        setProfileSession(false);
+        return false;
+      }
+      setProfileSession(profileSession);
+
+      const profile = await getUserProfile();
       console.log(profile);
       setProfile(profile);
 
@@ -45,15 +91,22 @@ export default function ProfilePage({ params }) {
       console.log(joined);
       setJoined(joined);
 
-      console.log(profile.id_profile)
-      const posts = await getPosts(profile.id_profile);
+      console.log(profile.id_profile);
+      const posts = await getPosts(
+        profile.id_profile,
+        profileSession.id_profile
+      );
       console.log(posts);
       setPosts(posts);
+
+      setBiography(profile.biography);
+
+      setProfileGotFound(true);
     }
     loadData();
   }, []);
 
-  async function getProfile() {
+  async function getUserProfile() {
     const { data, error } = await supabase
       .from("profile")
       .select(
@@ -143,7 +196,7 @@ export default function ProfilePage({ params }) {
     return dateStringCustom;
   }
 
-  async function getPosts(profileId) {
+  async function getPosts(profileId, profileIdSession) {
     const { data: postsData, error: postsError } = await supabase
       .from("post")
       .select(
@@ -198,7 +251,7 @@ export default function ProfilePage({ params }) {
           .from("rating_post")
           .select("*")
           .eq("post_id", post.id_post)
-          .eq("profile_id", profileId);
+          .eq("profile_id", profileIdSession);
 
         console.log(ratingData);
 
@@ -219,6 +272,84 @@ export default function ProfilePage({ params }) {
 
     console.log(countComments);
     return countComments;
+  }
+
+  async function handleUpdateBiography() {
+    if (biography == "") {
+      return;
+    }
+
+    const { data: updateData, error: updateError } = await supabase
+      .from("profile")
+      .update({ biography: biography })
+      .eq("id_profile", profile.id_profile);
+
+    if (updateError) {
+      console.log(updateError);
+      return;
+    }
+
+    console.log(updateData);
+
+    setProfile({ ...profile, biography: biography });
+  }
+
+  async function addBadgeToProfile(e) {
+    e.preventDefault();
+    console.log(code);
+    setCode("");
+    setAddBadge(false);
+
+    if (code == "") {
+      setErrorCode("Code darf nicht leer sein!");
+      return;
+    }
+
+    if (code.length != 6) {
+      setErrorCode("Code muss 6 Zeichen lang sein!");
+      return;
+    }
+
+    const data = await CodeToBadge(code);
+    console.log(data);
+
+    if (!data) {
+      setErrorCode("Der Code konnte nicht überprüft werden!");
+      return false;
+    }
+    if (data == "ungültig") {
+      setErrorCode("Der Code ist ungültig!");
+      return false;
+    }
+
+    const { data: badgeData, error: badgeError } = await supabase
+      .from("profile_badge")
+      .insert({ profile_id: profile.id_profile, badge_id: data.id_badge });
+
+    if (badgeError) {
+      console.log(badgeError);
+      setErrorCode("Der Code konnte nicht hinzugefügt werden!");
+      return;
+    }
+
+    const badges = await getBadges(profile);
+    setBadges(badges);
+  }
+
+  async function handleRemoveBadge(badgeId) {
+    const { data: badgeData, error: badgeError } = await supabase
+      .from("profile_badge")
+      .delete()
+      .eq("profile_id", profile.id_profile)
+      .eq("badge_id", badgeId);
+
+    if (badgeError) {
+      console.log(badgeError);
+      return;
+    }
+
+    const badges = await getBadges(profile);
+    setBadges(badges);
   }
 
   return (
@@ -249,25 +380,159 @@ export default function ProfilePage({ params }) {
           <div className="w-full mt-3">
             <p className="text-muted text text-sm">Beigetreten {joined}</p>
           </div>
+          <div className="w-full mt-1">
+            <h1 className="title font-semibold text-lg">
+              {profile.karma} Karma
+            </h1>
+          </div>
           <div className="flex flex-wrap gap-4 mt-3">
             {Object.keys(badges).map((badge) => {
               const item = badges[badge];
+              const badgesForUsers = [1, 2, 6, 7, 8, 9];
               let text = item.text;
               if (text == null) {
                 text = "#" + profile.userCount;
               }
               return (
                 <div
-                  className={item.class + " px-5 py-1.5 rounded-badge"}
+                  className={
+                    item.class +
+                    " px-5 py-1.5 rounded-badge flex justify-between items-center"
+                  }
                   key={item.key}
                 >
                   <p className="text-text text text-sm">{text}</p>
+                  {profile.id_profile == profileSession.id_profile && (
+                    <>
+                      {!badgesForUsers.includes(parseInt(item.key)) && (
+                        <FontAwesomeIcon
+                          icon={faXmark}
+                          className="text-text text text-sm ms-2 hover:cursor-pointer"
+                          onClick={() => handleRemoveBadge(item.key)}
+                        />
+                      )}
+                    </>
+                  )}
                 </div>
               );
             })}
+            {addBadge ? (
+              <>
+                {profile.id_profile == profileSession.id_profile && (
+                  <div className="flex w-1/2">
+                    <form
+                      className="w-full"
+                      onSubmit={(e) => addBadgeToProfile(e)}
+                    >
+                      <label
+                        className={
+                          "text text-sm ms-1.5 px-3 py-1 rounded-t-form" +
+                          (errorCode != ""
+                            ? " bg-error opacity-50"
+                            : " bg-primary ")
+                        }
+                        htmlFor="code"
+                      >
+                        Code
+                      </label>
+                      {errorCode != "" && (
+                        <div className="bg-error rounded-t-div px-3 py-2 text-text text text-sm">
+                          {errorCode}
+                        </div>
+                      )}
+                      <input
+                        className={
+                          "input w-full" +
+                          (errorCode != ""
+                            ? " border-error rounded-b-form rounded-t-none"
+                            : "")
+                        }
+                        id="code"
+                        type="number"
+                        autoComplete="off"
+                        required
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                      />
+                      <div className="flex w-full justify-between mt-4 space-x-4">
+                        <button
+                          type="button"
+                          onClick={() => setAddBadge(false)}
+                          className="btn-secondary text text-xs hover:bg-background hover:text-text hover:border-text transition-all duration-500"
+                        >
+                          Abbrechen
+                        </button>
+                        <button
+                          type="submit"
+                          className="btn-primary text text-xs border-[3px] border-primary hover:bg-background hover:text-text hover:border-text transition-all duration-500"
+                        >
+                          Hinzufügen
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {profile.id_profile == profileSession.id_profile && (
+                  <div
+                    className={
+                      "bg-muted px-5 py-1.5 rounded-badge hover:cursor-pointer"
+                    }
+                    onClick={() => setAddBadge(true)}
+                  >
+                    <p className="text-text text text-sm">
+                      <FontAwesomeIcon icon={faPlus} />
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-          <p className="text mt-3 font-semibold">{profile.biography}</p>
-          <hr className="seperator mt-8" />
+          {editBiography ? (
+            <form className="w-full mt-3">
+              <textarea
+                className="w-full rounded-input input"
+                value={biography}
+                onChange={(e) => setBiography(e.target.value)}
+                rows={5}
+              />
+              <div className="w-full flex justify-end mt-2 mb-8 space-x-4">
+                <button
+                  onClick={() => setEditBiography(false)}
+                  className="btn-secondary text text-xs hover:bg-background hover:text-text hover:border-text transition-all duration-500"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={async () => {
+                    await handleUpdateBiography();
+                    setEditBiography(false);
+                  }}
+                  className="btn-primary text text-xs border-[3px] border-primary hover:bg-background hover:text-text hover:border-text transition-all duration-500"
+                >
+                  Speichern
+                </button>
+              </div>
+            </form>
+          ) : (
+            <>
+              <p className="text mt-3 font-semibold mb-8">{biography}</p>
+              {profileSession &&
+                profileSession.id_profile == profile.id_profile && (
+                  <div className="w-full flex justify-end">
+                    <button
+                      onClick={() => setEditBiography(true)}
+                      className="mt-8 mb-3 bg-primary text-xs text-white py-2 px-2.5 rounded-full border-2 border-transparent hover:bg-background hover:text-text hover:border-text transition-all duration-500"
+                    >
+                      <FontAwesomeIcon icon={faPen} />
+                    </button>
+                  </div>
+                )}
+            </>
+          )}
+          <hr className="seperator" />
           <div className="mt-8 space-y-16">
             {posts.map((post) => (
               <div key={post.id_post}>
@@ -296,13 +561,15 @@ export default function ProfilePage({ params }) {
                           />
                         )}
                       >
-                        {profile.id_profile == post.profile.id_profile ? (
+                        {profileSession.id_profile ==
+                        post.profile.id_profile ? (
                           <Dropdown.Item
                             className="text text-sm hover:bg-accentBackground"
                             onClick={async () => {
                               await handlePostDelete(post.id_post);
                               const newPosts = await getPosts(
-                                profile.id_profile
+                                profile.id_profile,
+                                profileSession.id_profile
                               );
                               setPosts(newPosts);
                             }}
@@ -362,8 +629,15 @@ export default function ProfilePage({ params }) {
                       size={1.22}
                       className="text text-2xl hover:cursor-pointer"
                       onClick={async () => {
-                        await handleVote(post.id_post, true, profile.id_pro);
-                        const posts = await getPosts(profile.id_profile);
+                        await handleVote(
+                          post.id_post,
+                          true,
+                          profileSession.id_profile
+                        );
+                        const posts = await getPosts(
+                          profile.id_profile,
+                          profileSession.id_profile
+                        );
                         setPosts(posts);
                       }}
                     />
@@ -380,9 +654,12 @@ export default function ProfilePage({ params }) {
                         await handleVote(
                           post.id_post,
                           false,
-                          profile.id_profile
+                          profileSession.id_profile
                         );
-                        const posts = await getPosts(profile.id_profile);
+                        const posts = await getPosts(
+                          profile.id_profile,
+                          profileSession.id_profile
+                        );
                         setPosts(posts);
                       }}
                     />
@@ -413,7 +690,7 @@ export default function ProfilePage({ params }) {
       ) : (
         <div className="flex justify-center mt-8">
           <h1 className="title text-2xl">
-            Profil konnte nicht gefunden werden!
+            <FontAwesomeIcon icon={faSpinner} spin />
           </h1>
         </div>
       )}

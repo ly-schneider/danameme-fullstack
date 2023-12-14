@@ -65,7 +65,7 @@ export default function CreatePostPage() {
       textInput = text;
     }
 
-    let fileUrl = null;
+    let fileUrl = { publicUrl: null };
     if (file) {
       const { error } = await supabase.storage
         .from("post-images")
