@@ -325,7 +325,7 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
           <button
-            className={"mt-3 sm:mt-0 w-full sm:ms-3 ms-0" + 
+            className={"mt-3 sm:mt-0 w-full sm:w-auto sm:ms-3 ms-0" + 
               (biography == profile.biography
                 ? " btn-secondary text-muted pointer-events-none hover:cursor-default"
                 : " btn-primary border-[3px] border-primary")
@@ -355,8 +355,8 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
         )}
-        <div className="flex flex-col sm:flex-row justify-center items-center mb-4 mt-2">
-          <h1 className="title text-lg font-semibold w-full text-center sm:w-1/4">Profilbild</h1>
+        <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center mb-4 mt-2">
+          <h1 className="title text-lg font-semibold w-full text-center sm:text-start sm:w-1/4">Profilbild</h1>
           <img
             src={
               typeof profileimage === "string" || profileimage instanceof String

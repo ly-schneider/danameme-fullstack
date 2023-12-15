@@ -25,6 +25,9 @@ export default function Footer() {
             <Link href="/datenschutz" className="hover:underline">
               <li>Datenschutz</li>
             </Link>
+            <Link href="/impressum" className="hover:underline">
+              <li>Impressum</li>
+            </Link>
           </ul>
           <ul>
             <Link href="/register" className="hover:underline">

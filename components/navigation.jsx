@@ -44,7 +44,7 @@ export default function Navigation() {
       <div className="items-center inline-flex flex-row flex-grow justify-between my-4 mx-5">
         <div>
           <Link href={"/"}>
-            <h1 className="title">DANAMEME</h1>
+            <h1 className="title text-2xl sm:text-3xl">DANAMEME</h1>
           </Link>
         </div>
         <div className="flex space-x-2 md:space-x-4">
