@@ -56,6 +56,15 @@ body {
   );
 }
 
+.alpha-tester {
+  background: rgb(5, 79, 89);
+  background: linear-gradient(
+    90deg,
+    rgb(86, 195, 219, 1) 0%,
+    rgba(6, 141, 170, 1) 100%
+  );
+}
+
 .coach {
   background: rgb(43, 221, 82);
   background: linear-gradient(
