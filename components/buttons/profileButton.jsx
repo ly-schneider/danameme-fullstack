@@ -2,11 +2,12 @@
 
 import {
   faGear,
+  faMoon,
   faRightToBracket,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Dropdown, Tooltip } from "flowbite-react";
+import { Dropdown, ToggleSwitch, Tooltip } from "flowbite-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getSession } from "../auth/getSession";
@@ -18,6 +19,8 @@ export default function ProfileButton() {
   const router = useRouter();
   const pathname = usePathname();
   const [profile, setProfile] = useState({});
+
+  const [theme, setTheme] = useState(false);
 
   useEffect(() => {
     async function getData() {
@@ -46,13 +49,17 @@ export default function ProfileButton() {
     }
   }
 
+  async function handleDarkmode() {
+    alert("Wolltest du ernsthaft den Darkmode aktivieren? Dein Account wird jetzt gelöscht!")
+  }
+
   return (
     <>
       <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md">
         <Dropdown
           renderTrigger={() => (
             <button
-              className={`text-background py-2 px-[13px] rounded-full border-2 border-transparent hover:bg-background hover:text-text hover:border-text transition-all duration-500 ${
+              className={`text-background py-[4.5px] px-[9px] sm:py-2 sm:px-[13px] rounded-full border-2 border-transparent hover:bg-background hover:text-text hover:border-text transition-all duration-500 ${
                 pathname == "/p/" + profile.username ? "bg-accent" : "bg-text"
               }`}
             >
@@ -86,6 +93,13 @@ export default function ProfileButton() {
           >
             <FontAwesomeIcon icon={faRightToBracket} className="me-1.5" />
             Logout
+          </Dropdown.Item>
+          <Dropdown.Item
+            className="text text-sm hover:bg-accentBackground border-t border-muted"
+            onClick={handleDarkmode}
+          >
+          <FontAwesomeIcon icon={faMoon} className="me-1.5" />
+            Darkmode
           </Dropdown.Item>
         </Dropdown>
       </div>

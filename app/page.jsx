@@ -70,7 +70,7 @@ export default function Home() {
           </div>
         </Toast>
       )}
-      <div className="space-y-16">
+      <div className="space-y-16 mx-6 sm:mx-0 mt-6">
         {posts.map((post) => (
           <div key={post.id_post}>
             <div className="flex flex-row items-center justify-between">
@@ -82,23 +82,23 @@ export default function Home() {
                   />
                 </Link>
                 <Link href={`/p/${post.profile.username}`} passHref>
-                  <h1 className="text-text font-bold text-xl font-poppins ms-4">
+                  <h1 className="text-text font-bold text-xl font-poppins ms-2 sm:ms-4">
                     {post.profile.username}
                   </h1>
                 </Link>
               </div>
               <div className="flex items-center">
-                <p className="text-muted text text-sm">
+                <p className="text-muted text text-xs sm:text-sm">
                   {calcTimeDifference(post.createdat)}
                 </p>
-                <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md">
+                <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
                   <Dropdown
                     dismissOnClick={false}
                     label=""
                     renderTrigger={() => (
                       <FontAwesomeIcon
                         icon={faEllipsisH}
-                        className="ms-4 text-muted text-2xl hover:cursor-pointer"
+                        className="ms-2 sm:ms-4 text-muted text-2xl hover:cursor-pointer"
                       />
                     )}
                   >

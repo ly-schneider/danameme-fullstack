@@ -272,9 +272,9 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
         )}
-        <div className="flex flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-1/4">Username</h1>
-          <div className="flex flex-end space-x-3 w-3/4">
+        <div className="flex flex-col sm:flex-row items-center mb-4">
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Username</h1>
+          <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="email"
               className="input text text-sm px-8 w-full text-center"
@@ -313,9 +313,9 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
         )}
-        <div className="flex flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-1/4">Biografie</h1>
-          <div className="flex space-x-3 w-3/4">
+        <div className="flex flex-col sm:flex-row items-center mb-4">
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Biografie</h1>
+          <div className="flex space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <textarea
               placeholder="Leer"
               rows={4}
@@ -325,10 +325,10 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
           <button
-            className={
-              biography == profile.biography
-                ? " btn-secondary text-muted pointer-events-none hover:cursor-default ms-3"
-                : " btn-primary ms-3 border-[3px] border-primary"
+            className={"mt-3 sm:mt-0 w-full sm:ms-3 ms-0" + 
+              (biography == profile.biography
+                ? " btn-secondary text-muted pointer-events-none hover:cursor-default"
+                : " btn-primary border-[3px] border-primary")
             }
             onClick={handleUpdateBiography}
           >
@@ -355,17 +355,17 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
         )}
-        <div className="flex flex-row justify-between items-center mb-4 mt-2">
-          <h1 className="title text-lg font-semibold w-1/4">Profilbild</h1>
+        <div className="flex flex-col sm:flex-row justify-center items-center mb-4 mt-2">
+          <h1 className="title text-lg font-semibold w-full text-center sm:w-1/4">Profilbild</h1>
           <img
             src={
               typeof profileimage === "string" || profileimage instanceof String
                 ? profileimage
                 : URL.createObjectURL(profileimage)
             }
-            className="w-24 h-24 rounded-full border-[3px] border-accent object-cover"
+            className="w-24 h-24 rounded-full border-[3px] border-accent object-cover mt-2"
           />
-          <div>
+          <div className="mt-3">
             <label
               htmlFor="fileInput"
               className="inline-block text cursor-pointer px-5 py-2 btn-primary border-[3px] border-primary"
@@ -401,7 +401,7 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
         )}
-        <div className="flex flex-row justify-between mb-4 mt-2">
+        <div className="flex flex-col sm:flex-row justify-between mb-4 mt-2">
           <h1 className="title text-lg font-semibold w-1/4">Badges</h1>
           <div className="flex flex-col">
             <div className="flex flex-wrap gap-4 mt-3">

@@ -47,7 +47,7 @@ export default function Navigation() {
             <h1 className="title">DANAMEME</h1>
           </Link>
         </div>
-        <div className="flex space-x-4">
+        <div className="flex space-x-2 md:space-x-4">
           {profile.length != 0 && (
             <AddPostButton selected={pathname == "/create"} />
           )}

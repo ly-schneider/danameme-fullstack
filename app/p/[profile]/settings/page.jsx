@@ -79,7 +79,7 @@ export default function SettingsPage({ params }) {
   }
 
   return (
-    <div>
+    <div className="mt-8 mx-12 sm:mx-0">
       {error ? (
         <div className="flex flex-col items-center w-full">
           <h1 className="title text-lg font-semibold">

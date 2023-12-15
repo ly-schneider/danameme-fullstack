@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function DatenschutzPage() {
   return (
     <>
-      <div className="px-4 space-y-12">
+      <div className="px-4 space-y-12 mt-8">
         <div>
           <h1 className="title text-2xl">Datenschutzrichtlinien</h1>
           <div className="text space-y-4 mt-2">

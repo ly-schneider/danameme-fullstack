@@ -30,7 +30,7 @@ import {
   mdiArrowUpBoldOutline,
 } from "@mdi/js";
 import Icon from "@mdi/react";
-import { Dropdown, Toast } from "flowbite-react";
+import { Dropdown, Toast, ToggleSwitch } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -368,7 +368,7 @@ export default function ProfilePage({ params }) {
         </Toast>
       )}
       {profileGotFound ? (
-        <div>
+        <div className="mx-6 sm:mx-0 mt-4">
           <div className="flex items-center">
             <img
               src={profile.profileimage}
@@ -417,15 +417,15 @@ export default function ProfilePage({ params }) {
                       src={post.profile.profileimage}
                       className="rounded-full border-[3px] border-accent h-14 w-14 object-cover"
                     />
-                    <h1 className="text-text font-bold text-xl font-poppins ms-4">
+                    <h1 className="text-text font-bold text-xl font-poppins ms-2 sm:ms-4">
                       {post.profile.username}
                     </h1>
                   </div>
                   <div className="flex items-center">
-                    <p className="text-muted text text-sm">
+                    <p className="text-muted text text-xs sm:text-sm">
                       {calcTimeDifference(post.createdat)}
                     </p>
-                    <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md">
+                    <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
                       <Dropdown
                         dismissOnClick={false}
                         label=""

@@ -79,7 +79,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-20">
+    <div className="mx-12 sm:mx-20 mt-8">
       <h1 className="title text-center font-bold">Registrierung</h1>
       {conditionalComponent()}
     </div>

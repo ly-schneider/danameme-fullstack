@@ -343,10 +343,10 @@ export default function PostPage({ params }) {
             </Link>
           </div>
           <div className="flex items-center">
-            <p className="text-muted text-sm ms-2">
+            <p className="text-muted text-xs sm:text-sm ms-2">
               {calcTimeDifference(comment.createdat)}
             </p>
-            <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md">
+            <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
               <Dropdown
                 dismissOnClick={false}
                 label=""
@@ -471,7 +471,7 @@ export default function PostPage({ params }) {
       )}
       {post.length != 0 ? (
         <>
-          <div key={post.id_post}>
+          <div key={post.id_post} className="mx-6 sm:mx-0 mt-2">
             <button
               className="btn-secondary items-center flex"
               onClick={() => router.back()}
@@ -491,16 +491,16 @@ export default function PostPage({ params }) {
                   />
                 </Link>
                 <Link href={`/p/${post.profile.username}`} passHref>
-                  <h1 className="text-text font-bold text-xl font-poppins ms-2">
+                  <h1 className="text-text font-bold text-xl font-poppins ms-2 sm:ms-4">
                     {post.profile.username}
                   </h1>
                 </Link>
               </div>
               <div className="flex items-center">
-                <p className="text-muted text text-sm">
+                <p className="text-muted text text-xs sm:text-sm">
                   {calcTimeDifference(post.createdat)}
                 </p>
-                <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md">
+                <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
                   <Dropdown
                     dismissOnClick={false}
                     label=""
@@ -607,7 +607,7 @@ export default function PostPage({ params }) {
               </div>
             </div>
           </div>
-          <div className="w-full mt-8">
+          <div className="sm:w-full mt-8 mx-6 sm:mx-0">
             <div className="w-full mt-3">
               <div className="flex flex-col space-y-8">
                 {profile && (
@@ -655,8 +655,10 @@ export default function PostPage({ params }) {
                   </div>
                 )}
                 {comments.length == 0 && (
-                  <div className="w-full flex justify-start">
-                    <p className="text text-muted">Keine Kommentare</p>
+                  <div className="flex flex-col items-center w-full">
+                    <h1 className="text text-muted text-base font-bold">
+                      Keine Kommentare
+                    </h1>
                   </div>
                 )}
                 {comments.map((comment) => (

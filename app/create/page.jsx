@@ -113,7 +113,7 @@ export default function CreatePostPage() {
   }
 
   return (
-    <div className="mx-20">
+    <div className="mx-12 sm:mx-20 mt-8">
       <div className="flex items-center">
         <img
           src={profile.profileimage}

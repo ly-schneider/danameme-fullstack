@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function InfoPage() {
   return (
     <>
-      <div className="px-4">
+      <div className="px-4 mt-8">
         <div>
           <h1 className="title text-2xl">DANAMEME</h1>
           <div className="text space-y-4 mt-2">

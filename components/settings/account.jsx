@@ -197,9 +197,9 @@ export default function AccountSettings({ account }) {
             />
           </div>
         )}
-        <div className="flex flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-1/4">E-Mail</h1>
-          <div className="flex flex-end space-x-3 w-3/4">
+        <div className="flex flex-col sm:flex-row items-center mb-4">
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">E-Mail</h1>
+          <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="email"
               className="input text text-sm px-8 w-full text-center"
@@ -271,9 +271,9 @@ export default function AccountSettings({ account }) {
             />
           </div>
         )}
-        <div className="flex flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-1/4">Vorname</h1>
-          <div className="flex flex-end space-x-3 w-3/4">
+        <div className="flex flex-col sm:flex-row items-center mb-4">
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Vorname</h1>
+          <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="text"
               className="input text text-sm px-8 w-full text-center"
@@ -312,9 +312,9 @@ export default function AccountSettings({ account }) {
             />
           </div>
         )}
-        <div className="flex flex-row items-center">
-          <h1 className="title text-lg font-semibold w-1/4">Nachname</h1>
-          <div className="flex justify-end space-x-3 w-3/4">
+        <div className="flex flex-col sm:flex-row items-center">
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Nachname</h1>
+          <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="text"
               className="input text text-sm px-8 w-full text-center"

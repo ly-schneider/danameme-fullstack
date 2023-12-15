@@ -22,7 +22,7 @@ export default function AddPostButton({ selected }) {
       >
         <button
           onClick={handleClick}
-          className={`text-background py-2 px-[13px] rounded-full border-2 border-transparent hover:bg-background hover:text-text hover:border-text transition-all duration-500 ${
+          className={`text-background py-1 px-[9px] sm:py-2 sm:px-[13px] rounded-full border-2 border-transparent hover:bg-background hover:text-text hover:border-text transition-all duration-500 ${
             selected ? "bg-accent" : "bg-text"
           }`}
         >
