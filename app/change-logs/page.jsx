@@ -15,7 +15,7 @@ export default function ChangelogsPage() {
     const { data, error } = await supabase
       .from("changelog")
       .select(
-        "createdat, title, text, type_id, changelog_type (id_type, text, class)"
+        "id_changelog, createdat, title, text, type_id, changelog_type (id_type, text, class)"
       )
       .order("createdat", { ascending: false });
 
