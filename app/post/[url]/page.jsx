@@ -1,5 +1,6 @@
 "use client";
 
+import { checkBan } from "@/components/auth/checkBan";
 import { getAccount } from "@/components/auth/getAccount";
 import { getProfile } from "@/components/auth/getProfile";
 import { getSession } from "@/components/auth/getSession";
@@ -7,6 +8,7 @@ import { addComment } from "@/components/comment/addComment";
 import { handleCommentDelete } from "@/components/comment/handleDelete";
 import { handleCommentReport } from "@/components/comment/handleReport";
 import { handleCommentVote } from "@/components/comment/handleVote";
+import { fetchComments } from "@/components/comment/fetchComments";
 import { saveAnswerComment } from "@/components/comment/saveAnswer";
 import { updateComment } from "@/components/comment/updateComment";
 import { calcTimeDifference } from "@/components/post/calcTimeDifference";
@@ -41,6 +43,7 @@ import { Dropdown, Modal, Toast } from "flowbite-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { calcTime } from "@/components/other/calcTime";
 
 export default function PostPage({ params }) {
   const router = useRouter();
@@ -56,6 +59,10 @@ export default function PostPage({ params }) {
 
   const [error, setError] = useState("");
 
+  const [banned, setBanned] = useState(false);
+  const [commentBanned, setCommentBanned] = useState(false);
+  const [banData, setBanData] = useState([]);
+
   useEffect(() => {
     async function getData() {
       const session = await getSession();
@@ -65,14 +72,33 @@ export default function PostPage({ params }) {
           const profile = await getProfile(account.id_account);
           if (profile) {
             setProfile(profile);
-            const post = await fetchPost(profile.id_profile);
-            setPost(post);
-            if (post != null) {
-              const comments = await fetchComments(
-                post.id_post,
-                profile.id_profile
-              );
-              setComments(comments);
+            const banData = await checkBan(account.id_account);
+            console.log(banData);
+            let banCond = false;
+            if (banData.length > 0) {
+              banData.forEach((ban) => {
+                console.log(ban);
+                if (ban.type == "account") {
+                  setBanned(true);
+                  setBanData(ban);
+                  banCond = true;
+                } else if (ban.type == "comment") {
+                  setCommentBanned(true);
+                  setBanData(ban);
+                }
+              });
+            }
+
+            if (!banCond) {
+              const post = await fetchPost(profile.id_profile);
+              setPost(post);
+              if (post != null) {
+                const comments = await fetchComments(
+                  post.id_post,
+                  profile.id_profile
+                );
+                setComments(comments);
+              }
             }
           }
         }
@@ -164,92 +190,6 @@ export default function PostPage({ params }) {
     );
 
     return checkRated[0];
-  }
-
-  async function fetchComments(postId, profileId) {
-    const { data: commentData, error: commentError } = await supabase
-      .from("comment")
-      .select(
-        "id_comment, post_id, text, createdat, profile_id, answer_id, edited, profile (username, profileimage, id_profile)"
-      )
-      .eq("post_id", postId);
-
-    if (commentError) {
-      console.log(commentError);
-      return;
-    }
-
-    const calcLikes = await Promise.all(
-      commentData.map(async (comment) => {
-        const { data: ratingData, error } = await supabase
-          .from("rating_comment")
-          .select("*")
-          .eq("comment_id", comment.id_comment);
-
-        let count = 0;
-        ratingData.map((rating) => {
-          if (rating.type == true) {
-            count++;
-          } else {
-            count--;
-          }
-        });
-
-        if (error) {
-          console.log(error);
-          return { ...comment, likes: 0 };
-        }
-
-        return { ...comment, likes: count };
-      })
-    );
-
-    const checkRated = await Promise.all(
-      calcLikes.map(async (comment) => {
-        let { data: ratingData, error } = await supabase
-          .from("rating_comment")
-          .select("*")
-          .eq("comment_id", comment.id_comment)
-          .eq("profile_id", profileId);
-
-        if (error) {
-          console.log(error);
-          return { ...comment, rating: null };
-        }
-
-        if (ratingData.length == 0) {
-          ratingData = null;
-        } else {
-          ratingData = ratingData[0].type;
-        }
-
-        return { ...comment, rating: ratingData };
-      })
-    );
-
-    const commentsWithAnswers = checkRated.map((comment) => {
-      if (comment.answer_id) {
-        const parentComment = checkRated.find(
-          (c) => c.id_comment === comment.answer_id
-        );
-        if (parentComment) {
-          if (!parentComment.replies) {
-            parentComment.replies = [];
-          }
-          parentComment.replies.push(comment);
-        }
-      }
-      return comment;
-    });
-
-    const removeInsertedComments = (comments) => {
-      return comments.filter((comment) => !comment.answer_id);
-    };
-
-    const commentsWithoutInserted = removeInsertedComments(commentsWithAnswers);
-
-    console.log(commentsWithoutInserted);
-    return commentsWithoutInserted;
   }
 
   function ReplyForm({ onReplySubmit }) {
@@ -370,7 +310,11 @@ export default function PostPage({ params }) {
                 {profile.id_profile == comment.profile.id_profile ? (
                   <>
                     <Dropdown.Item
-                      className="text text-sm hover:bg-accentBackground"
+                      className={
+                        (commentBanned
+                          ? "pointer-events-none text-muted hover:bg-inherit"
+                          : "hover:bg-accentBackground") + " text text-sm"
+                      }
                       onClick={() => {
                         setEditComment(!editComment);
                         setCommentText(comment.text);
@@ -505,14 +449,26 @@ export default function PostPage({ params }) {
                 />
               </div>
               <div
-                className="flex items-center hover:cursor-pointer"
+                className={
+                  (commentBanned
+                    ? "pointer-events-none"
+                    : "hover:cursor-pointer") + " flex items-center"
+                }
                 onClick={handleToggleReplyForm}
               >
                 <FontAwesomeIcon
                   icon={faReply}
-                  className="text text-xl me-1.5"
+                  className={
+                    (commentBanned && "text-muted ") + "text text-xl me-1.5"
+                  }
                 />
-                <p className="text text-base">Antworten</p>
+                <p
+                  className={
+                    (commentBanned && "text-muted ") + "text text-base"
+                  }
+                >
+                  Antworten
+                </p>
               </div>
             </div>
           </>
@@ -682,7 +638,21 @@ export default function PostPage({ params }) {
           <div className="sm:w-full mt-8 mx-6 sm:mx-0">
             <div className="w-full mt-3">
               <div className="flex flex-col space-y-8">
-                {profile && (
+                {commentBanned ? (
+                  <div className="flex flex-col w-full">
+                    <h1 className="text text-muted text-base font-bold">
+                      Kommentieren ist bis zum {calcTime(banData.until)} nicht
+                      möglich!
+                    </h1>
+                    <p className="text text-base font-bold text-muted mt-0">
+                      Grund dafür ist: {banData.reason}
+                    </p>
+                    <p className="text text-xs text-muted mt-3">
+                      Du wurdest von {banData.bannedby} am{" "}
+                      {calcTime(banData.createdat)} gebannt.
+                    </p>
+                  </div>
+                ) : (
                   <div className="">
                     <p className="text text-muted">
                       Kommentiere als{" "}
