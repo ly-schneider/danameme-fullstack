@@ -80,7 +80,7 @@ export default function ProfileSettings({ profile }) {
       .forEach((key) => {
         console.log(key);
         sortedArrray.push({
-          key: key,
+          id_badge: parseInt(key),
           class: badgesTemp[key].class,
           text: badgesTemp[key].text,
         });
@@ -273,7 +273,9 @@ export default function ProfileSettings({ profile }) {
           </div>
         )}
         <div className="flex flex-col sm:flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Username</h1>
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">
+            Username
+          </h1>
           <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="email"
@@ -314,7 +316,9 @@ export default function ProfileSettings({ profile }) {
           </div>
         )}
         <div className="flex flex-col sm:flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Biografie</h1>
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">
+            Biografie
+          </h1>
           <div className="flex space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <textarea
               placeholder="Leer"
@@ -325,7 +329,8 @@ export default function ProfileSettings({ profile }) {
             />
           </div>
           <button
-            className={"mt-3 sm:mt-0 w-full sm:w-auto sm:ms-3 ms-0" + 
+            className={
+              "mt-3 sm:mt-0 w-full sm:w-auto sm:ms-3 ms-0" +
               (biography == profile.biography
                 ? " btn-secondary text-muted pointer-events-none hover:cursor-default"
                 : " btn-primary border-[3px] border-primary")
@@ -356,7 +361,9 @@ export default function ProfileSettings({ profile }) {
           </div>
         )}
         <div className="flex flex-col sm:flex-row justify-center sm:justify-between items-center mb-4 mt-2">
-          <h1 className="title text-lg font-semibold w-full text-center sm:text-start sm:w-1/4">Profilbild</h1>
+          <h1 className="title text-lg font-semibold w-full text-center sm:text-start sm:w-1/4">
+            Profilbild
+          </h1>
           <img
             src={
               typeof profileimage === "string" || profileimage instanceof String
@@ -408,7 +415,7 @@ export default function ProfileSettings({ profile }) {
               {Object.keys(badges).map((badge) => {
                 const item = badges[badge];
                 let text = item.text;
-                const arrayBadges = [1, 2, 6, 7, 8, 9];
+                const arrayBadges = [1, 2, 6];
                 if (text == null) {
                   text = "#" + profile.userCount;
                 }
@@ -418,16 +425,17 @@ export default function ProfileSettings({ profile }) {
                       item.class +
                       " px-5 py-1.5 rounded-badge flex justify-between items-center"
                     }
-                    key={item.key}
+                    key={item.id_badge}
                   >
                     <p className="text-text text text-sm">{text}</p>
-                    {!arrayBadges.includes(parseInt(item.key)) && (
-                      <FontAwesomeIcon
-                        icon={faXmark}
-                        className="text-text ms-2 hover:cursor-pointer"
-                        onClick={() => handleRemoveBadge(item.key)}
-                      />
-                    )}
+                    {item.text != null &&
+                      !arrayBadges.includes(parseInt(item.id_badge)) && (
+                        <FontAwesomeIcon
+                          icon={faXmark}
+                          className="text-text ms-2 hover:cursor-pointer"
+                          onClick={() => handleRemoveBadge(item.id_badge)}
+                        />
+                      )}
                   </div>
                 );
               })}

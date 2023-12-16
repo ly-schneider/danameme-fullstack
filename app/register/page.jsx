@@ -8,15 +8,15 @@ import Third from "@/components/register/third";
 import { useState } from "react";
 
 export default function RegisterPage() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(5);
 
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    firstname: "",
-    lastname: "",
-    username: "",
-    code: 0,
+    email: "test@mail.com",
+    password: "Test1234",
+    firstname: "Test",
+    lastname: "Test",
+    username: "testuser",
+    code: 321654,
   });
 
   function conditionalComponent() {

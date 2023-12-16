@@ -110,7 +110,7 @@ body {
   );
 }
 
-.ten-to-hundred {
+.ten-to-twenty {
   background: rgb(255, 169, 39);
   background: linear-gradient(
     90deg,
@@ -119,12 +119,48 @@ body {
   );
 }
 
-.hundred-to-twohundred {
+.twenty-to-thirty {
   background: rgb(6, 211, 113);
   background: linear-gradient(
     90deg,
     rgba(6, 211, 113, 1) 0%,
     rgba(0, 164, 215, 1) 100%
+  );
+}
+
+.thirty-to-forty {
+  background: rgb(56, 171, 69);
+  background: linear-gradient(
+    90deg,
+    rgb(85, 219, 101) 0%,
+    rgb(24, 133, 37) 100%
+  );
+}
+
+.forty-to-fifty {
+  background: rgb(185, 61, 183);
+  background: linear-gradient(
+    90deg,
+    rgb(232, 127, 232) 0%,
+    rgb(170, 50, 168) 100%
+  );
+}
+
+.fifty-to-sixty {
+  background: rgb(221, 126, 25);
+  background: linear-gradient(
+    90deg,
+    rgb(221, 126, 25) 0%,
+    rgb(214, 169, 7) 100%
+  );
+}
+
+.sixty-to-seventy {
+  background: rgb(127, 251, 255);
+  background: linear-gradient(
+    90deg,
+    rgb(73, 189, 185) 0%,
+    rgb(40, 211, 148) 100%
   );
 }
 

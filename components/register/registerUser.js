@@ -99,7 +99,7 @@ async function insertProfileInto(id_account, formData) {
     .select("userCount")
     .order("userCount", { ascending: false });
 
-    console.log(userCountData)
+  console.log(userCountData);
 
   if (getError) {
     console.log(getError);
@@ -117,14 +117,14 @@ async function insertProfileInto(id_account, formData) {
   const randomImage = defaultProfileImages[randomIndex];
 
   let userCount = userCountData;
-  console.log(userCount)
+  console.log(userCount);
   if (userCount.length == 0) {
     userCount = 1;
   } else {
     userCount = userCountData[0].userCount + 1;
   }
 
-  console.log(userCount)
+  console.log(userCount);
 
   const { error } = await supabase.from("profile").insert({
     username: formData.username,
@@ -138,7 +138,7 @@ async function insertProfileInto(id_account, formData) {
     return "Es gab einen Fehler beim schreiben in die Datenbank!";
   }
 
-  return userCount.userCount + 1;
+  return userCount;
 }
 
 async function getProfile(formData) {
@@ -159,11 +159,20 @@ async function getProfile(formData) {
 async function insertBadgeInto(id_profile, badgeList, userCount) {
   if (userCount <= 10) {
     badgeList.push(7);
-  } else if (userCount <= 100) {
+  } else if (userCount <= 20) {
     badgeList.push(8);
-  } else if (userCount <= 200) {
+  } else if (userCount <= 30) {
     badgeList.push(9);
+  } else if (userCount <= 40) {
+    badgeList.push(11);
+  } else if (userCount <= 50) {
+    badgeList.push(12);
+  } else if (userCount <= 60) {
+    badgeList.push(13);
+  } else if (userCount <= 70) {
+    badgeList.push(14);
   }
+
   let errorText = "";
   badgeList.map(async (badge) => {
     const { error } = await supabase.from("profile_badge").insert({
@@ -180,5 +189,6 @@ async function insertBadgeInto(id_profile, badgeList, userCount) {
   if (errorText != "") {
     return errorText;
   }
+
   return true;
 }
