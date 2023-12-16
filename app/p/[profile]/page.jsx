@@ -52,9 +52,6 @@ export default function ProfilePage({ params }) {
 
   const [profileGotFound, setProfileGotFound] = useState(false);
 
-  const [editBiography, setEditBiography] = useState(false);
-  const [biography, setBiography] = useState("");
-
   const [addBadge, setAddBadge] = useState(false);
 
   const [code, setCode] = useState("");
@@ -118,8 +115,6 @@ export default function ProfilePage({ params }) {
         profileSession.id_profile
       );
       setPosts(posts);
-
-      setBiography(profile.biography);
 
       setProfileGotFound(true);
     }
@@ -288,23 +283,49 @@ export default function ProfilePage({ params }) {
     return countComments;
   }
 
-  async function handleUpdateBiography() {
-    if (biography == "") {
-      return;
-    }
-
-    const { data: updateData, error: updateError } = await supabase
-      .from("profile")
-      .update({ biography: biography })
-      .eq("id_profile", profile.id_profile);
-
-    if (updateError) {
-      console.log(updateError);
-      return;
-    }
-
-    setProfile({ ...profile, biography: biography });
+  async function handleProfileUpdate() {
+    const profile = await getUserProfile();
+    setProfile(profile);
   }
+
+  async function handlePosts() {
+    const posts = await getPosts(profile.id_profile, profileSession.id_profile);
+    setPosts(posts);
+  }
+
+  async function handleProfileBadges() {
+    const badges = await getBadges(profile);
+    setBadges(badges);
+  }
+
+  async function handlePostRating() {
+    const posts = await getPosts(profile.id_profile, profileSession.id_profile);
+    setPosts(posts);
+  }
+
+  supabase
+    .channel("profile-rating-post")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "profile" },
+      handleProfileUpdate
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "profile_badge" },
+      handleProfileBadges
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "post" },
+      handlePosts
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "rating_post" },
+      handlePostRating
+    )
+    .subscribe();
 
   return (
     <>
@@ -395,7 +416,7 @@ export default function ProfilePage({ params }) {
               );
             })}
           </div>
-          <p className="text mt-3 font-semibold mb-8">{biography}</p>
+          <p className="text mt-3 font-semibold mb-8">{profile.biography}</p>
           <hr className="seperator" />
           <div className="mt-8 space-y-16">
             {posts.map((post) => (

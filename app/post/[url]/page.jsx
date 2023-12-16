@@ -187,6 +187,39 @@ export default function PostPage({ params }) {
     return checkRated[0];
   }
 
+  async function handleRatingPost() {
+    const post = await fetchPost(profile.id_profile);
+    setPost(post);
+    if (post != null) {
+      const comments = await fetchComments(post.id_post, profile.id_profile);
+      setComments(comments);
+    }
+  }
+
+  async function handleComment() {
+    const newComment = await fetchComments(post.id_post, profile.id_profile);
+    setComments(newComment);
+  }
+
+  supabase
+    .channel("changes-rating-comment")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "rating_post" },
+      handleRatingPost
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "rating_comment" },
+      handleComment
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "comment" },
+      handleComment
+    )
+    .subscribe();
+
   function ReplyForm({ onReplySubmit }) {
     const [replyText, setReplyText] = useState();
 

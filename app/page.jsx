@@ -4,11 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faArrowCircleUp,
+  faArrowUp,
   faCheckCircle,
   faEllipsisH,
   faPen,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import {
+  faCircleUp,
   faComment,
   faFlag,
   faPaperPlane,
@@ -45,6 +49,8 @@ export default function Home() {
   const [banned, setBanned] = useState(false);
   const [banData, setBanData] = useState([]);
 
+  const [newPost, setNewPost] = useState(false);
+
   useEffect(() => {
     async function getData() {
       const session = await getSession();
@@ -78,6 +84,40 @@ export default function Home() {
     getData();
   }, []);
 
+  function handlePosts() {
+    setNewPost(true);
+    setTimeout(() => {
+      setNewPost(false);
+    }, 5000);
+  }
+
+  async function handleNewPost() {
+    const posts = await fetchPosts(profileId);
+    setPosts(posts);
+    setNewPost(false);
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+  }
+
+  async function handleRating() {
+    const posts = await fetchPosts(profileId);
+    setPosts(posts);
+  }
+
+  // Listen to new ratings
+  supabase
+    .channel("homepage-rating-post")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "rating_post" },
+      handleRating
+    )
+    .on(
+      "postgres_changes",
+      { event: "INSERT", schema: "public", table: "post" },
+      handlePosts
+    )
+    .subscribe();
+
   return (
     <>
       {success != "" && (
@@ -89,6 +129,22 @@ export default function Home() {
               className="text text-xl me-2"
             />
             <p className="text text-sm">{success}</p>
+          </div>
+        </Toast>
+      )}
+      {newPost && (
+        <Toast
+          className="bg-success fixed z-20 w-auto top-5 left-[calc(50vw_-_112.5px)] hover:cursor-pointer hover:scale-[1.03] transition-all duration-300"
+          onClick={() => handleNewPost()}
+        >
+          <div className="flex items-center">
+            <FontAwesomeIcon
+              icon={faCircleUp}
+              className="text text-background text-lg me-2"
+            />
+            <p className="text text-background text-xs">
+              Es gibt einen neuen Beitrag!
+            </p>
           </div>
         </Toast>
       )}

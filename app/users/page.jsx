@@ -115,6 +115,20 @@ export default function UsersPage() {
     setUsers(data);
   }
 
+  async function handleNewProfiles(payload) {
+    console.log(payload);
+    getUsers();
+  }
+
+  supabase
+    .channel("users-new-profiles")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "profile" },
+      handleNewProfiles
+    )
+    .subscribe();
+
   return (
     <>
       {banned ? (
