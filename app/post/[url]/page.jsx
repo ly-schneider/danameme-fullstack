@@ -376,7 +376,10 @@ export default function PostPage({ params }) {
                   <Dropdown.Item
                     className="text text-sm hover:bg-accentBackground"
                     onClick={async () => {
-                      handleCommentReport(comment.id_comment);
+                      handleCommentReport(
+                        comment.id_comment,
+                        profile.id_profile
+                      );
 
                       setSuccess("Kommentar wurde gemeldet!");
                       setTimeout(() => {
@@ -526,7 +529,7 @@ export default function PostPage({ params }) {
                       <Dropdown.Item
                         className="text text-sm hover:bg-accentBackground"
                         onClick={async () => {
-                          handlePostReport(post.id_post);
+                          handlePostReport(post.id_post, profile.id_profile);
 
                           setSuccess("Beitrag wurde gemeldet!");
                           setTimeout(() => {

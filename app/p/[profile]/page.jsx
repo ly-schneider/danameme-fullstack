@@ -3,24 +3,24 @@
 import { getAccount } from "@/components/auth/getAccount";
 import { getProfile } from "@/components/auth/getProfile";
 import { getSession } from "@/components/auth/getSession";
+import { handleProfileReport } from "@/components/auth/handleReport";
 import CodeToBadge from "@/components/codeToBadge";
 import { calcTimeDifference } from "@/components/post/calcTimeDifference";
-import { fetchPosts } from "@/components/post/fetchPosts";
 import { generateTitle } from "@/components/post/generateTitle";
 import { handlePostDelete } from "@/components/post/handleDelete";
 import { handlePostReport } from "@/components/post/handleReport";
 import { handleVote } from "@/components/post/handleVote";
 import supabase from "@/components/supabase";
-import { faComment, faPaperPlane } from "@fortawesome/free-regular-svg-icons";
+import {
+  faFlag,
+  faComment,
+  faPaperPlane,
+} from "@fortawesome/free-regular-svg-icons";
 import {
   faCheckCircle,
   faEllipsisH,
-  faFlag,
-  faPen,
-  faPlus,
   faSpinner,
   faTrashCan,
-  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -30,7 +30,7 @@ import {
   mdiArrowUpBoldOutline,
 } from "@mdi/js";
 import Icon from "@mdi/react";
-import { Dropdown, Toast, ToggleSwitch } from "flowbite-react";
+import { Dropdown, Toast } from "flowbite-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -369,14 +369,50 @@ export default function ProfilePage({ params }) {
       )}
       {profileGotFound ? (
         <div className="mx-6 sm:mx-0 mt-4">
-          <div className="flex items-center">
-            <img
-              src={profile.profileimage}
-              className="rounded-full border-[5px] border-accent h-24 w-24 object-cover"
-            />
-            <h1 className="text-text font-bold text-3xl font-poppins ms-4">
-              {profile.username}
-            </h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <img
+                src={profile.profileimage}
+                className="rounded-full border-[5px] border-accent h-24 w-24 object-cover"
+              />
+              <h1 className="text-text font-bold text-3xl font-poppins ms-4">
+                {profile.username}
+              </h1>
+            </div>
+            {profileSession.id_profile != profile.id_profile && (
+              <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
+                <Dropdown
+                  dismissOnClick={false}
+                  label=""
+                  renderTrigger={() => (
+                    <FontAwesomeIcon
+                      icon={faEllipsisH}
+                      className="ms-4 text-muted text-2xl hover:cursor-pointer"
+                    />
+                  )}
+                >
+                  <Dropdown.Item
+                    className="text text-sm hover:bg-accentBackground"
+                    onClick={async () => {
+                      const status = await handleProfileReport(
+                        profile.id_profile,
+                        profileSession.id_profile
+                      );
+
+                      if (status == true) {
+                        setSuccess("Profil wurde erfolgreich gemeldet!");
+                        setTimeout(() => {
+                          setSuccess("");
+                        }, 3000);
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faFlag} className="me-1.5" />
+                    Report
+                  </Dropdown.Item>
+                </Dropdown>
+              </div>
+            )}
           </div>
           <div className="w-full mt-3">
             <p className="text-muted text text-sm">Beigetreten {joined}</p>
@@ -460,7 +496,8 @@ export default function ProfilePage({ params }) {
                             className="text text-sm hover:bg-accentBackground"
                             onClick={async () => {
                               const status = await handlePostReport(
-                                post.id_post
+                                post.id_post,
+                                profileSession.id_profile
                               );
                               if (status == true) {
                                 setSuccess(

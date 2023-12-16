@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisH } from "@fortawesome/free-solid-svg-icons";
+import { faCheckCircle, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
 import {
-  faCheckCircle,
   faComment,
   faFlag,
   faPaperPlane,
@@ -118,7 +117,10 @@ export default function Home() {
                       <Dropdown.Item
                         className="text text-sm hover:bg-accentBackground"
                         onClick={async () => {
-                          const status = await handlePostReport(post.id_post);
+                          const status = await handlePostReport(
+                            post.id_post,
+                            profileId
+                          );
                           if (status == true) {
                             setSuccess("Beitrag wurde erfolgreich gemeldet!");
                             setTimeout(() => {
