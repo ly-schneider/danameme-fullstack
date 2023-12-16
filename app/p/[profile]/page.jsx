@@ -19,6 +19,7 @@ import {
 import {
   faCheckCircle,
   faEllipsisH,
+  faPen,
   faSpinner,
   faTrashCan,
 } from "@fortawesome/free-solid-svg-icons";
@@ -32,9 +33,12 @@ import {
 import Icon from "@mdi/react";
 import { Dropdown, Toast } from "flowbite-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function ProfilePage({ params }) {
+  const router = useRouter();
+
   const [profileSession, setProfileSession] = useState(null);
 
   const [profile, setProfile] = useState({});
@@ -201,7 +205,7 @@ export default function ProfilePage({ params }) {
     const { data: postsData, error: postsError } = await supabase
       .from("post")
       .select(
-        "id_post, title, content, asset, createdat, profile_id, profile (username, profileimage, id_profile)"
+        "id_post, title, content, asset, createdat, profile_id, edited, profile (username, profileimage, id_profile)"
       )
       .order("createdat", { ascending: false })
       .eq("profile_id", profileId);
@@ -458,6 +462,11 @@ export default function ProfilePage({ params }) {
                     </h1>
                   </div>
                   <div className="flex items-center">
+                    {post.edited && (
+                      <p className="text-muted text text-xs sm:text-sm mr-4">
+                        (Bearbeitet)
+                      </p>
+                    )}
                     <p className="text-muted text text-xs sm:text-sm">
                       {calcTimeDifference(post.createdat)}
                     </p>
@@ -474,23 +483,37 @@ export default function ProfilePage({ params }) {
                       >
                         {profileSession.id_profile ==
                         post.profile.id_profile ? (
-                          <Dropdown.Item
-                            className="text text-sm hover:bg-accentBackground"
-                            onClick={async () => {
-                              await handlePostDelete(post.id_post);
-                              const newPosts = await getPosts(
-                                profile.id_profile,
-                                profileSession.id_profile
-                              );
-                              setPosts(newPosts);
-                            }}
-                          >
-                            <FontAwesomeIcon
-                              icon={faTrashCan}
-                              className="me-1.5"
-                            />
-                            Delete
-                          </Dropdown.Item>
+                          <>
+                            <Dropdown.Item
+                              className="text text-sm hover:bg-accentBackground"
+                              onClick={() =>
+                                router.push(`/post/${generateTitle(post)}/edit`)
+                              }
+                            >
+                              <FontAwesomeIcon
+                                icon={faPen}
+                                className="me-1.5"
+                              />
+                              Bearbeiten
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              className="text text-sm hover:bg-accentBackground"
+                              onClick={async () => {
+                                await handlePostDelete(post.id_post);
+                                const newPosts = await getPosts(
+                                  profile.id_profile,
+                                  profileSession.id_profile
+                                );
+                                setPosts(newPosts);
+                              }}
+                            >
+                              <FontAwesomeIcon
+                                icon={faTrashCan}
+                                className="me-1.5"
+                              />
+                              Löschen
+                            </Dropdown.Item>
+                          </>
                         ) : (
                           <Dropdown.Item
                             className="text text-sm hover:bg-accentBackground"

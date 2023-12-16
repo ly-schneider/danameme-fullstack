@@ -5,14 +5,17 @@ import { getProfile } from "@/components/auth/getProfile";
 import { getSession } from "@/components/auth/getSession";
 import supabase from "@/components/supabase";
 import { faPlusSquare } from "@fortawesome/free-regular-svg-icons";
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function CreatePostPage() {
+export default function EditPost({ params }) {
   const router = useRouter();
 
-  const [profile, setProfile] = useState({});
+  const [profile, setProfile] = useState([]);
+
+  const [postId, setPostId] = useState("");
 
   const [title, setTitle] = useState("");
   const [errorTitle, setErrorTitle] = useState("");
@@ -20,26 +23,64 @@ export default function CreatePostPage() {
   const [text, setText] = useState("");
   const [errorText, setErrorText] = useState("");
 
-  const [file, setFile] = useState(null);
+  const [oldFile, setOldFile] = useState("");
+  const [file, setFile] = useState("");
   const [errorImage, setErrorImage] = useState("");
 
   useEffect(() => {
     async function getData() {
       const session = await getSession();
       if (session) {
-        const account = await getAccount(session.session.user.email);
-        if (account) {
-          const profile = await getProfile(account.id_account);
+        const accountId = await getAccount(session.session.user.email);
+        if (accountId) {
+          const profile = await getProfile(accountId.id_account);
           if (profile) {
             setProfile(profile);
-          } else {
-            router.push("/login");
+            const post = await fetchPost(profile);
+            console.log(post);
+            setTitle(post.title);
+            setText(post.content);
+            setFile(post.asset);
+            setOldFile(post.asset);
+            setPostId(post.id_post);
           }
         }
+      } else {
+        router.push("/login");
       }
     }
     getData();
   }, []);
+
+  async function fetchPost(profile) {
+    let id = params.url.split("-");
+    id = id[id.length - 1];
+    console.log(id);
+
+    const { data: postsData, error: postsError } = await supabase
+      .from("post")
+      .select(
+        "id_post, title, content, asset, createdat, profile_id, profile (username, profileimage, id_profile)"
+      )
+      .eq("id_post", id);
+
+    if (postsError) {
+      console.log(postsError);
+      return;
+    }
+
+    if (postsData.length == 0) {
+      setPost([]);
+      return null;
+    }
+
+    if (postsData[0].profile_id != profile.id_profile) {
+      setPost([]);
+      return null;
+    }
+
+    return postsData[0];
+  }
 
   const handleFileChange = (event) => {
     const input = event.target;
@@ -61,12 +102,29 @@ export default function CreatePostPage() {
     }
 
     let textInput = null;
-    if (text.length != 0) {
+    console.log(text);
+    if (text != null || text != "") {
       textInput = text;
     }
 
-    let fileUrl = { publicUrl: null };
-    if (file) {
+    let fileUrl;
+    console.log(file);
+    if (typeof file !== "string" || !file instanceof String) {
+      let fileName = oldFile.split("/")[oldFile.split("/").length - 1];
+      console.log(fileName);
+
+      const { data: oldFileData, error: oldFileError } = await supabase.storage
+        .from("post-images")
+        .remove([fileName]);
+
+      if (oldFileError) {
+        console.log(oldFileError);
+        setErrorImage(
+          "Beim Löschen des alten Bildes ist ein Fehler aufgetreten."
+        );
+        return;
+      }
+
       const { error } = await supabase.storage
         .from("post-images")
         .upload(profile.username + "-" + file.name, file, {
@@ -76,15 +134,7 @@ export default function CreatePostPage() {
 
       if (error) {
         console.log(error);
-        if (error.statusCode == "409") {
-          setErrorImage(
-            "Ein Bild mit diesem Namen existiert bereits. Bitte bennene dein Bild um."
-          );
-        } else {
-          setErrorImage(
-            "Beim Hochladen des Bildes ist ein Fehler aufgetreten."
-          );
-        }
+        setErrorImage("Beim Hochladen des Bildes ist ein Fehler aufgetreten.");
         return;
       }
 
@@ -93,19 +143,27 @@ export default function CreatePostPage() {
         .getPublicUrl(profile.username + "-" + file.name);
 
       console.log(url);
-      fileUrl = url;
+      fileUrl = url.publicUrl;
+    } else {
+      fileUrl = file;
     }
 
-    const { error } = await supabase.from("post").insert({
-      title: title,
-      content: textInput,
-      profile_id: profile.id_profile,
-      asset: fileUrl.publicUrl,
-    });
+    console.log(fileUrl);
+
+    const { error } = await supabase
+      .from("post")
+      .update({
+        title: title,
+        content: textInput,
+        profile_id: profile.id_profile,
+        asset: fileUrl,
+        edited: true,
+      })
+      .eq("id_post", postId);
 
     if (error) {
       console.log(error);
-      setErrorImage("Beim erstellen des Posts ist ein Fehler aufgetreten.");
+      setErrorImage("Beim aktualisiern des Posts ist ein Fehler aufgetreten.");
       return;
     }
 
@@ -114,13 +172,13 @@ export default function CreatePostPage() {
 
   return (
     <div className="mx-12 sm:mx-20 mt-8">
-      <div className="flex items-center">
-        <img
-          src={profile.profileimage}
-          className="w-16 h-16 rounded-full me-4 object-cover border-[3px] border-accent"
-        />
-        <h1 className="title font-bold">{profile.username}</h1>
-      </div>
+      <button
+        className="btn-secondary items-center flex"
+        onClick={() => router.back()}
+      >
+        <FontAwesomeIcon icon={faArrowLeft} className="text text-sm me-2" />
+        Zurück
+      </button>
       <form onSubmit={(e) => handleSubmit(e)} className="mt-8">
         <div>
           <label
@@ -201,7 +259,7 @@ export default function CreatePostPage() {
             </label>
           </div>
           <button className="btn-primary text text-sm" type="submit">
-            Post
+            Aktualisieren
           </button>
         </div>
         <p className="mt-2 text-xs text" id="fileName">
@@ -215,7 +273,11 @@ export default function CreatePostPage() {
         <div className="mt-5">
           <img
             className="rounded-image"
-            src={file ? URL.createObjectURL(file) : ""}
+            src={
+              typeof file === "string" || file instanceof String
+                ? file
+                : URL.createObjectURL(file)
+            }
           />
         </div>
       </form>

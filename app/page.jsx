@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckCircle, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheckCircle,
+  faEllipsisH,
+  faPen,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   faComment,
   faFlag,
@@ -87,6 +91,11 @@ export default function Home() {
                 </Link>
               </div>
               <div className="flex items-center">
+                {post.edited && (
+                  <p className="text-muted text text-xs sm:text-sm mr-4">
+                    (Bearbeitet)
+                  </p>
+                )}
                 <p className="text-muted text text-xs sm:text-sm">
                   {calcTimeDifference(post.createdat)}
                 </p>
@@ -102,17 +111,31 @@ export default function Home() {
                     )}
                   >
                     {profileId == post.profile.id_profile ? (
-                      <Dropdown.Item
-                        className="text text-sm hover:bg-accentBackground"
-                        onClick={async () => {
-                          await handlePostDelete(post.id_post);
-                          const newPosts = await fetchPosts(profileId);
-                          setPosts(newPosts);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
-                        Delete
-                      </Dropdown.Item>
+                      <>
+                        <Dropdown.Item
+                          className="text text-sm hover:bg-accentBackground"
+                          onClick={() =>
+                            router.push(`/post/${generateTitle(post)}/edit`)
+                          }
+                        >
+                          <FontAwesomeIcon icon={faPen} className="me-1.5" />
+                          Bearbeiten
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          className="text text-sm hover:bg-accentBackground"
+                          onClick={async () => {
+                            await handlePostDelete(post.id_post);
+                            const newPosts = await fetchPosts(profileId);
+                            setPosts(newPosts);
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={faTrashCan}
+                            className="me-1.5"
+                          />
+                          Löschen
+                        </Dropdown.Item>
+                      </>
                     ) : (
                       <Dropdown.Item
                         className="text text-sm hover:bg-accentBackground"

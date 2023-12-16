@@ -8,6 +8,7 @@ import { handleCommentDelete } from "@/components/comment/handleDelete";
 import { handleCommentReport } from "@/components/comment/handleReport";
 import { handleCommentVote } from "@/components/comment/handleVote";
 import { saveAnswerComment } from "@/components/comment/saveAnswer";
+import { updateComment } from "@/components/comment/updateComment";
 import { calcTimeDifference } from "@/components/post/calcTimeDifference";
 import { generateTitle } from "@/components/post/generateTitle";
 import { handlePostDelete } from "@/components/post/handleDelete";
@@ -23,6 +24,7 @@ import {
   faArrowLeft,
   faCheckCircle,
   faEllipsisH,
+  faPen,
   faReply,
   faRotateRight,
   faTrashCan,
@@ -168,7 +170,7 @@ export default function PostPage({ params }) {
     const { data: commentData, error: commentError } = await supabase
       .from("comment")
       .select(
-        "id_comment, post_id, text, createdat, profile_id, answer_id, profile (username, profileimage, id_profile)"
+        "id_comment, post_id, text, createdat, profile_id, answer_id, edited, profile (username, profileimage, id_profile)"
       )
       .eq("post_id", postId);
 
@@ -297,6 +299,9 @@ export default function PostPage({ params }) {
   }
 
   function Comment({ comment }) {
+    const [commentText, setCommentText] = useState("");
+    const [editComment, setEditComment] = useState(false);
+
     const [showReplyForm, setShowReplyForm] = useState(false);
 
     function handleToggleReplyForm() {
@@ -343,6 +348,11 @@ export default function PostPage({ params }) {
             </Link>
           </div>
           <div className="flex items-center">
+            {comment.edited && (
+              <p className="text-muted text text-xs sm:text-sm mr-2">
+                (Bearbeitet)
+              </p>
+            )}
             <p className="text-muted text-xs sm:text-sm ms-2">
               {calcTimeDifference(comment.createdat)}
             </p>
@@ -358,20 +368,32 @@ export default function PostPage({ params }) {
                 )}
               >
                 {profile.id_profile == comment.profile.id_profile ? (
-                  <Dropdown.Item
-                    className="text text-sm hover:bg-accentBackground"
-                    onClick={async () => {
-                      await handleCommentDelete(comment.id_comment);
-                      const newComments = await fetchComments(
-                        post.id_post,
-                        profile.id_profile
-                      );
-                      setComments(newComments);
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
-                    Delete
-                  </Dropdown.Item>
+                  <>
+                    <Dropdown.Item
+                      className="text text-sm hover:bg-accentBackground"
+                      onClick={() => {
+                        setEditComment(!editComment);
+                        setCommentText(comment.text);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faPen} className="me-1.5" />
+                      Bearbeiten
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      className="text text-sm hover:bg-accentBackground"
+                      onClick={async () => {
+                        await handleCommentDelete(comment.id_comment);
+                        const newComments = await fetchComments(
+                          post.id_post,
+                          profile.id_profile
+                        );
+                        setComments(newComments);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
+                      Löschen
+                    </Dropdown.Item>
+                  </>
                 ) : (
                   <Dropdown.Item
                     className="text text-sm hover:bg-accentBackground"
@@ -395,59 +417,106 @@ export default function PostPage({ params }) {
             </div>
           </div>
         </div>
-        <p className="text ms-14">{comment.text}</p>
-        <div className="flex items-center flex-row w-full mt-3 space-x-2 ms-14">
-          <div className="flex items-center">
-            <Icon
-              path={
-                comment.rating == true ? mdiArrowUpBold : mdiArrowUpBoldOutline
-              }
-              size={1.22}
-              className="text text-2xl hover:cursor-pointer"
-              onClick={async () => {
-                await handleCommentVote(
-                  comment.id_comment,
-                  true,
-                  profile.id_profile
-                );
-                const newComment = await fetchComments(
-                  post.id_post,
-                  profile.id_profile
-                );
-                setComments(newComment);
-              }}
+        {editComment ? (
+          <div className="mt-3 ms-14">
+            <textarea
+              className="min-h-[45px] max-h-[200px] w-full h-24 mt-2 bg-background border-primary border-[3px] input"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
             />
-            <p className="text text-base mx-0.5">{comment.likes}</p>
-            <Icon
-              path={
-                comment.rating == false
-                  ? mdiArrowDownBold
-                  : mdiArrowDownBoldOutline
-              }
-              size={1.22}
-              className="text text-2xl hover:cursor-pointer"
-              onClick={async () => {
-                await handleCommentVote(
-                  comment.id_comment,
-                  false,
-                  profile.id_profile
-                );
-                const newComment = await fetchComments(
-                  post.id_post,
-                  profile.id_profile
-                );
-                setComments(newComment);
-              }}
-            />
+            <div className="flex items-center flex-row w-full justify-end mt-3">
+              <button
+                className={
+                  commentText.length > 0 && commentText != comment.text
+                    ? "btn-primary border-[3px] border-primary"
+                    : "btn-secondary text-muted pointer-events-none hover:cursor-default"
+                }
+                onClick={async () => {
+                  const status = await updateComment(
+                    comment.id_comment,
+                    commentText
+                  );
+                  setCommentText("");
+                  if (!status) {
+                    setError("Ein Fehler ist aufgetreten!");
+                    setTimeout(() => {
+                      setError("");
+                    }, 3000);
+                    return;
+                  }
+                  const newComments = await fetchComments(
+                    post.id_post,
+                    profile.id_profile
+                  );
+                  setComments(newComments);
+                }}
+              >
+                Aktualisieren
+              </button>
+            </div>
           </div>
-          <div
-            className="flex items-center hover:cursor-pointer"
-            onClick={handleToggleReplyForm}
-          >
-            <FontAwesomeIcon icon={faReply} className="text text-xl me-1.5" />
-            <p className="text text-base">Antworten</p>
-          </div>
-        </div>
+        ) : (
+          <>
+            <p className="text ms-14">{comment.text}</p>
+            <div className="flex items-center flex-row w-full mt-3 space-x-2 ms-14">
+              <div className="flex items-center">
+                <Icon
+                  path={
+                    comment.rating == true
+                      ? mdiArrowUpBold
+                      : mdiArrowUpBoldOutline
+                  }
+                  size={1.22}
+                  className="text text-2xl hover:cursor-pointer"
+                  onClick={async () => {
+                    await handleCommentVote(
+                      comment.id_comment,
+                      true,
+                      profile.id_profile
+                    );
+                    const newComment = await fetchComments(
+                      post.id_post,
+                      profile.id_profile
+                    );
+                    setComments(newComment);
+                  }}
+                />
+                <p className="text text-base mx-0.5">{comment.likes}</p>
+                <Icon
+                  path={
+                    comment.rating == false
+                      ? mdiArrowDownBold
+                      : mdiArrowDownBoldOutline
+                  }
+                  size={1.22}
+                  className="text text-2xl hover:cursor-pointer"
+                  onClick={async () => {
+                    await handleCommentVote(
+                      comment.id_comment,
+                      false,
+                      profile.id_profile
+                    );
+                    const newComment = await fetchComments(
+                      post.id_post,
+                      profile.id_profile
+                    );
+                    setComments(newComment);
+                  }}
+                />
+              </div>
+              <div
+                className="flex items-center hover:cursor-pointer"
+                onClick={handleToggleReplyForm}
+              >
+                <FontAwesomeIcon
+                  icon={faReply}
+                  className="text text-xl me-1.5"
+                />
+                <p className="text text-base">Antworten</p>
+              </div>
+            </div>
+          </>
+        )}
 
         {showReplyForm && <ReplyForm onReplySubmit={handleReplySubmit} />}
 
