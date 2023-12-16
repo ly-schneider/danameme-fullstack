@@ -132,6 +132,14 @@ body {
   background-color: #174b7e;
 }
 
+.bugfix {
+  background-color: #a31b1b;
+}
+
+.update {
+  background-color: #1ba356;
+}
+
 input[type="file"] {
   display: none;
 }
