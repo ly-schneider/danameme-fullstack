@@ -12,8 +12,6 @@ export default function AddPostButton({ selected }) {
     router.push("/create/");
   }
 
-  console.log(selected);
-
   return (
     <>
       <Tooltip

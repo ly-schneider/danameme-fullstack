@@ -48,11 +48,9 @@ export default function LoginPage() {
       }
 
       const banData = await checkBan(accountData.id_account);
-      console.log(banData);
       let banCond = false;
       if (banData.length > 0) {
         banData.forEach((ban) => {
-          console.log(ban);
           if (ban.type == "account") {
             setBanned(true);
             setBanData(ban);

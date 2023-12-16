@@ -55,11 +55,9 @@ export default function Home() {
           if (profile) {
             setProfileId(profile.id_profile);
             const banData = await checkBan(account.id_account);
-            console.log(banData);
             let banCond = false;
             if (banData.length > 0) {
               banData.forEach((ban) => {
-                console.log(ban);
                 if (ban.type == "account") {
                   setBanned(true);
                   setBanData(ban);

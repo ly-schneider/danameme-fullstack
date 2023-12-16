@@ -56,8 +56,6 @@ export async function fetchPosts(profileId) {
         .eq("post_id", post.id_post)
         .eq("profile_id", profileId);
 
-      console.log(ratingData);
-
       if (ratingError) {
         console.log(ratingError);
         return { ...post, comments: commentData.length, rating: null };
@@ -73,6 +71,5 @@ export async function fetchPosts(profileId) {
     })
   );
 
-  console.log(countComments);
   return countComments;
 }

@@ -20,12 +20,9 @@ export default function ProfileButton() {
   const pathname = usePathname();
   const [profile, setProfile] = useState({});
 
-  const [theme, setTheme] = useState(false);
-
   useEffect(() => {
     async function getData() {
       const session = await getSession();
-      console.log(session);
       if (session) {
         const account = await getAccount(session.session.user.email);
         if (account) {

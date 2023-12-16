@@ -53,8 +53,6 @@ export async function checkBan(accountId) {
       return;
     }
 
-    console.log(bannedByData);
-
     bans.push({
       id_ban: ban.id_ban,
       createdat: ban.createdat,
@@ -69,6 +67,5 @@ export async function checkBan(accountId) {
 
   await Promise.all(banPromises);
 
-  console.log(bans);
   return bans;
 }

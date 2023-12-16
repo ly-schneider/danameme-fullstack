@@ -73,11 +73,9 @@ export default function PostPage({ params }) {
           if (profile) {
             setProfile(profile);
             const banData = await checkBan(account.id_account);
-            console.log(banData);
             let banCond = false;
             if (banData.length > 0) {
               banData.forEach((ban) => {
-                console.log(ban);
                 if (ban.type == "account") {
                   setBanned(true);
                   setBanData(ban);
@@ -110,7 +108,6 @@ export default function PostPage({ params }) {
   async function fetchPost(profileId) {
     let id = params.url.split("-");
     id = id[id.length - 1];
-    console.log(id);
 
     const { data: postsData, error: postsError } = await supabase
       .from("post")
@@ -171,8 +168,6 @@ export default function PostPage({ params }) {
           .select("*")
           .eq("post_id", post.id_post)
           .eq("profile_id", profileId);
-
-        console.log(ratingData);
 
         if (ratingError) {
           console.log(ratingError);
@@ -249,7 +244,6 @@ export default function PostPage({ params }) {
     }
 
     async function handleReplySubmit(replyText) {
-      console.log(replyText);
       if (replyText == false) {
         setShowReplyForm(false);
         return;
@@ -603,7 +597,6 @@ export default function PostPage({ params }) {
                   size={1.22}
                   className="text text-2xl hover:cursor-pointer"
                   onClick={async () => {
-                    console.log(post.id_post);
                     await handleVote(post.id_post, false, profile.id_profile);
                     const postNew = await fetchPost(profile.id_profile);
                     setPost(postNew);

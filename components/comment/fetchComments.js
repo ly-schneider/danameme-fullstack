@@ -82,6 +82,5 @@ export async function fetchComments(postId, profileId) {
 
   const commentsWithoutInserted = removeInsertedComments(commentsWithAnswers);
 
-  console.log(commentsWithoutInserted);
   return commentsWithoutInserted;
 }

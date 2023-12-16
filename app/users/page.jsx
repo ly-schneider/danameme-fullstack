@@ -30,11 +30,9 @@ export default function UsersPage() {
           const profile = await getProfile(account.id_account);
           if (profile) {
             const banData = await checkBan(account.id_account);
-            console.log(banData);
             let banCond = false;
             if (banData.length > 0) {
               banData.forEach((ban) => {
-                console.log(ban);
                 if (ban.type == "account") {
                   setBanned(true);
                   setBanData(ban);
@@ -58,10 +56,6 @@ export default function UsersPage() {
   useEffect(() => {
     getUsers();
   }, [filter]);
-
-  useEffect(() => {
-    console.log(users);
-  }, [users]);
 
   async function getUsers() {
     switch (filter) {

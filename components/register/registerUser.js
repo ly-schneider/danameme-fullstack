@@ -99,8 +99,6 @@ async function insertProfileInto(id_account, formData) {
     .select("userCount")
     .order("userCount", { ascending: false });
 
-  console.log(userCountData);
-
   if (getError) {
     console.log(getError);
     return "Es gab einen Fehler beim lesen aus der Datenbank!";
@@ -117,14 +115,11 @@ async function insertProfileInto(id_account, formData) {
   const randomImage = defaultProfileImages[randomIndex];
 
   let userCount = userCountData;
-  console.log(userCount);
   if (userCount.length == 0) {
     userCount = 1;
   } else {
     userCount = userCountData[0].userCount + 1;
   }
-
-  console.log(userCount);
 
   const { error } = await supabase.from("profile").insert({
     username: formData.username,

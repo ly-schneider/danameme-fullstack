@@ -24,7 +24,6 @@ export default function ChangelogsPage() {
       return;
     }
 
-    console.log(data);
     setChangelogs(data);
   }
 

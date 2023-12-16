@@ -37,7 +37,6 @@ export default function EditPost({ params }) {
           if (profile) {
             setProfile(profile);
             const post = await fetchPost(profile);
-            console.log(post);
             setTitle(post.title);
             setText(post.content);
             setFile(post.asset);
@@ -55,7 +54,6 @@ export default function EditPost({ params }) {
   async function fetchPost(profile) {
     let id = params.url.split("-");
     id = id[id.length - 1];
-    console.log(id);
 
     const { data: postsData, error: postsError } = await supabase
       .from("post")
@@ -102,16 +100,13 @@ export default function EditPost({ params }) {
     }
 
     let textInput = null;
-    console.log(text);
     if (text != null || text != "") {
       textInput = text;
     }
 
     let fileUrl;
-    console.log(file);
     if (typeof file !== "string" || !file instanceof String) {
       let fileName = oldFile.split("/")[oldFile.split("/").length - 1];
-      console.log(fileName);
 
       const { data: oldFileData, error: oldFileError } = await supabase.storage
         .from("post-images")
@@ -142,13 +137,10 @@ export default function EditPost({ params }) {
         .from("post-images")
         .getPublicUrl(profile.username + "-" + file.name);
 
-      console.log(url);
       fileUrl = url.publicUrl;
     } else {
       fileUrl = file;
     }
-
-    console.log(fileUrl);
 
     const { error } = await supabase
       .from("post")

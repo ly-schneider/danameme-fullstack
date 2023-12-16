@@ -64,9 +64,6 @@ export default function AccountSettings({ account }) {
       return false;
     }
 
-    console.log(data);
-
-    console.log(email);
     const { data: updateUser, error: updateUserError } =
       await supabase.auth.updateUser({
         email: email,
@@ -77,7 +74,6 @@ export default function AccountSettings({ account }) {
       return false;
     }
 
-    console.log(updateUser);
     setErrorEmail(
       "Bitte schaue in dein E-Mail Postfach zum die Änderung zu bestätigen. Überprüfe auch deinen Spam-Ordner."
     );
@@ -93,8 +89,6 @@ export default function AccountSettings({ account }) {
       setErrorEmail("Ein Fehler ist aufgetreten.");
       return false;
     }
-
-    console.log(data);
 
     if (data.length != 0) {
       setErrorEmail("Diese E-Mail wird bereits verwendet.");
@@ -112,7 +106,6 @@ export default function AccountSettings({ account }) {
       return false;
     }
 
-    console.log(data);
     setSuccessPassword(
       "Ein Link wurde an deine E-Mail Adresse gesendet für das Zurücksetzten des Passworts."
     );
@@ -133,7 +126,6 @@ export default function AccountSettings({ account }) {
       return false;
     }
 
-    console.log(data);
     setFirstnameSuccess("Vorname wurde aktualisiert.");
   }
 
@@ -152,7 +144,6 @@ export default function AccountSettings({ account }) {
       return false;
     }
 
-    console.log(data);
     setLastnameSuccess("Nachname wurde aktualisiert.");
   }
 
@@ -171,10 +162,7 @@ export default function AccountSettings({ account }) {
       return false;
     }
 
-    console.log(data);
-
     const status = await deleteAccountAuth(session.session.user.id);
-    console.log(status);
 
     if (status == false) {
       setDeleteAccountError("Ein Fehler ist aufgetreten.");
@@ -198,7 +186,9 @@ export default function AccountSettings({ account }) {
           </div>
         )}
         <div className="flex flex-col sm:flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-full sm:w-1/4">E-Mail</h1>
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">
+            E-Mail
+          </h1>
           <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="email"
@@ -272,7 +262,9 @@ export default function AccountSettings({ account }) {
           </div>
         )}
         <div className="flex flex-col sm:flex-row items-center mb-4">
-          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Vorname</h1>
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">
+            Vorname
+          </h1>
           <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="text"
@@ -313,7 +305,9 @@ export default function AccountSettings({ account }) {
           </div>
         )}
         <div className="flex flex-col sm:flex-row items-center">
-          <h1 className="title text-lg font-semibold w-full sm:w-1/4">Nachname</h1>
+          <h1 className="title text-lg font-semibold w-full sm:w-1/4">
+            Nachname
+          </h1>
           <div className="flex justify-between sm:justify-end space-x-3 w-full sm:w-3/4 mt-3 sm:mt-0">
             <input
               type="text"
@@ -337,7 +331,10 @@ export default function AccountSettings({ account }) {
       <div className="flex flex-row w-full justify-end mt-8">
         <button
           className="btn-secondary border-error text-muted hover:btn-primary hover:bg-error hover:border-error hover:text-text transition-all duration-300"
-          onClick={() => {setDeleteAccount(!deleteAccount); setAccountDeleteEmail("")}}
+          onClick={() => {
+            setDeleteAccount(!deleteAccount);
+            setAccountDeleteEmail("");
+          }}
         >
           <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
           Account löschen
@@ -373,7 +370,10 @@ export default function AccountSettings({ account }) {
             />
             <div className="flex flex-row justify-between items-center mt-2 space-x-4">
               <button
-                onClick={() => {setDeleteAccount(!deleteAccount); setAccountDeleteEmail("")}}
+                onClick={() => {
+                  setDeleteAccount(!deleteAccount);
+                  setAccountDeleteEmail("");
+                }}
                 className={
                   "w-full mt-4 border-[3px] btn-primary bg-error border-error text-text"
                 }

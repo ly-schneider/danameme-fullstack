@@ -20,14 +20,12 @@ export default function Navigation() {
   useEffect(() => {
     async function getData() {
       const session = await getSession();
-      console.log(session);
       if (session) {
         const account = await getAccount(session.session.user.email);
         if (account) {
           const profile = await getProfile(account.id_account);
           if (profile) {
             setProfile(profile);
-            console.log(profile);
           }
         }
       } else {

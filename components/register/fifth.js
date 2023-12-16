@@ -126,7 +126,6 @@ export default function Fifth({ formData, setFormData, page, setPage }) {
       return false;
     }
 
-    console.log(data);
     location.href = "/";
   }
 

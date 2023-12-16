@@ -39,10 +39,8 @@ export default function CreatePostPage() {
           if (profile) {
             setProfile(profile);
             const banData = await checkBan(account.id_account);
-            console.log(banData);
             if (banData.length > 0) {
               banData.forEach((ban) => {
-                console.log(ban);
                 if (ban.type == "account") {
                   setBanned(true);
                   setBanData(ban);
@@ -112,7 +110,6 @@ export default function CreatePostPage() {
         .from("post-images")
         .getPublicUrl(profile.username + "-" + file.name);
 
-      console.log(url);
       fileUrl = url;
     }
 

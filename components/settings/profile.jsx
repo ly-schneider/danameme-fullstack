@@ -31,13 +31,11 @@ export default function ProfileSettings({ profile }) {
     setUsername(profile.username);
     setBiography(profile.biography);
     setProfileimage(profile.profileimage);
-    console.log(profile.profileimage);
   }, [profile]);
 
   useEffect(() => {
     async function getData() {
       const badges = await getBadges(profile);
-      console.log(badges);
       setBadges(badges);
     }
     getData();
@@ -78,15 +76,12 @@ export default function ProfileSettings({ profile }) {
       .sort()
       .reverse()
       .forEach((key) => {
-        console.log(key);
         sortedArrray.push({
           id_badge: parseInt(key),
           class: badgesTemp[key].class,
           text: badgesTemp[key].text,
         });
       });
-
-    console.log(sortedArrray);
 
     return sortedArrray;
   }
@@ -171,8 +166,6 @@ export default function ProfileSettings({ profile }) {
       .from("profile-images")
       .getPublicUrl(profile.username + "-profileimage.jpg");
 
-    console.log(url);
-
     const { error: updateError } = await supabase
       .from("profile")
       .update({ profileimage: url.publicUrl })
@@ -229,8 +222,6 @@ export default function ProfileSettings({ profile }) {
       setErrorBadges("Der Code ist ungültig.");
       return;
     }
-
-    console.log(badge);
 
     const { data, error } = await supabase
       .from("profile_badge")

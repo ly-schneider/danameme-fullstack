@@ -85,11 +85,9 @@ export default function ProfilePage({ params }) {
       setProfileSession(profileSession);
 
       const banData = await checkBan(accountSession.id_account);
-      console.log(banData);
       let banCond = false;
       if (banData.length > 0) {
         banData.forEach((ban) => {
-          console.log(ban);
           if (ban.type == "account") {
             setBanned(true);
             setBanData(ban);
@@ -102,7 +100,6 @@ export default function ProfilePage({ params }) {
       }
 
       const profile = await getUserProfile();
-      console.log(profile);
       setProfile(profile);
 
       if (profile == false) {
@@ -111,19 +108,15 @@ export default function ProfilePage({ params }) {
       }
 
       const badges = await getBadges(profile);
-      console.log(badges);
       setBadges(badges);
 
       const joined = await getJoined(profile);
-      console.log(joined);
       setJoined(joined);
 
-      console.log(profile.id_profile);
       const posts = await getPosts(
         profile.id_profile,
         profileSession.id_profile
       );
-      console.log(posts);
       setPosts(posts);
 
       setBiography(profile.biography);
@@ -185,15 +178,12 @@ export default function ProfilePage({ params }) {
       .sort()
       .reverse()
       .forEach((key) => {
-        console.log(key);
         sortedArrray.push({
           key: key,
           class: badgesTemp[key].class,
           text: badgesTemp[key].text,
         });
       });
-
-    console.log(sortedArrray);
 
     return sortedArrray;
   }
@@ -280,8 +270,6 @@ export default function ProfilePage({ params }) {
           .eq("post_id", post.id_post)
           .eq("profile_id", profileIdSession);
 
-        console.log(ratingData);
-
         if (ratingError) {
           console.log(ratingError);
           return { ...post, comments: commentData.length, rating: null };
@@ -297,7 +285,6 @@ export default function ProfilePage({ params }) {
       })
     );
 
-    console.log(countComments);
     return countComments;
   }
 
@@ -316,67 +303,7 @@ export default function ProfilePage({ params }) {
       return;
     }
 
-    console.log(updateData);
-
     setProfile({ ...profile, biography: biography });
-  }
-
-  async function addBadgeToProfile(e) {
-    e.preventDefault();
-    console.log(code);
-    setCode("");
-    setAddBadge(false);
-
-    if (code == "") {
-      setErrorCode("Code darf nicht leer sein!");
-      return;
-    }
-
-    if (code.length != 6) {
-      setErrorCode("Code muss 6 Zeichen lang sein!");
-      return;
-    }
-
-    const data = await CodeToBadge(code);
-    console.log(data);
-
-    if (!data) {
-      setErrorCode("Der Code konnte nicht überprüft werden!");
-      return false;
-    }
-    if (data == "ungültig") {
-      setErrorCode("Der Code ist ungültig!");
-      return false;
-    }
-
-    const { data: badgeData, error: badgeError } = await supabase
-      .from("profile_badge")
-      .insert({ profile_id: profile.id_profile, badge_id: data.id_badge });
-
-    if (badgeError) {
-      console.log(badgeError);
-      setErrorCode("Der Code konnte nicht hinzugefügt werden!");
-      return;
-    }
-
-    const badges = await getBadges(profile);
-    setBadges(badges);
-  }
-
-  async function handleRemoveBadge(badgeId) {
-    const { data: badgeData, error: badgeError } = await supabase
-      .from("profile_badge")
-      .delete()
-      .eq("profile_id", profile.id_profile)
-      .eq("badge_id", badgeId);
-
-    if (badgeError) {
-      console.log(badgeError);
-      return;
-    }
-
-    const badges = await getBadges(profile);
-    setBadges(badges);
   }
 
   return (
