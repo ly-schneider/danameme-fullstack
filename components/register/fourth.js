@@ -17,14 +17,28 @@ export default function Fourth({ formData, setFormData, page, setPage }) {
   useEffect(() => {
     if (username.length < 3 && usernameTryed) {
       setErrorUsername("Benutzername muss mindestens 3 Zeichen lang sein!");
+    } else if (/[\u00C4\u00E4\u00D6\u00F6\u00DC\u00FC\u00DF]/.test(username)) {
+      setErrorUsername("Benutzername darf keine Umlaute enthalten!");
+    } else if (/[^a-zA-Z0-9-_]/.test(username)) {
+      setErrorUsername(
+        "Benutzername darf keine Sonderzeichen enthalten, außer '-' und '_'!"
+      );
     } else {
       setErrorUsername("");
     }
   }, [username]);
 
   function handleValidation() {
-    if (username.length < 3 && !usernameTryed) {
+    if (username.length < 3 && usernameTryed) {
       setErrorUsername("Benutzername muss mindestens 3 Zeichen lang sein!");
+      return false;
+    } else if (/[\u00C4\u00E4\u00D6\u00F6\u00DC\u00FC\u00DF]/.test(username)) {
+      setErrorUsername("Benutzername darf keine Umlaute enthalten!");
+      return false;
+    } else if (/[^a-zA-Z0-9-_]/.test(username)) {
+      setErrorUsername(
+        "Benutzername darf keine Sonderzeichen enthalten, außer '-' und '_'!"
+      );
       return false;
     } else {
       setErrorUsername("");
@@ -53,6 +67,18 @@ export default function Fourth({ formData, setFormData, page, setPage }) {
 
     if (username.length < 3) {
       setErrorUsername("Benutzername muss mindestens 3 Zeichen lang sein!");
+      formError = true;
+    }
+
+    if (/[\u00C4\u00E4\u00D6\u00F6\u00DC\u00FC\u00DF]/.test(username)) {
+      setErrorUsername("Benutzername darf keine Umlaute enthalten!");
+      formError = true;
+    }
+
+    if (/[^a-zA-Z0-9-_]/.test(username)) {
+      setErrorUsername(
+        "Benutzername darf keine Sonderzeichen enthalten, außer '-' und '_'!"
+      );
       formError = true;
     }
 
