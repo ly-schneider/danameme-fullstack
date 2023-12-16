@@ -30,7 +30,7 @@ export default function ChangelogsPage() {
 
   return (
     <div className="mt-8 mx-5 sm:mx-0">
-      <h1 className="title">Changelogs</h1>
+      <h1 className="title">Change Logs</h1>
       <div className="flex flex-col space-y-5 mt-8">
         {changelogs.map((log) => (
           <div
