@@ -72,19 +72,15 @@ export default function ProfileButton() {
           label=""
           className="text-sm font-medium text-white bg-zinc-800 !mt-2"
         >
-          <Dropdown.Item className="text text-sm text-muted font-extrabold pointer-events-none border-b border-muted hover:cursor-default">
+          <Dropdown.Item
+            className="text text-sm text-text font-extrabold hover:bg-accentBackground"
+            onClick={() => router.push("/p/" + profile.username)}
+          >
             <img
               src={profile.profileimage}
               className="w-8 h-8 rounded-image border-2 border-accent me-1.5 object-cover"
             />
             {profile.username}
-          </Dropdown.Item>
-          <Dropdown.Item
-            className="text text-sm hover:bg-accentBackground"
-            onClick={() => router.push("/p/" + profile.username)}
-          >
-            <FontAwesomeIcon icon={faUser} className="me-1.5" />
-            Profil
           </Dropdown.Item>
           <Dropdown.Item
             className="text text-sm hover:bg-accentBackground"
