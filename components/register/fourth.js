@@ -29,7 +29,7 @@ export default function Fourth({ formData, setFormData, page, setPage }) {
   }, [username]);
 
   function handleValidation() {
-    if (username.length < 3 && usernameTryed) {
+    if (username.length < 3 && !usernameTryed) {
       setErrorUsername("Benutzername muss mindestens 3 Zeichen lang sein!");
       return false;
     } else if (/[\u00C4\u00E4\u00D6\u00F6\u00DC\u00FC\u00DF]/.test(username)) {
