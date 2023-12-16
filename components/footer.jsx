@@ -36,6 +36,9 @@ export default function Footer() {
             <Link href="/login" className="hover:underline">
               <li>Login</li>
             </Link>
+            <Link href="/changelogs" className="hover:underline">
+              <li>Change Logs</li>
+            </Link>
           </ul>
         </div>
         <div className="w-full md:w-1/3 justify-start md:justify-end text-start md:text-end">

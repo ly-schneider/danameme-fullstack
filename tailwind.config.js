@@ -26,6 +26,7 @@ module.exports = {
         div: "10px",
         badge: "5px",
         image: "20px",
+        changelog: "15px",
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
