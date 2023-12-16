@@ -24,7 +24,7 @@ export async function handleVote(postId, type, profileId) {
     return;
   }
 
-  console.log(postUser)
+  console.log(postUser);
 
   const { data: userKarma, error: userKarmaError } = await supabase
     .from("profile")
@@ -36,7 +36,7 @@ export async function handleVote(postId, type, profileId) {
     return;
   }
 
-  console.log(userKarma)
+  console.log(userKarma);
 
   let karma = userKarma[0].karma;
   if (data.length == 0) {
@@ -92,15 +92,15 @@ export async function handleVote(postId, type, profileId) {
     }
   }
 
-  console.log(profileId)
+  console.log(profileId);
 
-  console.log(karma)
+  console.log(karma);
 
   if (karma < 0) {
     karma = 0;
   }
 
-  console.log(postUser[0].profile_id)
+  console.log(postUser[0].profile_id);
   if (profileId != postUser[0].profile_id) {
     const { error: updateKarmaError } = await supabase
       .from("profile")

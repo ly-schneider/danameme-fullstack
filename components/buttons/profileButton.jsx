@@ -25,7 +25,7 @@ export default function ProfileButton() {
   useEffect(() => {
     async function getData() {
       const session = await getSession();
-      console.log(session)
+      console.log(session);
       if (session) {
         const account = await getAccount(session.session.user.email);
         if (account) {
@@ -50,7 +50,10 @@ export default function ProfileButton() {
   }
 
   async function handleDarkmode() {
-    alert("Wolltest du ernsthaft den Darkmode aktivieren? Dein Account wird jetzt gelöscht!")
+    alert(
+      "Wolltest du ernsthaft den Whitemode aktivieren? Dein Account wird jetzt gelöscht!"
+    );
+    alert("War nur Spass! (Trotzdem cringe von dir)");
   }
 
   return (
@@ -70,7 +73,10 @@ export default function ProfileButton() {
           className="text-sm font-medium text-white bg-zinc-800 !mt-2"
         >
           <Dropdown.Item className="text text-sm text-muted font-extrabold pointer-events-none border-b border-muted hover:cursor-default">
-            <img src={profile.profileimage} className="w-8 h-8 rounded-image border-2 border-accent me-1.5 object-cover" />
+            <img
+              src={profile.profileimage}
+              className="w-8 h-8 rounded-image border-2 border-accent me-1.5 object-cover"
+            />
             {profile.username}
           </Dropdown.Item>
           <Dropdown.Item
@@ -98,7 +104,7 @@ export default function ProfileButton() {
             className="text text-sm hover:bg-accentBackground border-t border-muted"
             onClick={handleDarkmode}
           >
-          <FontAwesomeIcon icon={faMoon} className="me-1.5" />
+            <FontAwesomeIcon icon={faMoon} className="me-1.5" />
             Darkmode
           </Dropdown.Item>
         </Dropdown>
