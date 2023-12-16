@@ -1,10 +1,12 @@
 "use client";
 
+import { checkBan } from "@/components/auth/checkBan";
 import { getAccount } from "@/components/auth/getAccount";
 import { getProfile } from "@/components/auth/getProfile";
 import { getSession } from "@/components/auth/getSession";
 import { handleProfileReport } from "@/components/auth/handleReport";
 import CodeToBadge from "@/components/codeToBadge";
+import { calcTime } from "@/components/other/calcTime";
 import { calcTimeDifference } from "@/components/post/calcTimeDifference";
 import { generateTitle } from "@/components/post/generateTitle";
 import { handlePostDelete } from "@/components/post/handleDelete";
@@ -58,6 +60,9 @@ export default function ProfilePage({ params }) {
   const [code, setCode] = useState("");
   const [errorCode, setErrorCode] = useState("");
 
+  const [banned, setBanned] = useState(false);
+  const [banData, setBanData] = useState([]);
+
   useEffect(() => {
     async function loadData() {
       const session = await getSession();
@@ -78,6 +83,23 @@ export default function ProfilePage({ params }) {
         return false;
       }
       setProfileSession(profileSession);
+
+      const banData = await checkBan(accountSession.id_account);
+      console.log(banData);
+      let banCond = false;
+      if (banData.length > 0) {
+        banData.forEach((ban) => {
+          console.log(ban);
+          if (ban.type == "account") {
+            setBanned(true);
+            setBanData(ban);
+            banCond = true;
+          }
+        });
+      }
+      if (banCond) {
+        return false;
+      }
 
       const profile = await getUserProfile();
       console.log(profile);
@@ -640,11 +662,29 @@ export default function ProfilePage({ params }) {
           </div>
         </div>
       ) : (
-        <div className="flex justify-center mt-8">
-          <h1 className="title text-2xl">
-            <FontAwesomeIcon icon={faSpinner} spin />
-          </h1>
-        </div>
+        <>
+          {banned ? (
+            <div className="flex flex-col items-center w-full mt-8">
+              <h1 className="title font-extrabold text-error">Banned!</h1>
+              <h1 className="title text-lg font-extrabold text-error">
+                Bis: {calcTime(banData.until)}
+              </h1>
+              <p className="text text-base text-center mt-3">
+                Grund dafür ist: {banData.reason}
+              </p>
+              <p className="text text-sm text-muted text-center mt-3">
+                Du wurdest von {banData.bannedby} am{" "}
+                {calcTime(banData.createdat)} gebannt.
+              </p>
+            </div>
+          ) : (
+            <div className="flex justify-center mt-8">
+              <h1 className="title text-2xl">
+                <FontAwesomeIcon icon={faSpinner} spin />
+              </h1>
+            </div>
+          )}
+        </>
       )}
     </>
   );

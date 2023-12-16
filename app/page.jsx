@@ -32,6 +32,9 @@ import { handlePostDelete } from "@/components/post/handleDelete";
 import { handlePostReport } from "@/components/post/handleReport";
 import { generateTitle } from "@/components/post/generateTitle";
 import { useRouter } from "next/navigation";
+import supabase from "@/components/supabase";
+import { checkBan } from "@/components/auth/checkBan";
+import { calcTime } from "@/components/other/calcTime";
 
 export default function Home() {
   const router = useRouter();
@@ -39,17 +42,35 @@ export default function Home() {
   const [profileId, setProfileId] = useState(null);
   const [success, setSuccess] = useState("");
 
+  const [banned, setBanned] = useState(false);
+  const [banData, setBanData] = useState([]);
+
   useEffect(() => {
     async function getData() {
       const session = await getSession();
       if (session) {
-        const accountId = await getAccount(session.session.user.email);
-        if (accountId) {
-          const profileId = await getProfile(accountId.id_account);
-          if (profileId) {
-            setProfileId(profileId.id_profile);
-            const posts = await fetchPosts(profileId.id_profile);
-            setPosts(posts);
+        const account = await getAccount(session.session.user.email);
+        if (account) {
+          const profile = await getProfile(account.id_account);
+          if (profile) {
+            setProfileId(profile.id_profile);
+            const banData = await checkBan(account.id_account);
+            console.log(banData);
+            let banCond = false;
+            if (banData.length > 0) {
+              banData.forEach((ban) => {
+                console.log(ban);
+                if (ban.type == "account") {
+                  setBanned(true);
+                  setBanData(ban);
+                  banCond = true;
+                }
+              });
+            }
+            if (!banCond) {
+              const posts = await fetchPosts(profile.id_profile);
+              setPosts(posts);
+            }
           }
         }
       } else {
@@ -231,11 +252,29 @@ export default function Home() {
             </div>
           </div>
         ))}
-        {posts.length == 0 && (
-          <div className="flex flex-col items-center w-full">
-            <h1 className="text text-2xl font-extrabold">Keine Beiträge</h1>
-            <p className="text text-base">Erstelle den ersten Beitrag!</p>
+        {banned ? (
+          <div className="flex flex-col items-center w-full mt-8">
+            <h1 className="title font-extrabold text-error">Banned!</h1>
+            <h1 className="title text-lg font-extrabold text-error">
+              Bis: {calcTime(banData.until)}
+            </h1>
+            <p className="text text-base text-center mt-3">
+              Grund dafür ist: {banData.reason}
+            </p>
+            <p className="text text-sm text-muted text-center mt-3">
+              Du wurdest von {banData.bannedby} am {calcTime(banData.createdat)}{" "}
+              gebannt.
+            </p>
           </div>
+        ) : (
+          <>
+            {posts.length == 0 && (
+              <div className="flex flex-col items-center w-full">
+                <h1 className="text text-2xl font-extrabold">Keine Beiträge</h1>
+                <p className="text text-base">Erstelle den ersten Beitrag!</p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>
