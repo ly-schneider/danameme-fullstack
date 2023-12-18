@@ -116,7 +116,7 @@ export default function PostPage({ params }) {
     const { data: postsData, error: postsError } = await supabase
       .from("post")
       .select(
-        "id_post, title, content, asset, createdat, profile_id, profile (username, profileimage, id_profile)"
+        "id_post, title, content, asset, createdat, profile_id, edited, profile (username, profileimage, id_profile)"
       )
       .eq("id_post", id);
 
@@ -554,49 +554,59 @@ export default function PostPage({ params }) {
                   </h1>
                 </Link>
               </div>
-              <div className="flex items-center">
-                <p className="text-muted text text-xs sm:text-sm">
-                  {calcTimeDifference(post.createdat)}
-                </p>
-                <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
-                  <Dropdown
-                    dismissOnClick={false}
-                    label=""
-                    renderTrigger={() => (
-                      <FontAwesomeIcon
-                        icon={faEllipsisH}
-                        className="ms-4 text-muted text-2xl hover:cursor-pointer"
-                      />
-                    )}
-                  >
-                    {profile.id_profile == post.profile.id_profile ? (
-                      <Dropdown.Item
-                        className="text text-sm hover:bg-accentBackground"
-                        onClick={async () => {
-                          await handlePostDelete(post.id_post);
-                          router.push("/");
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faTrashCan} className="me-1.5" />
-                        Delete
-                      </Dropdown.Item>
-                    ) : (
-                      <Dropdown.Item
-                        className="text text-sm hover:bg-accentBackground"
-                        onClick={async () => {
-                          handlePostReport(post.id_post, profile.id_profile);
+              <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
+                {post.edited && (
+                  <p className="text-muted sm:w-1/2 w-full text-end text text-xs sm:text-sm">
+                    (Bearbeitet)
+                  </p>
+                )}
+                <div className="flex w-full items-center">
+                  <p className="text-muted w-full text text-xs sm:text-sm">
+                    {calcTimeDifference(post.createdat)}
+                  </p>
+                  <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
+                    <Dropdown
+                      dismissOnClick={false}
+                      label=""
+                      renderTrigger={() => (
+                        <FontAwesomeIcon
+                          icon={faEllipsisH}
+                          className="ms-4 text-muted text-2xl hover:cursor-pointer"
+                        />
+                      )}
+                    >
+                      {profile.id_profile == post.profile.id_profile ? (
+                        <Dropdown.Item
+                          className="text text-sm hover:bg-accentBackground"
+                          onClick={async () => {
+                            await handlePostDelete(post.id_post);
+                            router.push("/");
+                          }}
+                        >
+                          <FontAwesomeIcon
+                            icon={faTrashCan}
+                            className="me-1.5"
+                          />
+                          Delete
+                        </Dropdown.Item>
+                      ) : (
+                        <Dropdown.Item
+                          className="text text-sm hover:bg-accentBackground"
+                          onClick={async () => {
+                            handlePostReport(post.id_post, profile.id_profile);
 
-                          setSuccess("Beitrag wurde gemeldet!");
-                          setTimeout(() => {
-                            setSuccess("");
-                          }, 3000);
-                        }}
-                      >
-                        <FontAwesomeIcon icon={faFlag} className="me-1.5" />
-                        Report
-                      </Dropdown.Item>
-                    )}
-                  </Dropdown>
+                            setSuccess("Beitrag wurde gemeldet!");
+                            setTimeout(() => {
+                              setSuccess("");
+                            }, 3000);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faFlag} className="me-1.5" />
+                          Report
+                        </Dropdown.Item>
+                      )}
+                    </Dropdown>
+                  </div>
                 </div>
               </div>
             </div>

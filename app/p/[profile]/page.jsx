@@ -431,82 +431,89 @@ export default function ProfilePage({ params }) {
                       {post.profile.username}
                     </h1>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
                     {post.edited && (
-                      <p className="text-muted text text-xs sm:text-sm mr-4">
+                      <p className="text-muted sm:w-1/2 w-full text-end text text-xs sm:text-sm">
                         (Bearbeitet)
                       </p>
                     )}
-                    <p className="text-muted text text-xs sm:text-sm">
-                      {calcTimeDifference(post.createdat)}
-                    </p>
-                    <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
-                      <Dropdown
-                        dismissOnClick={false}
-                        label=""
-                        renderTrigger={() => (
-                          <FontAwesomeIcon
-                            icon={faEllipsisH}
-                            className="ms-4 text-muted text-2xl hover:cursor-pointer"
-                          />
-                        )}
-                      >
-                        {profileSession.id_profile ==
-                        post.profile.id_profile ? (
-                          <>
-                            <Dropdown.Item
-                              className="text text-sm hover:bg-accentBackground"
-                              onClick={() =>
-                                router.push(`/post/${generateTitle(post)}/edit`)
-                              }
-                            >
-                              <FontAwesomeIcon
-                                icon={faPen}
-                                className="me-1.5"
-                              />
-                              Bearbeiten
-                            </Dropdown.Item>
+                    <div className="flex w-full items-center">
+                      <p className="text-muted w-full text text-xs sm:text-sm">
+                        {calcTimeDifference(post.createdat)}
+                      </p>
+                      <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
+                        <Dropdown
+                          dismissOnClick={false}
+                          label=""
+                          renderTrigger={() => (
+                            <FontAwesomeIcon
+                              icon={faEllipsisH}
+                              className="ms-4 text-muted text-2xl hover:cursor-pointer"
+                            />
+                          )}
+                        >
+                          {profileSession.id_profile ==
+                          post.profile.id_profile ? (
+                            <>
+                              <Dropdown.Item
+                                className="text text-sm hover:bg-accentBackground"
+                                onClick={() =>
+                                  router.push(
+                                    `/post/${generateTitle(post)}/edit`
+                                  )
+                                }
+                              >
+                                <FontAwesomeIcon
+                                  icon={faPen}
+                                  className="me-1.5"
+                                />
+                                Bearbeiten
+                              </Dropdown.Item>
+                              <Dropdown.Item
+                                className="text text-sm hover:bg-accentBackground"
+                                onClick={async () => {
+                                  await handlePostDelete(post.id_post);
+                                  const newPosts = await getPosts(
+                                    profile.id_profile,
+                                    profileSession.id_profile
+                                  );
+                                  setPosts(newPosts);
+                                }}
+                              >
+                                <FontAwesomeIcon
+                                  icon={faTrashCan}
+                                  className="me-1.5"
+                                />
+                                Löschen
+                              </Dropdown.Item>
+                            </>
+                          ) : (
                             <Dropdown.Item
                               className="text text-sm hover:bg-accentBackground"
                               onClick={async () => {
-                                await handlePostDelete(post.id_post);
-                                const newPosts = await getPosts(
-                                  profile.id_profile,
+                                const status = await handlePostReport(
+                                  post.id_post,
                                   profileSession.id_profile
                                 );
-                                setPosts(newPosts);
+                                if (status == true) {
+                                  setSuccess(
+                                    "Beitrag wurde erfolgreich gemeldet!"
+                                  );
+                                  setTimeout(() => {
+                                    setSuccess("");
+                                  }, 3000);
+                                }
                               }}
                             >
                               <FontAwesomeIcon
-                                icon={faTrashCan}
+                                icon={faFlag}
                                 className="me-1.5"
                               />
-                              Löschen
+                              Report
                             </Dropdown.Item>
-                          </>
-                        ) : (
-                          <Dropdown.Item
-                            className="text text-sm hover:bg-accentBackground"
-                            onClick={async () => {
-                              const status = await handlePostReport(
-                                post.id_post,
-                                profileSession.id_profile
-                              );
-                              if (status == true) {
-                                setSuccess(
-                                  "Beitrag wurde erfolgreich gemeldet!"
-                                );
-                                setTimeout(() => {
-                                  setSuccess("");
-                                }, 3000);
-                              }
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faFlag} className="me-1.5" />
-                            Report
-                          </Dropdown.Item>
-                        )}
-                      </Dropdown>
+                          )}
+                        </Dropdown>
+                      </div>
                     </div>
                   </div>
                 </div>
