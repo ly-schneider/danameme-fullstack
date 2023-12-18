@@ -164,6 +164,11 @@ body {
   );
 }
 
+.bossinfo {
+  background: rgb(0, 78, 158);
+  background: linear-gradient(90deg, rgb(0, 78, 158) 0%, rgb(1, 39, 107) 100%);
+}
+
 .feature {
   background-color: #174b7e;
 }
