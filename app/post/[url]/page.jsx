@@ -89,7 +89,11 @@ export default function PostPage({ params }) {
 
             if (!banCond) {
               const post = await fetchPost(profile.id_profile);
-              setPost(post);
+              if (post == null) {
+                setPost([]);
+              } else {
+                setPost(post);
+              }
               if (post != null) {
                 const comments = await fetchComments(
                   post.id_post,
@@ -122,7 +126,6 @@ export default function PostPage({ params }) {
     }
 
     if (postsData.length == 0) {
-      setPost([]);
       return null;
     }
 
@@ -737,11 +740,11 @@ export default function PostPage({ params }) {
           </div>
         </>
       ) : (
-        <div className="w-full justify-center">
-          <h1 className="title text-center text-lg">
+        <div className="w-full justify-center mt-8 sm:mt-0">
+          <h1 className="title mx-5 sm:mx-0 text-center text-lg">
             Beitrag konnte nicht gefunden werden!
           </h1>
-          <div className="flex justify-between items-center mx-[105px] mt-6">
+          <div className="flex justify-between items-center mx-8 sm:mx-[105px] mt-6">
             <button
               className="btn-primary border-[3px] border-primary"
               onClick={() => router.back()}
