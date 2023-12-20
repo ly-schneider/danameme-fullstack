@@ -1,3 +1,5 @@
+"use client";
+
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -14,18 +16,32 @@ export default function Footer() {
         </div>
         <div className="flex text-text font-lato font-semibold w-full md:w-1/3 justify-start md:justify-center space-x-8">
           <ul>
-            <Link href="/" className="hover:underline">
+            <Link href="/info" className="hover:underline">
               <li>Info</li>
             </Link>
             <Link href="/about" className="hover:underline">
               <li>Über mich</li>
             </Link>
-            {/* <li>Datenschutz</li> */}
+            <Link href="/datenschutz" className="hover:underline">
+              <li>Datenschutz</li>
+            </Link>
+            <Link href="/impressum" className="hover:underline">
+              <li>Impressum</li>
+            </Link>
           </ul>
-          <ul className="text-muted">
-            <li>Registrierung</li>
-            <li>Login</li>
-            <li>Profil</li>
+          <ul>
+            <Link href="/register" className="hover:underline">
+              <li>Registrierung</li>
+            </Link>
+            <Link href="/login" className="hover:underline">
+              <li>Login</li>
+            </Link>
+            <Link href="/change-logs" className="hover:underline">
+              <li>Change Logs</li>
+            </Link>
+            <Link href="/users" className="hover:underline">
+              <li>Alle Benutzer</li>
+            </Link>
           </ul>
         </div>
         <div className="w-full md:w-1/3 justify-start md:justify-end text-start md:text-end">

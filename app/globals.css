@@ -10,14 +10,175 @@
     @apply text-3xl font-poppins font-extrabold text-text;
   }
 
+  .text {
+    @apply font-lato font-medium text-base text-text;
+  }
+
+  .btn-primary {
+    @apply bg-primary rounded-button px-6 py-2 text-text text-sm;
+  }
+
+  .btn-secondary {
+    @apply bg-background border-[3px] border-primary rounded-button px-6 py-2 text-text text-sm;
+  }
+
   .input {
     @apply text-sm font-lato font-medium text-text border-[3px] border-primary bg-background rounded-form px-4 py-2 placeholder:text-sm placeholder:text-placeholder;
+  }
+
+  .seperator {
+    @apply border-[2px] border-primary rounded-[2px];
   }
 }
 
 body {
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
+}
+
+/* Badge Styles */
+.ict-campus {
+  background: rgb(219, 198, 86);
+  background: linear-gradient(
+    90deg,
+    rgba(219, 198, 86, 1) 0%,
+    rgba(185, 156, 3, 1) 100%
+  );
+}
+
+.ccyp {
+  background: rgb(86, 195, 219);
+  background: linear-gradient(
+    90deg,
+    rgba(86, 195, 219, 1) 0%,
+    rgba(6, 141, 170, 1) 100%
+  );
+}
+
+.alpha-tester {
+  background: rgb(5, 79, 89);
+  background: linear-gradient(
+    90deg,
+    rgb(86, 195, 219, 1) 0%,
+    rgba(6, 141, 170, 1) 100%
+  );
+}
+
+.coach {
+  background: rgb(43, 221, 82);
+  background: linear-gradient(
+    90deg,
+    rgba(43, 221, 82, 1) 0%,
+    rgba(6, 170, 32, 1) 100%
+  );
+}
+
+.danamike {
+  background: rgb(221, 43, 43);
+  background: linear-gradient(
+    90deg,
+    rgba(221, 43, 43, 1) 0%,
+    rgba(168, 0, 0, 1) 100%
+  );
+}
+
+.fourohfour {
+  background: rgb(221, 43, 43);
+  background: linear-gradient(
+    90deg,
+    rgba(221, 43, 43, 1) 0%,
+    rgba(168, 0, 0, 1) 100%
+  );
+}
+
+.extern {
+  background: rgb(255, 204, 127);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 204, 127, 1) 0%,
+    rgba(218, 170, 76, 1) 100%
+  );
+}
+
+.one-to-ten {
+  background: rgb(199, 127, 255);
+  background: linear-gradient(
+    90deg,
+    rgba(199, 127, 255, 1) 0%,
+    rgba(127, 232, 255, 1) 100%
+  );
+}
+
+.ten-to-twenty {
+  background: rgb(255, 169, 39);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 169, 39, 1) 0%,
+    rgba(255, 30, 30, 1) 100%
+  );
+}
+
+.twenty-to-thirty {
+  background: rgb(6, 211, 113);
+  background: linear-gradient(
+    90deg,
+    rgba(6, 211, 113, 1) 0%,
+    rgba(0, 164, 215, 1) 100%
+  );
+}
+
+.thirty-to-forty {
+  background: rgb(56, 171, 69);
+  background: linear-gradient(
+    90deg,
+    rgb(85, 219, 101) 0%,
+    rgb(24, 133, 37) 100%
+  );
+}
+
+.forty-to-fifty {
+  background: rgb(185, 61, 183);
+  background: linear-gradient(
+    90deg,
+    rgb(232, 127, 232) 0%,
+    rgb(170, 50, 168) 100%
+  );
+}
+
+.fifty-to-sixty {
+  background: rgb(221, 126, 25);
+  background: linear-gradient(
+    90deg,
+    rgb(221, 126, 25) 0%,
+    rgb(214, 169, 7) 100%
+  );
+}
+
+.sixty-to-seventy {
+  background: rgb(127, 251, 255);
+  background: linear-gradient(
+    90deg,
+    rgb(73, 189, 185) 0%,
+    rgb(40, 211, 148) 100%
+  );
+}
+
+.bossinfo {
+  background: rgb(0, 78, 158);
+  background: linear-gradient(90deg, rgb(0, 78, 158) 0%, rgb(1, 39, 107) 100%);
+}
+
+.feature {
+  background-color: #174b7e;
+}
+
+.bugfix {
+  background-color: #a31b1b;
+}
+
+.update {
+  background-color: #1ba356;
 }
 
 input[type="file"] {

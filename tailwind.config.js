@@ -23,6 +23,10 @@ module.exports = {
       borderRadius: {
         form: "10px",
         button: "10px",
+        div: "10px",
+        badge: "5px",
+        image: "20px",
+        changelog: "15px",
       },
       fontFamily: {
         poppins: ["Poppins", "sans-serif"],
