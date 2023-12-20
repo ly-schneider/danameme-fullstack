@@ -54,19 +54,35 @@ export default function AccountSettings({ account }) {
       return false;
     }
 
-    const { data, error } = await supabase
-      .from("account")
-      .update({ email: email })
-      .eq("id_account", account.id_account);
+    // const { data, error } = await supabase
+    //   .from("account")
+    //   .update({ email: email })
+    //   .eq("id_account", account.id_account);
 
-    if (error) {
-      setErrorEmail("Ein Fehler ist aufgetreten.");
-      return false;
+    // if (error) {
+    //   setErrorEmail("Ein Fehler ist aufgetreten.");
+    //   return false;
+    // }
+
+    let redirectUrl = window.location.hostname;
+    if (redirectUrl == "localhost") {
+      redirectUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        "/p/" +
+        account.username +
+        "/settings/";
+    } else {
+      redirectUrl = redirectUrl + "/p/" + account.username + "/settings/";
     }
 
     const { data: updateUser, error: updateUserError } =
       await supabase.auth.updateUser({
         email: email,
+        options: {
+          emailRedirectTo: "http://localhost:3000/update-password/",
+        },
       });
 
     if (updateUserError) {
@@ -99,7 +115,20 @@ export default function AccountSettings({ account }) {
   }
 
   async function handleUpdatePassword() {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email);
+    let redirectUrl = window.location.hostname;
+    if (redirectUrl == "localhost") {
+      redirectUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        "/update-password/";
+    } else {
+      redirectUrl = redirectUrl + "/update-password/";
+    }
+
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://localhost:3000/p/lyschneider/settings/",
+    });
 
     if (error) {
       setErrorPassword("Ein Fehler ist aufgetreten.");

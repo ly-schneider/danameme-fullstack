@@ -20,6 +20,7 @@ export default function Navigation() {
   useEffect(() => {
     async function getData() {
       const session = await getSession();
+      console.log(session);
       if (session) {
         const account = await getAccount(session.session.user.email);
         if (account) {
@@ -29,7 +30,12 @@ export default function Navigation() {
           }
         }
       } else {
-        if (pathname != "/login" && pathname != "/register") {
+        if (
+          pathname != "/login" &&
+          pathname != "/register" &&
+          pathname != "/forgot-password" &&
+          pathname != "/update-password"
+        ) {
           router.push("/login");
         }
       }

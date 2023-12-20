@@ -116,7 +116,7 @@ export default function PostPage({ params }) {
     const { data: postsData, error: postsError } = await supabase
       .from("post")
       .select(
-        "id_post, title, content, asset, createdat, profile_id, edited, profile (username, profileimage, id_profile)"
+        "id_post, title, content, asset, createdat, profile_id, edited, pinned, profile (username, profileimage, id_profile)"
       )
       .eq("id_post", id);
 
@@ -564,49 +564,54 @@ export default function PostPage({ params }) {
                   <p className="text-muted w-full text text-xs sm:text-sm">
                     {calcTimeDifference(post.createdat)}
                   </p>
-                  <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
-                    <Dropdown
-                      dismissOnClick={false}
-                      label=""
-                      renderTrigger={() => (
-                        <FontAwesomeIcon
-                          icon={faEllipsisH}
-                          className="ms-4 text-muted text-2xl hover:cursor-pointer"
-                        />
-                      )}
-                    >
-                      {profile.id_profile == post.profile.id_profile ? (
-                        <Dropdown.Item
-                          className="text text-sm hover:bg-accentBackground"
-                          onClick={async () => {
-                            await handlePostDelete(post.id_post);
-                            router.push("/");
-                          }}
-                        >
+                  {post.profile.username != "DANAMEME" && (
+                    <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
+                      <Dropdown
+                        dismissOnClick={false}
+                        label=""
+                        renderTrigger={() => (
                           <FontAwesomeIcon
-                            icon={faTrashCan}
-                            className="me-1.5"
+                            icon={faEllipsisH}
+                            className="ms-4 text-muted text-2xl hover:cursor-pointer"
                           />
-                          Delete
-                        </Dropdown.Item>
-                      ) : (
-                        <Dropdown.Item
-                          className="text text-sm hover:bg-accentBackground"
-                          onClick={async () => {
-                            handlePostReport(post.id_post, profile.id_profile);
+                        )}
+                      >
+                        {profile.id_profile == post.profile.id_profile ? (
+                          <Dropdown.Item
+                            className="text text-sm hover:bg-accentBackground"
+                            onClick={async () => {
+                              await handlePostDelete(post.id_post);
+                              router.push("/");
+                            }}
+                          >
+                            <FontAwesomeIcon
+                              icon={faTrashCan}
+                              className="me-1.5"
+                            />
+                            Delete
+                          </Dropdown.Item>
+                        ) : (
+                          <Dropdown.Item
+                            className="text text-sm hover:bg-accentBackground"
+                            onClick={async () => {
+                              handlePostReport(
+                                post.id_post,
+                                profile.id_profile
+                              );
 
-                            setSuccess("Beitrag wurde gemeldet!");
-                            setTimeout(() => {
-                              setSuccess("");
-                            }, 3000);
-                          }}
-                        >
-                          <FontAwesomeIcon icon={faFlag} className="me-1.5" />
-                          Report
-                        </Dropdown.Item>
-                      )}
-                    </Dropdown>
-                  </div>
+                              setSuccess("Beitrag wurde gemeldet!");
+                              setTimeout(() => {
+                                setSuccess("");
+                              }, 3000);
+                            }}
+                          >
+                            <FontAwesomeIcon icon={faFlag} className="me-1.5" />
+                            Report
+                          </Dropdown.Item>
+                        )}
+                      </Dropdown>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -620,35 +625,39 @@ export default function PostPage({ params }) {
               </div>
             )}
             <div className="flex items-center flex-row w-full mt-3 space-x-2">
-              <div className="flex items-center">
-                <Icon
-                  path={
-                    post.rating == true ? mdiArrowUpBold : mdiArrowUpBoldOutline
-                  }
-                  size={1.22}
-                  className="text text-2xl hover:cursor-pointer"
-                  onClick={async () => {
-                    await handleVote(post.id_post, true, profile.id_profile);
-                    const postNew = await fetchPost(profile.id_profile);
-                    setPost(postNew);
-                  }}
-                />
-                <p className="text text-base mx-0.5">{post.likes}</p>
-                <Icon
-                  path={
-                    post.rating == false
-                      ? mdiArrowDownBold
-                      : mdiArrowDownBoldOutline
-                  }
-                  size={1.22}
-                  className="text text-2xl hover:cursor-pointer"
-                  onClick={async () => {
-                    await handleVote(post.id_post, false, profile.id_profile);
-                    const postNew = await fetchPost(profile.id_profile);
-                    setPost(postNew);
-                  }}
-                />
-              </div>
+              {post.profile.username != "DANAMEME" && (
+                <div className="flex items-center">
+                  <Icon
+                    path={
+                      post.rating == true
+                        ? mdiArrowUpBold
+                        : mdiArrowUpBoldOutline
+                    }
+                    size={1.22}
+                    className="text text-2xl hover:cursor-pointer"
+                    onClick={async () => {
+                      await handleVote(post.id_post, true, profile.id_profile);
+                      const postNew = await fetchPost(profile.id_profile);
+                      setPost(postNew);
+                    }}
+                  />
+                  <p className="text text-base mx-0.5">{post.likes}</p>
+                  <Icon
+                    path={
+                      post.rating == false
+                        ? mdiArrowDownBold
+                        : mdiArrowDownBoldOutline
+                    }
+                    size={1.22}
+                    className="text text-2xl hover:cursor-pointer"
+                    onClick={async () => {
+                      await handleVote(post.id_post, false, profile.id_profile);
+                      const postNew = await fetchPost(profile.id_profile);
+                      setPost(postNew);
+                    }}
+                  />
+                </div>
+              )}
               <div className="flex items-center">
                 <FontAwesomeIcon
                   icon={faComment}

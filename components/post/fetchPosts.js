@@ -4,8 +4,9 @@ export async function fetchPosts(profileId) {
   const { data: postsData, error: postsError } = await supabase
     .from("post")
     .select(
-      "id_post, title, content, asset, createdat, edited, profile_id, profile (username, profileimage, id_profile)"
+      "id_post, title, content, asset, createdat, edited, profile_id, pinned, profile (username, profileimage, id_profile)"
     )
+    .order("pinned", { ascending: false })
     .order("createdat", { ascending: false });
 
   if (postsError) {
