@@ -7,5 +7,5 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  return <LayoutContainer children={children} />
+  return <LayoutContainer>{children}</LayoutContainer>;
 }
