@@ -39,7 +39,7 @@ export default function LayoutContainer({ children }) {
           <Container>
             <div className="flex flex-col items-center justify-center mt-8">
               <h1 className="text-4xl font-bold title text-center">
-                DANAMEME launched in {time}!
+                DANAMEME launches in {time}!
               </h1>
             </div>
           </Container>
