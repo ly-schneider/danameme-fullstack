@@ -106,6 +106,23 @@ export default function ProfileSettings({ profile }) {
       return;
     }
 
+    if (username.length < 3) {
+      setErrorUsername("Der Username muss mindestens 3 Zeichen lang sein.");
+      return;
+    }
+
+    if (/[\u00C4\u00E4\u00D6\u00F6\u00DC\u00FC\u00DF]/.test(username)) {
+      setErrorUsername("Benutzername darf keine Umlaute enthalten!");
+      return;
+    }
+
+    if (/[^a-zA-Z0-9-_]/.test(username)) {
+      setErrorUsername(
+        "Benutzername darf keine Sonderzeichen enthalten, außer '-' und '_'!"
+      );
+      return;
+    }
+
     const { data, error } = await supabase
       .from("profile")
       .update({ username: username })

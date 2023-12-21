@@ -42,7 +42,7 @@ export default function ProfileButton() {
     if (error) {
       console.log(error);
     } else {
-      router.push("/login");
+      location.href = "/login";
     }
   }
 

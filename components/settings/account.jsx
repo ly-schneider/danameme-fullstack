@@ -44,71 +44,8 @@ export default function AccountSettings({ account }) {
     getData();
   }, [account]);
 
-  async function handleUpdateEmail() {
-    if (email == account.email) {
-      return false;
-    }
-
-    const checkEmailStatus = await checkEmail();
-    if (checkEmailStatus == false) {
-      return false;
-    }
-
-    const { data, error } = await supabase
-      .from("account")
-      .update({ email: email })
-      .eq("id_account", account.id_account);
-
-    if (error) {
-      setErrorEmail("Ein Fehler ist aufgetreten.");
-      return false;
-    }
-
-    const { data: updateUser, error: updateUserError } =
-      await supabase.auth.updateUser({
-        email: email,
-      });
-
-    if (updateUserError) {
-      setErrorEmail("Ein Fehler ist aufgetreten.");
-      return false;
-    }
-
-    setErrorEmail(
-      "Bitte schaue in dein E-Mail Postfach zum die Änderung zu bestätigen. Überprüfe auch deinen Spam-Ordner."
-    );
-  }
-
-  async function checkEmail() {
-    const { data, error } = await supabase
-      .from("account")
-      .select("*")
-      .eq("email", email);
-
-    if (error) {
-      setErrorEmail("Ein Fehler ist aufgetreten.");
-      return false;
-    }
-
-    if (data.length != 0) {
-      setErrorEmail("Diese E-Mail wird bereits verwendet.");
-      return false;
-    }
-
-    return true;
-  }
-
   async function handleUpdatePassword() {
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email);
-
-    if (error) {
-      setErrorPassword("Ein Fehler ist aufgetreten.");
-      return false;
-    }
-
-    setSuccessPassword(
-      "Ein Link wurde an deine E-Mail Adresse gesendet für das Zurücksetzten des Passworts."
-    );
+    router.push("/forgot-password");
   }
 
   async function handleFirstnameChange() {
@@ -196,16 +133,6 @@ export default function AccountSettings({ account }) {
               onChange={(e) => setEmail(e.target.value)}
               value={email}
             />
-            <button
-              className={
-                email == account.email
-                  ? " btn-secondary text-muted pointer-events-none hover:cursor-default"
-                  : " btn-primary"
-              }
-              onClick={handleUpdateEmail}
-            >
-              Aktualisieren
-            </button>
           </div>
         </div>
         {errorPassword != "" && (
