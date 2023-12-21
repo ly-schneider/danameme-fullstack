@@ -31,5 +31,8 @@
   },
   "overrides": {
     "node-gyp-build": "4.6.1"
+  },
+  "engines": {
+    "node": "^18.17.0"
   }
 }
