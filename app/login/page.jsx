@@ -19,14 +19,15 @@ export default function LoginPage() {
   const [banData, setBanData] = useState([]);
 
   async function handleSubmit(e) {
+    let formError = false;
     e.preventDefault();
 
-    if (!email) {
-      setErrorEmail("Bitte geben Sie eine E-Mail Adresse ein.");
+    if (email == "") {
+      setErrorEmail("E-Mail Adresse muss vorhanden sein!");
+      formError = true;
     } else if (!email.includes("@") || !email.includes(".")) {
-      setErrorEmail("Bitte geben Sie eine gültige E-Mail Adresse ein.");
-    } else {
-      setErrorEmail("");
+      setErrorEmail("E-Mail Adresse ist ungültig!");
+      formError = true;
     }
 
     if (!password) {
@@ -39,15 +40,20 @@ export default function LoginPage() {
       const { data: accountData, error: accountsError } = await supabase
         .from("account")
         .select("id_account")
-        .eq("email", email)
-        .single();
+        .eq("email", email);
 
       if (accountsError) {
         console.log(accountsError);
         return false;
       }
 
-      const banData = await checkBan(accountData.id_account);
+      if (accountData.length == 0) {
+        setErrorEmail("E-Mail Adresse oder Passwort ist falsch.");
+        setErrorPassword("E-Mail Adresse oder Passwort ist falsch.");
+        return false;
+      }
+
+      const banData = await checkBan(accountData[0].id_account);
       let banCond = false;
       if (banData.length > 0) {
         banData.forEach((ban) => {
@@ -165,6 +171,9 @@ export default function LoginPage() {
                 Anmelden
               </button>
             </div>
+            <Link href="/forgot-password">
+              <p className="text mt-4 text-sm underline">Passwort vergessen?</p>
+            </Link>
           </form>
         </div>
       )}
