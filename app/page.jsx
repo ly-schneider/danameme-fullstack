@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import Image from "next/image";
+import { Suspense, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowCircleUp,
@@ -40,6 +41,7 @@ import { useRouter } from "next/navigation";
 import supabase from "@/components/supabase";
 import { checkBan } from "@/components/auth/checkBan";
 import { calcTime } from "@/components/other/calcTime";
+import LazyImage from "@/components/post/lazyImage";
 
 export default function Home() {
   const router = useRouter();
@@ -155,9 +157,13 @@ export default function Home() {
             <div className="flex flex-row items-center justify-between">
               <div className="flex items-center">
                 <Link href={`/p/${post.profile.username}`} passHref>
-                  <img
+                  <Image
+                    width={56}
+                    height={56}
+                    loading="lazy"
+                    alt={"Profile Image of " + post.profile.username}
                     src={post.profile.profileimage}
-                    className="rounded-full border-[3px] border-accent h-14 w-14 object-cover"
+                    className="rounded-full border-[3px] border-accent object-cover"
                   />
                 </Link>
                 <Link href={`/p/${post.profile.username}`} passHref>
@@ -266,7 +272,10 @@ export default function Home() {
             </div>
             {post.asset && (
               <div className="w-full mt-3">
-                <img src={post.asset} className="w-full rounded-image" />
+                <LazyImage
+                  src={post.asset}
+                  alt={post.title ? post.title : "Post"}
+                />
               </div>
             )}
             <div className="flex items-center flex-row w-full mt-3 space-x-2">
@@ -346,14 +355,25 @@ export default function Home() {
             </p>
           </div>
         ) : (
-          <>
-            {posts.length == 0 && (
-              <div className="flex flex-col items-center w-full">
-                <h1 className="text text-2xl font-extrabold">Keine Beiträge</h1>
-                <p className="text text-base">Erstelle den ersten Beitrag!</p>
+          <div>
+            <div className="flex flex-row items-center justify-between">
+              <div className="flex items-center">
+                <div className="rounded-full bg-zinc-700 w-14 h-14 flex items-center justify-center animate-pulse"></div>
+                <hr className="border-4 border-zinc-700 ml-3 w-52 rounded-md animate-pulse" />
               </div>
-            )}
-          </>
+              <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
+                <div className="flex w-full items-center">
+                  <hr className="border-2 border-zinc-700 ml-3 w-20 rounded-md animate-pulse" />
+                </div>
+              </div>
+            </div>
+            <div className="w-full mt-6">
+              <hr className="border-[6px] border-zinc-700 w-40 rounded-md animate-pulse" />
+            </div>
+            <div className="w-full mt-6">
+              <div className="bg-zinc-700 w-full rounded-image h-[500px] animate-pulse"></div>
+            </div>
+          </div>
         )}
       </div>
     </>

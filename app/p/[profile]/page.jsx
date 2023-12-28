@@ -641,10 +641,52 @@ export default function ProfilePage({ params }) {
               </p>
             </div>
           ) : (
-            <div className="flex justify-center mt-8">
-              <h1 className="title text-2xl">
-                <FontAwesomeIcon icon={faSpinner} spin />
-              </h1>
+            <div className="mt-3">
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex items-center">
+                  <div className="rounded-full bg-zinc-700 w-24 h-24 flex items-center justify-center animate-pulse"></div>
+                  <hr className="border-[6px] border-zinc-700 ml-3 w-52 rounded-md animate-pulse" />
+                </div>
+                <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
+                  <div className="flex w-full items-center">
+                    <hr className="border-2 border-zinc-700 ml-3 w-20 rounded-md animate-pulse" />
+                  </div>
+                </div>
+              </div>
+              <div className="w-full mt-6">
+                <hr className="border-[3px] border-zinc-700 w-28 rounded-md animate-pulse" />
+              </div>
+              <div className="w-full flex flex-row gap-4 flex-wrap mt-6">
+                <hr className="border-[12px] border-zinc-700 w-28 rounded-md animate-pulse" />
+                <hr className="border-[12px] border-zinc-700 w-28 rounded-md animate-pulse" />
+                <hr className="border-[12px] border-zinc-700 w-28 rounded-md animate-pulse" />
+                <hr className="border-[12px] border-zinc-700 w-28 rounded-md animate-pulse" />
+              </div>
+              <div className="w-full mt-6 space-y-4">
+                <hr className="border-[5px] border-zinc-700 w-3/4 rounded-md animate-pulse" />
+                <hr className="border-[5px] border-zinc-700 w-[calc(100%-50px)] rounded-md animate-pulse" />
+                <hr className="border-[5px] border-zinc-700 w-96 rounded-md animate-pulse" />
+              </div>
+              <div className="w-full mt-12">
+                <hr className="border-[2px] border-zinc-700 w-full animate-pulse" />
+              </div>
+              <div className="flex flex-row items-center justify-between mt-12">
+                <div className="flex items-center">
+                  <div className="rounded-full bg-zinc-700 w-14 h-14 flex items-center justify-center animate-pulse"></div>
+                  <hr className="border-4 border-zinc-700 ml-3 w-52 rounded-md animate-pulse" />
+                </div>
+                <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
+                  <div className="flex w-full items-center">
+                    <hr className="border-2 border-zinc-700 ml-3 w-20 rounded-md animate-pulse" />
+                  </div>
+                </div>
+              </div>
+              <div className="w-full mt-6">
+                <hr className="border-[6px] border-zinc-700 w-40 rounded-md animate-pulse" />
+              </div>
+              <div className="w-full mt-6">
+                <div className="bg-zinc-700 w-full rounded-image h-[250px] animate-pulse"></div>
+              </div>
             </div>
           )}
         </>

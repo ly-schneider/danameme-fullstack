@@ -529,7 +529,7 @@ export default function PostPage({ params }) {
       )}
       {post.length != 0 ? (
         <>
-          <div key={post.id_post} className="mx-6 sm:mx-0 mt-2">
+          <div key={post.id_post} className="mx-6 sm:mx-0 mt-4">
             <button
               className="btn-secondary items-center flex"
               onClick={() => router.back()}
@@ -759,22 +759,27 @@ export default function PostPage({ params }) {
           </div>
         </>
       ) : (
-        <div className="w-full justify-center mt-8 sm:mt-0">
-          <h1 className="title mx-5 sm:mx-0 text-center text-lg">
-            Beitrag konnte nicht gefunden werden!
-          </h1>
-          <div className="flex justify-between items-center mx-8 sm:mx-[105px] mt-6">
-            <button
-              className="btn-primary border-[3px] border-primary"
-              onClick={() => router.back()}
-            >
-              <FontAwesomeIcon icon={faArrowLeft} className="me-1.5" />
-              Zurück
-            </button>
-            <button className="btn-secondary" onClick={() => router.refresh()}>
-              <FontAwesomeIcon icon={faRotateRight} className="me-1.5" />
-              Aktualisieren
-            </button>
+        <div className="mt-3">
+          <button className="btn-secondary" onClick={() => router.back()}>
+            <FontAwesomeIcon icon={faArrowLeft} className="text text-sm me-2" />
+            Zurück
+          </button>
+          <div className="flex flex-row items-center justify-between mt-8">
+            <div className="flex items-center">
+              <div className="rounded-full bg-zinc-700 w-14 h-14 flex items-center justify-center animate-pulse"></div>
+              <hr className="border-4 border-zinc-700 ml-3 w-52 rounded-md animate-pulse" />
+            </div>
+            <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
+              <div className="flex w-full items-center">
+                <hr className="border-2 border-zinc-700 ml-3 w-20 rounded-md animate-pulse" />
+              </div>
+            </div>
+          </div>
+          <div className="w-full mt-6">
+            <hr className="border-[6px] border-zinc-700 w-40 rounded-md animate-pulse" />
+          </div>
+          <div className="w-full mt-6">
+            <div className="bg-zinc-700 w-full rounded-image h-[250px] animate-pulse"></div>
           </div>
         </div>
       )}
