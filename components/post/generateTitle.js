@@ -1,9 +1,15 @@
 export function generateTitle(post) {
   let title = post.title;
-  let newTitle = title
-    .toLowerCase()
-    .replace(/ /g, "-")
-    .replace(/[^\w-]+/g, "");
+  let newTitle;
+
+  if (title == null) {
+    newTitle = "post";
+  } else {
+    newTitle = title
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "");
+  }
 
   if (newTitle.substring(newTitle.length - 1) == "-") {
     newTitle = newTitle.substring(0, newTitle.length - 1);

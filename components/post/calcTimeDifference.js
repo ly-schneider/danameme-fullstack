@@ -15,7 +15,7 @@ export function calcTimeDifference(date) {
     return `vor ${minutes} Minute${minutes !== 1 ? "n" : ""}`;
   } else if (secondsDifference < 86400) {
     const hours = Math.floor(secondsDifference / 3600);
-    return `vor ${hours} Stude${hours !== 1 ? "n" : ""}`;
+    return `vor ${hours} Stunde${hours !== 1 ? "n" : ""}`;
   } else if (secondsDifference < 604800) {
     const days = Math.floor(secondsDifference / 86400);
     return `vor ${days} Tag${days !== 1 ? "en" : ""}`;

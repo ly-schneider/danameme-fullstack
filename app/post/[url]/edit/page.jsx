@@ -37,8 +37,23 @@ export default function EditPost({ params }) {
           if (profile) {
             setProfile(profile);
             const post = await fetchPost(profile);
-            setTitle(post.title);
-            setText(post.content);
+            if (!post) {
+              router.back();
+              return;
+            }
+
+            if (post.title == null) {
+              setTitle("");
+            } else {
+              setTitle(post.title);
+            }
+
+            if (post.content == null) {
+              setText("");
+            } else {
+              setText(post.content);
+            }
+
             setFile(post.asset);
             setOldFile(post.asset);
             setPostId(post.id_post);
@@ -68,12 +83,10 @@ export default function EditPost({ params }) {
     }
 
     if (postsData.length == 0) {
-      setPost([]);
       return null;
     }
 
     if (postsData[0].profile_id != profile.id_profile) {
-      setPost([]);
       return null;
     }
 
@@ -92,60 +105,70 @@ export default function EditPost({ params }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (title == "") {
-      setErrorTitle("Bitte gib einen Titel ein.");
-      return;
-    } else {
-      setErrorTitle("");
+    let titleInput = null;
+    if (title.length != 0) {
+      titleInput = title;
     }
+    console.log(titleInput);
 
     let textInput = null;
-    if (text != null || text != "") {
+    if (text.length != 0) {
       textInput = text;
+    }
+    console.log(text);
+    console.log(textInput);
+
+    if (titleInput == null && textInput == null && !file && !oldFile) {
+      setErrorTitle("Bitte gib einen Titel ein.");
+      return false;
     }
 
     let fileUrl;
-    if (typeof file !== "string" || !file instanceof String) {
-      let fileName = oldFile.split("/")[oldFile.split("/").length - 1];
+    console.log(file);
+    if (file) {
+      if (typeof file !== "string" || !file instanceof String) {
+        let fileName = oldFile.split("/")[oldFile.split("/").length - 1];
 
-      const { data: oldFileData, error: oldFileError } = await supabase.storage
-        .from("post-images")
-        .remove([fileName]);
+        const { data: oldFileData, error: oldFileError } =
+          await supabase.storage.from("post-images").remove([fileName]);
 
-      if (oldFileError) {
-        console.log(oldFileError);
-        setErrorImage(
-          "Beim Löschen des alten Bildes ist ein Fehler aufgetreten."
-        );
-        return;
+        if (oldFileError) {
+          console.log(oldFileError);
+          setErrorImage(
+            "Beim Löschen des alten Bildes ist ein Fehler aufgetreten."
+          );
+          return;
+        }
+
+        const { error } = await supabase.storage
+          .from("post-images")
+          .upload(profile.username + "-" + file.name, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (error) {
+          console.log(error);
+          setErrorImage(
+            "Beim Hochladen des Bildes ist ein Fehler aufgetreten."
+          );
+          return;
+        }
+
+        const { data: url } = supabase.storage
+          .from("post-images")
+          .getPublicUrl(profile.username + "-" + file.name);
+
+        fileUrl = url.publicUrl;
+      } else {
+        fileUrl = file;
       }
-
-      const { error } = await supabase.storage
-        .from("post-images")
-        .upload(profile.username + "-" + file.name, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (error) {
-        console.log(error);
-        setErrorImage("Beim Hochladen des Bildes ist ein Fehler aufgetreten.");
-        return;
-      }
-
-      const { data: url } = supabase.storage
-        .from("post-images")
-        .getPublicUrl(profile.username + "-" + file.name);
-
-      fileUrl = url.publicUrl;
-    } else {
-      fileUrl = file;
     }
 
     const { error } = await supabase
       .from("post")
       .update({
-        title: title,
+        title: titleInput,
         content: textInput,
         profile_id: profile.id_profile,
         asset: fileUrl,
@@ -262,16 +285,18 @@ export default function EditPost({ params }) {
             {errorImage}
           </div>
         )}
-        <div className="mt-5">
-          <img
-            className="rounded-image"
-            src={
-              typeof file === "string" || file instanceof String
-                ? file
-                : URL.createObjectURL(file)
-            }
-          />
-        </div>
+        {file && (
+          <div className="mt-5">
+            <img
+              className="rounded-image"
+              src={
+                typeof file === "string" || file instanceof String
+                  ? file
+                  : URL.createObjectURL(file)
+              }
+            />
+          </div>
+        )}
       </form>
     </div>
   );

@@ -44,7 +44,7 @@ export default function Navigation() {
   }, []);
 
   return (
-    <nav className="bg-background w-full items-center inline-flex flex-row">
+    <nav className="fixed bg-background w-full items-center inline-flex flex-row">
       <div className="items-center inline-flex flex-row flex-grow justify-between my-4 mx-5">
         <div>
           <Link href={"/"}>

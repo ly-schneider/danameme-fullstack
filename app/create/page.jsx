@@ -71,16 +71,19 @@ export default function CreatePostPage() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    if (title == "") {
-      setErrorTitle("Bitte gib einen Titel ein.");
-      return;
-    } else {
-      setErrorTitle("");
+    let titleInput = null;
+    if (title.length != 0) {
+      titleInput = title;
     }
 
     let textInput = null;
     if (text.length != 0) {
       textInput = text;
+    }
+
+    if (titleInput == null && textInput == null && !file) {
+      setErrorTitle("Bitte gib einen Titel ein.");
+      return false;
     }
 
     let fileUrl = { publicUrl: null };
@@ -114,7 +117,7 @@ export default function CreatePostPage() {
     }
 
     const { error } = await supabase.from("post").insert({
-      title: title,
+      title: titleInput,
       content: textInput,
       profile_id: profile.id_profile,
       asset: fileUrl.publicUrl,
