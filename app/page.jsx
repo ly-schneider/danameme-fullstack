@@ -156,15 +156,17 @@ export default function Home() {
           <div key={post.id_post}>
             <div className="flex flex-row items-center justify-between">
               <div className="flex items-center">
-                <Link href={`/p/${post.profile.username}`} passHref>
-                  <Image
-                    width={56}
-                    height={56}
-                    loading="lazy"
-                    alt={"Profile Image of " + post.profile.username}
-                    src={post.profile.profileimage}
-                    className="rounded-full border-[3px] border-accent object-cover"
-                  />
+                <Link href={`/p/${post.profile.username}`}>
+                  <div className="w-14 h-14 overflow-hidden rounded-full border-[3px] border-accent">
+                    <Image
+                      width={56}
+                      height={56}
+                      loading="lazy"
+                      alt={"Profile Image of " + post.profile.username}
+                      src={post.profile.profileimage}
+                      className="block w-full h-auto"
+                    />
+                  </div>
                 </Link>
                 <Link href={`/p/${post.profile.username}`} passHref>
                   <h1 className="text-text font-bold text-xl font-poppins ms-2 sm:ms-4">
@@ -266,7 +268,9 @@ export default function Home() {
               <Link href={`/post/${generateTitle(post)}`}>
                 <h1 className="title text-2xl font-bold">{post.title}</h1>
                 {post.content && (
-                  <p className="text text-base">{post.content}</p>
+                  <p className="text text-base whitespace-pre-line">
+                    {post.content}
+                  </p>
                 )}
               </Link>
             </div>

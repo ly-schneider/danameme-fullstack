@@ -420,7 +420,9 @@ export default function ProfilePage({ params }) {
               );
             })}
           </div>
-          <p className="text mt-3 font-semibold mb-8">{profile.biography}</p>
+          <p className="text mt-3 font-semibold mb-8 whitespace-pre-line">
+            {profile.biography}
+          </p>
           <hr className="seperator" />
           <div className="mt-8 space-y-16">
             {posts.map((post) => (
@@ -527,7 +529,9 @@ export default function ProfilePage({ params }) {
                   <Link href={`/post/${generateTitle(post)}`}>
                     <h1 className="title text-2xl font-bold">{post.title}</h1>
                     {post.content && (
-                      <p className="text text-base">{post.content}</p>
+                      <p className="text text-base whitespace-pre-line">
+                        {post.content}
+                      </p>
                     )}
                   </Link>
                 </div>

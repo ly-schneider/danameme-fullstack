@@ -431,7 +431,7 @@ export default function PostPage({ params }) {
           </div>
         ) : (
           <>
-            <p className="text ms-14">{comment.text}</p>
+            <p className="text ms-14 whitespace-pre-line">{comment.text}</p>
             <div className="flex items-center flex-row w-full mt-3 space-x-2 ms-14">
               <div className="flex items-center">
                 <Icon
@@ -617,7 +617,11 @@ export default function PostPage({ params }) {
             </div>
             <div className="w-full mt-3">
               <h1 className="title text-2xl font-bold">{post.title}</h1>
-              {post.content && <p className="text text-base">{post.content}</p>}
+              {post.content && (
+                <p className="text text-base whitespace-pre-line">
+                  {post.content}
+                </p>
+              )}
             </div>
             {post.asset && (
               <div className="w-full mt-3">
