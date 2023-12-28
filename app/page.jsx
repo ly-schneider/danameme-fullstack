@@ -157,16 +157,10 @@ export default function Home() {
             <div className="flex flex-row items-center justify-between">
               <div className="flex items-center">
                 <Link href={`/p/${post.profile.username}`}>
-                  <div className="w-14 h-14 overflow-hidden rounded-full border-[3px] border-accent">
-                    <Image
-                      width={56}
-                      height={56}
-                      loading="lazy"
-                      alt={"Profile Image of " + post.profile.username}
-                      src={post.profile.profileimage}
-                      className="block w-full h-auto"
-                    />
-                  </div>
+                  <img
+                    src={post.profile.profileimage}
+                    className="rounded-full border-[3px] border-accent h-14 w-14 object-cover"
+                  />
                 </Link>
                 <Link href={`/p/${post.profile.username}`} passHref>
                   <h1 className="text-text font-bold text-xl font-poppins ms-2 sm:ms-4">
