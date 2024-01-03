@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { getSession } from "./auth/getSession";
 import { getAccount } from "./auth/getAccount";
 import { getProfile } from "./auth/getProfile";
+import NotificationButton from "./buttons/notificationButton";
 
 export default function Navigation() {
   const router = useRouter();
@@ -53,7 +54,10 @@ export default function Navigation() {
         </div>
         <div className="flex space-x-2 md:space-x-4">
           {profile.length != 0 && (
-            <AddPostButton selected={pathname == "/create"} />
+            <>
+              <NotificationButton id_profile={profile.id_profile} />
+              <AddPostButton selected={pathname == "/create"} />
+            </>
           )}
           <HomeButton selected={pathname == "/"} />
           {profile.length != 0 && <ProfileButton />}

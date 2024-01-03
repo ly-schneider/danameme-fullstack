@@ -45,6 +45,22 @@ export async function handleCommentVote(commentId, type, profileId) {
       return;
     }
 
+    const { error: notificationError } = await supabase
+      .from("notification")
+      .insert({
+        toprofile_id: postUser[0].profile_id,
+        fromprofile_id: profileId,
+        text: `hat deinem Kommentar ein ${
+          type ? "Upvote" : "Downvote"
+        } gegeben`,
+        comment_id: commentId,
+      });
+
+    if (notificationError) {
+      console.log(notificationError);
+      return;
+    }
+
     if (type) {
       karma += 1;
     } else {
@@ -62,6 +78,17 @@ export async function handleCommentVote(commentId, type, profileId) {
         return;
       }
 
+      const { error: notificationError } = await supabase
+        .from("notification")
+        .delete()
+        .eq("comment_id", commentId)
+        .eq("fromprofile_id", profileId);
+
+      if (notificationError) {
+        console.log(notificationError);
+        return;
+      }
+
       if (type) {
         karma -= 1;
       } else {
@@ -75,6 +102,52 @@ export async function handleCommentVote(commentId, type, profileId) {
 
       if (error) {
         console.log(error);
+        return;
+      }
+
+      const { data: notificationData, error: notificationErrorData } =
+        await supabase
+          .from("notification")
+          .select("id_notification")
+          .eq("comment_id", commentId)
+          .eq("fromprofile_id", profileId);
+
+      if (notificationErrorData) {
+        console.log(notificationErrorData);
+        return;
+      }
+
+      if (notificationData.length == 0) {
+        const { error: notificationError } = await supabase
+          .from("notification")
+          .insert({
+            toprofile_id: postUser[0].profile_id,
+            fromprofile_id: profileId,
+            text: `hat deinem Kommentar ein ${
+              type ? "Upvote" : "Downvote"
+            } gegeben`,
+            comment_id: commentId,
+          });
+
+        if (notificationError) {
+          console.log(notificationError);
+          return;
+        }
+        return;
+      }
+
+      const { error: notificationError } = await supabase
+        .from("notification")
+        .update({
+          text: `hat deinem Kommentar ein ${
+            type ? "Upvote" : "Downvote"
+          } gegeben`,
+        })
+        .eq("comment_id", commentId)
+        .eq("fromprofile_id", profileId);
+
+      if (notificationError) {
+        console.log(notificationError);
         return;
       }
 
