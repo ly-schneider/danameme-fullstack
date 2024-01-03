@@ -106,9 +106,8 @@ export default function Home() {
     setPosts(posts);
   }
 
-  // Listen to new ratings
   supabase
-    .channel("homepage-rating-post")
+    .channel("homepage-rating-post-notifications")
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "rating_post" },

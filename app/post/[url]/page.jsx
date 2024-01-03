@@ -724,6 +724,7 @@ export default function PostPage({ params }) {
                         }
                         onClick={async () => {
                           const status = await addComment(
+                            post.profile_id,
                             post.id_post,
                             commentText,
                             profile.id_profile

@@ -55,7 +55,7 @@ export default function Navigation() {
         <div className="flex space-x-2 md:space-x-4">
           {profile.length != 0 && (
             <>
-              <NotificationButton />
+              <NotificationButton id_profile={profile.id_profile} />
               <AddPostButton selected={pathname == "/create"} />
             </>
           )}
