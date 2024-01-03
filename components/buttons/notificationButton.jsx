@@ -9,7 +9,7 @@ export default function NotificationButton() {
   const router = useRouter();
 
   function handleClick() {
-    router.push("/create/");
+    router.push("/notification/");
   }
 
   return (
