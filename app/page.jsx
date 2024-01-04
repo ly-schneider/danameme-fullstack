@@ -354,7 +354,7 @@ export default function Home() {
         ) : (
           <>
             {posts.length == 0 && (
-              <div>
+              <div className="z-0">
                 <div className="flex flex-row items-center justify-between">
                   <div className="flex items-center">
                     <div className="rounded-full bg-zinc-700 w-14 h-14 flex items-center justify-center animate-pulse"></div>
