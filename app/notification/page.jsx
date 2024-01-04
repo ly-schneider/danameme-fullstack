@@ -5,6 +5,7 @@ import { getAccount } from "@/components/auth/getAccount";
 import { getProfile } from "@/components/auth/getProfile";
 import { getSession } from "@/components/auth/getSession";
 import { calcTime } from "@/components/other/calcTime";
+import calcTimeShort from "@/components/other/calcTimeShort";
 import { generateTitle } from "@/components/post/generateTitle";
 import supabase from "@/components/supabase";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -205,6 +206,10 @@ export default function NotificationPage() {
                                 </Link>
                               </>
                             )}
+                            <span className="text-muted text-sm">
+                              {" "}
+                              {calcTimeShort(notification.createdat)}
+                            </span>
                           </p>
                         </div>
                       </div>
