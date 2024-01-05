@@ -200,6 +200,28 @@ export default function PostPage({ params }) {
     }
   }
 
+  async function updatePost(postId) {
+    let newPost;
+    if (post.id_post == postId) {
+      newPost = { ...post, rating: true };
+    } else {
+      newPost = post;
+    }
+    setPost(newPost);
+  }
+
+  async function updateComments(commentId) {
+    setComments(
+      comments.map((comment) => {
+        if (comment.id_comment == commentId) {
+          return { ...comment, rating: true };
+        } else {
+          return comment;
+        }
+      })
+    );
+  }
+
   async function handleComment() {
     const newComment = await fetchComments(post.id_post, profile.id_profile);
     setComments(newComment);
@@ -435,49 +457,46 @@ export default function PostPage({ params }) {
             <p className="text ms-14 whitespace-pre-line">{comment.text}</p>
             <div className="flex items-center flex-row w-full mt-3 space-x-2 ms-14">
               <div className="flex items-center">
-                <Icon
-                  path={
-                    comment.rating == true
-                      ? mdiArrowUpBold
-                      : mdiArrowUpBoldOutline
-                  }
-                  size={1.22}
-                  className="text text-2xl hover:cursor-pointer"
-                  onClick={async () => {
-                    await handleCommentVote(
-                      comment.id_comment,
-                      true,
-                      profile.id_profile
-                    );
-                    const newComment = await fetchComments(
-                      post.id_post,
-                      profile.id_profile
-                    );
-                    setComments(newComment);
-                  }}
-                />
-                <p className="text text-base mx-0.5">{comment.likes}</p>
-                <Icon
-                  path={
-                    comment.rating == false
-                      ? mdiArrowDownBold
-                      : mdiArrowDownBoldOutline
-                  }
-                  size={1.22}
-                  className="text text-2xl hover:cursor-pointer"
-                  onClick={async () => {
-                    await handleCommentVote(
-                      comment.id_comment,
-                      false,
-                      profile.id_profile
-                    );
-                    const newComment = await fetchComments(
-                      post.id_post,
-                      profile.id_profile
-                    );
-                    setComments(newComment);
-                  }}
-                />
+                <div className="flex flex-row items-center">
+                  <Icon
+                    path={
+                      comment.rating == true
+                        ? mdiArrowUpBold
+                        : mdiArrowUpBoldOutline
+                    }
+                    size={1.22}
+                    className="text text-2xl hover:cursor-pointer"
+                    onClick={async () => {
+                      await handleCommentVote(
+                        comment.id_comment,
+                        true,
+                        profile.id_profile
+                      );
+                      updateComments(comment.id_comment);
+                    }}
+                  />
+                  <p className="text text-base me-0.5">{comment.upvotes}</p>
+                </div>
+                <div className="flex flex-row items-center">
+                  <Icon
+                    path={
+                      comment.rating == false
+                        ? mdiArrowDownBold
+                        : mdiArrowDownBoldOutline
+                    }
+                    size={1.22}
+                    className="text text-2xl hover:cursor-pointer"
+                    onClick={async () => {
+                      await handleCommentVote(
+                        comment.id_comment,
+                        true,
+                        profile.id_profile
+                      );
+                      updateComments(comment.id_comment);
+                    }}
+                  />
+                  <p className="text text-base me-0.5">{comment.downvotes}</p>
+                </div>
               </div>
               <div
                 className={
@@ -647,8 +666,7 @@ export default function PostPage({ params }) {
                           true,
                           profile.id_profile
                         );
-                        const postNew = await fetchPost(profile.id_profile);
-                        setPost(postNew);
+                        updatePost(post.id_post);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.upvotes}</p>
@@ -668,8 +686,7 @@ export default function PostPage({ params }) {
                           false,
                           profile.id_profile
                         );
-                        const postNew = await fetchPost(profile.id_profile);
-                        setPost(postNew);
+                        updatePost(post.id_post);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.downvotes}</p>

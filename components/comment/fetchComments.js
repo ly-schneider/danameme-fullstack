@@ -20,21 +20,22 @@ export async function fetchComments(postId, profileId) {
         .select("*")
         .eq("comment_id", comment.id_comment);
 
-      let count = 0;
+      let upvotes = 0;
+      let downvotes = 0;
       ratingData.map((rating) => {
         if (rating.type == true) {
-          count++;
+          upvotes++;
         } else {
-          count--;
+          downvotes++;
         }
       });
 
       if (error) {
         console.log(error);
-        return { ...comment, likes: 0 };
+        return { ...comment, upvotes: 0, downvotes: 0 };
       }
 
-      return { ...comment, likes: count };
+      return { ...comment, upvotes: upvotes, downvotes: downvotes };
     })
   );
 

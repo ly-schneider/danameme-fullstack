@@ -87,6 +87,18 @@ export default function Home() {
     getData();
   }, []);
 
+  async function updatePosts(postId) {
+    setPosts(
+      posts.map((post) => {
+        if (post.id_post == postId) {
+          return { ...post, rating: true };
+        } else {
+          return post;
+        }
+      })
+    );
+  }
+
   function handlePosts() {
     setNewPost(true);
     setTimeout(() => {
@@ -269,10 +281,12 @@ export default function Home() {
             </div>
             {post.asset && (
               <div className="w-full mt-3">
-                <LazyImage
-                  src={post.asset}
-                  alt={post.title ? post.title : "Post"}
-                />
+                <Link href={`/post/${generateTitle(post)}`} passHref>
+                  <LazyImage
+                    src={post.asset}
+                    alt={post.title ? post.title : "Post"}
+                  />
+                </Link>
               </div>
             )}
             <div className="flex items-center flex-row w-full mt-3 space-x-2">
@@ -289,8 +303,7 @@ export default function Home() {
                       className="text text-2xl hover:cursor-pointer"
                       onClick={async () => {
                         await handleVote(post.id_post, true, profileId);
-                        const posts = await fetchPosts(profileId);
-                        setPosts(posts);
+                        updatePosts(post.id_post);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.upvotes}</p>
@@ -306,8 +319,7 @@ export default function Home() {
                       className="text text-2xl hover:cursor-pointer"
                       onClick={async () => {
                         await handleVote(post.id_post, false, profileId);
-                        const posts = await fetchPosts(profileId);
-                        setPosts(posts);
+                        updatePosts(post.id_post);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.downvotes}</p>
