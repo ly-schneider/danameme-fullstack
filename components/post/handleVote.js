@@ -45,18 +45,22 @@ export async function handleVote(postId, type, profileId) {
       return;
     }
 
-    const { error: notificationError } = await supabase
-      .from("notification")
-      .insert({
-        toprofile_id: postUser[0].profile_id,
-        fromprofile_id: profileId,
-        text: `hat deinem Beitrag ein ${type ? "Upvote" : "Downvote"} gegeben`,
-        post_id: postId,
-      });
+    if (profileId != postUser[0].profile_id) {
+      const { error: notificationError } = await supabase
+        .from("notification")
+        .insert({
+          toprofile_id: postUser[0].profile_id,
+          fromprofile_id: profileId,
+          text: `hat deinem Beitrag ein ${
+            type ? "Upvote" : "Downvote"
+          } gegeben`,
+          post_id: postId,
+        });
 
-    if (notificationError) {
-      console.log(notificationError);
-      return;
+      if (notificationError) {
+        console.log(notificationError);
+        return;
+      }
     }
 
     if (type) {
@@ -76,15 +80,17 @@ export async function handleVote(postId, type, profileId) {
         return;
       }
 
-      const { error: notificationError } = await supabase
-        .from("notification")
-        .delete()
-        .eq("post_id", postId)
-        .eq("fromprofile_id", profileId);
+      if (profileId != postUser[0].profile_id) {
+        const { error: notificationError } = await supabase
+          .from("notification")
+          .delete()
+          .eq("post_id", postId)
+          .eq("fromprofile_id", profileId);
 
-      if (notificationError) {
-        console.log(notificationError);
-        return;
+        if (notificationError) {
+          console.log(notificationError);
+          return;
+        }
       }
 
       if (type) {
@@ -103,50 +109,52 @@ export async function handleVote(postId, type, profileId) {
         return;
       }
 
-      const { data: notificationData, error: notificationErrorData } =
-        await supabase
-          .from("notification")
-          .select("id_notification")
-          .eq("post_id", postId)
-          .eq("fromprofile_id", profileId);
+      if (profileId != postUser[0].profile_id) {
+        const { data: notificationData, error: notificationErrorData } =
+          await supabase
+            .from("notification")
+            .select("id_notification")
+            .eq("post_id", postId)
+            .eq("fromprofile_id", profileId);
 
-      if (notificationErrorData) {
-        console.log(notificationErrorData);
-        return;
-      }
+        if (notificationErrorData) {
+          console.log(notificationErrorData);
+          return;
+        }
 
-      if (notificationData.length == 0) {
+        if (notificationData.length == 0) {
+          const { error: notificationError } = await supabase
+            .from("notification")
+            .insert({
+              toprofile_id: postUser[0].profile_id,
+              fromprofile_id: profileId,
+              text: `hat deinem Beitrag ein ${
+                type ? "Upvote" : "Downvote"
+              } gegeben`,
+              post_id: postId,
+            });
+
+          if (notificationError) {
+            console.log(notificationError);
+            return;
+          }
+          return;
+        }
+
         const { error: notificationError } = await supabase
           .from("notification")
-          .insert({
-            toprofile_id: postUser[0].profile_id,
-            fromprofile_id: profileId,
+          .update({
             text: `hat deinem Beitrag ein ${
               type ? "Upvote" : "Downvote"
             } gegeben`,
-            post_id: postId,
-          });
+          })
+          .eq("post_id", postId)
+          .eq("fromprofile_id", profileId);
 
         if (notificationError) {
           console.log(notificationError);
           return;
         }
-        return;
-      }
-
-      const { error: notificationError } = await supabase
-        .from("notification")
-        .update({
-          text: `hat deinem Beitrag ein ${
-            type ? "Upvote" : "Downvote"
-          } gegeben`,
-        })
-        .eq("post_id", postId)
-        .eq("fromprofile_id", profileId);
-
-      if (notificationError) {
-        console.log(notificationError);
-        return;
       }
 
       if (type) {

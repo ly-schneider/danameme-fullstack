@@ -200,28 +200,6 @@ export default function PostPage({ params }) {
     }
   }
 
-  async function updatePost(postId) {
-    let newPost;
-    if (post.id_post == postId) {
-      newPost = { ...post, rating: true };
-    } else {
-      newPost = post;
-    }
-    setPost(newPost);
-  }
-
-  async function updateComments(commentId) {
-    setComments(
-      comments.map((comment) => {
-        if (comment.id_comment == commentId) {
-          return { ...comment, rating: true };
-        } else {
-          return comment;
-        }
-      })
-    );
-  }
-
   async function handleComment() {
     const newComment = await fetchComments(post.id_post, profile.id_profile);
     setComments(newComment);
@@ -472,7 +450,11 @@ export default function PostPage({ params }) {
                         true,
                         profile.id_profile
                       );
-                      updateComments(comment.id_comment);
+                      const newComments = await fetchComments(
+                        post.id_post,
+                        profile.id_profile
+                      );
+                      setComments(newComments);
                     }}
                   />
                   <p className="text text-base me-0.5">{comment.upvotes}</p>
@@ -489,10 +471,14 @@ export default function PostPage({ params }) {
                     onClick={async () => {
                       await handleCommentVote(
                         comment.id_comment,
-                        true,
+                        false,
                         profile.id_profile
                       );
-                      updateComments(comment.id_comment);
+                      const newComments = await fetchComments(
+                        post.id_post,
+                        profile.id_profile
+                      );
+                      setComments(newComments);
                     }}
                   />
                   <p className="text text-base me-0.5">{comment.downvotes}</p>
@@ -666,7 +652,8 @@ export default function PostPage({ params }) {
                           true,
                           profile.id_profile
                         );
-                        updatePost(post.id_post);
+                        const newPost = await fetchPost(profile.id_profile);
+                        setPost(newPost);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.upvotes}</p>
@@ -686,7 +673,8 @@ export default function PostPage({ params }) {
                           false,
                           profile.id_profile
                         );
-                        updatePost(post.id_post);
+                        const newPost = await fetchPost(profile.id_profile);
+                        setPost(newPost);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.downvotes}</p>

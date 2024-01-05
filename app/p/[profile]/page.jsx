@@ -284,18 +284,6 @@ export default function ProfilePage({ params }) {
     return countComments;
   }
 
-  async function updatePosts(postId) {
-    setPosts(
-      posts.map((post) => {
-        if (post.id_post == postId) {
-          return { ...post, rating: true };
-        } else {
-          return post;
-        }
-      })
-    );
-  }
-
   async function handleProfileUpdate() {
     const profile = await getUserProfile();
     setProfile(profile);
@@ -565,7 +553,11 @@ export default function ProfilePage({ params }) {
                               true,
                               profileSession.id_profile
                             );
-                            updatePosts(post.id_post);
+                            const posts = await fetchPosts(
+                              profile.id_profile,
+                              profileSession.id_profile
+                            );
+                            setPosts(posts);
                           }}
                         />
                         <p className="text text-base me-0.5">{post.upvotes}</p>
@@ -585,7 +577,11 @@ export default function ProfilePage({ params }) {
                               false,
                               profileSession.id_profile
                             );
-                            updatePosts(post.id_post);
+                            const posts = await fetchPosts(
+                              profile.id_profile,
+                              profileSession.id_profile
+                            );
+                            setPosts(posts);
                           }}
                         />
                         <p className="text text-base me-0.5">

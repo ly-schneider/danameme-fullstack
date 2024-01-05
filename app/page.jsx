@@ -87,18 +87,6 @@ export default function Home() {
     getData();
   }, []);
 
-  async function updatePosts(postId) {
-    setPosts(
-      posts.map((post) => {
-        if (post.id_post == postId) {
-          return { ...post, rating: true };
-        } else {
-          return post;
-        }
-      })
-    );
-  }
-
   function handlePosts() {
     setNewPost(true);
     setTimeout(() => {
@@ -303,7 +291,8 @@ export default function Home() {
                       className="text text-2xl hover:cursor-pointer"
                       onClick={async () => {
                         await handleVote(post.id_post, true, profileId);
-                        updatePosts(post.id_post);
+                        const newPosts = await fetchPosts(profileId);
+                        setPosts(newPosts);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.upvotes}</p>
@@ -319,7 +308,8 @@ export default function Home() {
                       className="text text-2xl hover:cursor-pointer"
                       onClick={async () => {
                         await handleVote(post.id_post, false, profileId);
-                        updatePosts(post.id_post);
+                        const newPosts = await fetchPosts(profileId);
+                        setPosts(newPosts);
                       }}
                     />
                     <p className="text text-base me-0.5">{post.downvotes}</p>
