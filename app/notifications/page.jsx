@@ -103,6 +103,20 @@ export default function NotificationPage() {
     );
   }
 
+  async function removeAllNotifications() {
+    const { data, error } = await supabase
+      .from("notification")
+      .delete()
+      .eq("toprofile_id", profile.id_profile);
+
+    if (error) {
+      console.log(error);
+      return false;
+    }
+
+    setNotifications([]);
+  }
+
   async function loadNewNotifications() {
     const data = await getNotifications(profile.id_profile);
     setNotifications(data);
@@ -136,115 +150,126 @@ export default function NotificationPage() {
       ) : (
         <div className="mt-8 mx-5 sm:mx-0">
           <h1 className="title ">Mitteilungen</h1>
-          <div className="mt-5">
+          <div className="mt-5 w-full">
             {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id_notification}
-                  className="flex flex-col py-3"
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex justify-between items-center w-full">
-                      <div className="flex items-center">
-                        <img
-                          src={notification.fromprofile_id.profileimage}
-                          className="rounded-full border-[3px] border-accent h-12 w-12 object-cover"
-                        />
-                        <div className="ml-3">
-                          <p className="text">
-                            <Link
-                              href={`/p/${notification.fromprofile_id.username}`}
-                              passHref
-                            >
-                              <span className="font-semibold">
-                                {notification.fromprofile_id.username}
-                              </span>{" "}
-                            </Link>
-                            {notification.text}
-                            {notification.post_id && (
-                              <>
-                                {!notification.post_id.asset &&
-                                notification.post_id.title ? (
+              <>
+                <div className="flex justify-end items-center">
+                  <button
+                    className="btn btn-primary text text-xs bg-muted rounded-md mb-2"
+                    onClick={removeAllNotifications}
+                  >
+                    Alle entfernen
+                  </button>
+                </div>
+                {notifications.map((notification) => (
+                  <div
+                    key={notification.id_notification}
+                    className="flex flex-col py-3"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center w-full">
+                        <div className="flex items-center">
+                          <img
+                            src={notification.fromprofile_id.profileimage}
+                            className="rounded-full border-[3px] border-accent h-12 w-12 object-cover"
+                          />
+                          <div className="ml-3">
+                            <p className="text">
+                              <Link
+                                href={`/p/${notification.fromprofile_id.username}`}
+                                passHref
+                              >
+                                <span className="font-semibold">
+                                  {notification.fromprofile_id.username}
+                                </span>{" "}
+                              </Link>
+                              {notification.text}
+                              {notification.post_id && (
+                                <>
+                                  {!notification.post_id.asset &&
+                                  notification.post_id.title ? (
+                                    <Link
+                                      href={
+                                        "/post/" +
+                                        generateTitle(notification.post_id)
+                                      }
+                                      className="font-semibold"
+                                    >
+                                      : {notification.post_id.title}
+                                    </Link>
+                                  ) : (
+                                    <>
+                                      {!notification.post_id.asset && (
+                                        <Link
+                                          href={
+                                            "/post/" +
+                                            generateTitle(notification.post_id)
+                                          }
+                                          className="font-semibold"
+                                        >
+                                          : {notification.post_id.content}
+                                        </Link>
+                                      )}
+                                    </>
+                                  )}
+                                </>
+                              )}
+                              {notification.comment_id && (
+                                <>
                                   <Link
                                     href={
                                       "/post/" +
-                                      generateTitle(notification.post_id)
+                                      generateTitle(
+                                        notification.comment_id.post_id
+                                      )
                                     }
                                     className="font-semibold"
                                   >
-                                    : {notification.post_id.title}
+                                    : {notification.comment_id.text}
                                   </Link>
-                                ) : (
-                                  <>
-                                    {!notification.post_id.asset && (
-                                      <Link
-                                        href={
-                                          "/post/" +
-                                          generateTitle(notification.post_id)
-                                        }
-                                        className="font-semibold"
-                                      >
-                                        : {notification.post_id.content}
-                                      </Link>
-                                    )}
-                                  </>
-                                )}
-                              </>
-                            )}
-                            {notification.comment_id && (
-                              <>
+                                </>
+                              )}
+                              <span className="text-muted text-sm">
+                                {" "}
+                                {calcTimeShort(notification.createdat)}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          {notification.post_id && (
+                            <>
+                              {notification.post_id.asset && (
                                 <Link
                                   href={
                                     "/post/" +
-                                    generateTitle(
-                                      notification.comment_id.post_id
-                                    )
+                                    generateTitle(notification.post_id)
                                   }
-                                  className="font-semibold"
                                 >
-                                  : {notification.comment_id.text}
+                                  <img
+                                    src={notification.post_id.asset}
+                                    className="rounded-sm h-10 w-10"
+                                  />
                                 </Link>
-                              </>
-                            )}
-                            <span className="text-muted text-sm">
-                              {" "}
-                              {calcTimeShort(notification.createdat)}
-                            </span>
-                          </p>
+                              )}
+                            </>
+                          )}
+                          <button
+                            className="ml-3 text-text"
+                            onClick={() =>
+                              handleRemoveNotification(
+                                notification.id_notification
+                              )
+                            }
+                          >
+                            <FontAwesomeIcon icon={faXmark} />
+                          </button>
                         </div>
-                      </div>
-                      <div className="flex items-center">
-                        {notification.post_id && (
-                          <>
-                            {notification.post_id.asset && (
-                              <Link
-                                href={
-                                  "/post/" + generateTitle(notification.post_id)
-                                }
-                              >
-                                <img
-                                  src={notification.post_id.asset}
-                                  className="rounded-sm h-10 w-10"
-                                />
-                              </Link>
-                            )}
-                          </>
-                        )}
-                        <button
-                          className="ml-3 text-text"
-                          onClick={() =>
-                            handleRemoveNotification(
-                              notification.id_notification
-                            )
-                          }
-                        >
-                          <FontAwesomeIcon icon={faXmark} />
-                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </>
             ) : (
               <div className="flex flex-col items-center w-full mt-8">
                 <h1 className="text text-muted text-base font-bold">
