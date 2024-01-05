@@ -136,21 +136,22 @@ export default function PostPage({ params }) {
           .select("*")
           .eq("post_id", post.id_post);
 
-        let count = 0;
+        let upvotes = 0;
+        let downvotes = 0;
         ratingData.map((rating) => {
           if (rating.type == true) {
-            count++;
+            upvotes++;
           } else {
-            count--;
+            downvotes++;
           }
         });
 
         if (error) {
           console.log(error);
-          return { ...post, likes: 0 };
+          return { ...post, upvotes: 0, downvotes: 0 };
         }
 
-        return { ...post, likes: count };
+        return { ...post, upvotes: upvotes, downvotes: downvotes };
       })
     );
 
@@ -631,35 +632,48 @@ export default function PostPage({ params }) {
             <div className="flex items-center flex-row w-full mt-3 space-x-2">
               {post.profile.username != "DANAMEME" && (
                 <div className="flex items-center">
-                  <Icon
-                    path={
-                      post.rating == true
-                        ? mdiArrowUpBold
-                        : mdiArrowUpBoldOutline
-                    }
-                    size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
-                    onClick={async () => {
-                      await handleVote(post.id_post, true, profile.id_profile);
-                      const postNew = await fetchPost(profile.id_profile);
-                      setPost(postNew);
-                    }}
-                  />
-                  <p className="text text-base mx-0.5">{post.likes}</p>
-                  <Icon
-                    path={
-                      post.rating == false
-                        ? mdiArrowDownBold
-                        : mdiArrowDownBoldOutline
-                    }
-                    size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
-                    onClick={async () => {
-                      await handleVote(post.id_post, false, profile.id_profile);
-                      const postNew = await fetchPost(profile.id_profile);
-                      setPost(postNew);
-                    }}
-                  />
+                  <div className="flex flex-row items-center">
+                    <Icon
+                      path={
+                        post.rating == true
+                          ? mdiArrowUpBold
+                          : mdiArrowUpBoldOutline
+                      }
+                      size={1.22}
+                      className="text text-2xl hover:cursor-pointer"
+                      onClick={async () => {
+                        await handleVote(
+                          post.id_post,
+                          true,
+                          profile.id_profile
+                        );
+                        const postNew = await fetchPost(profile.id_profile);
+                        setPost(postNew);
+                      }}
+                    />
+                    <p className="text text-base me-0.5">{post.upvotes}</p>
+                  </div>
+                  <div className="flex flex-row items-center">
+                    <Icon
+                      path={
+                        post.rating == false
+                          ? mdiArrowDownBold
+                          : mdiArrowDownBoldOutline
+                      }
+                      size={1.22}
+                      className="text text-2xl hover:cursor-pointer"
+                      onClick={async () => {
+                        await handleVote(
+                          post.id_post,
+                          false,
+                          profile.id_profile
+                        );
+                        const postNew = await fetchPost(profile.id_profile);
+                        setPost(postNew);
+                      }}
+                    />
+                    <p className="text text-base me-0.5">{post.downvotes}</p>
+                  </div>
                 </div>
               )}
               <div className="flex items-center">

@@ -110,7 +110,7 @@ export default function ProfilePage({ params }) {
       const joined = await getJoined(profile);
       setJoined(joined);
 
-      const posts = await getPosts(
+      const posts = await fetchPosts(
         profile.id_profile,
         profileSession.id_profile
       );
@@ -208,7 +208,7 @@ export default function ProfilePage({ params }) {
     return dateStringCustom;
   }
 
-  async function getPosts(profileId, profileIdSession) {
+  async function fetchPosts(profileId, profileIdSession) {
     const { data: postsData, error: postsError } = await supabase
       .from("post")
       .select(
@@ -229,21 +229,22 @@ export default function ProfilePage({ params }) {
           .select("*")
           .eq("post_id", post.id_post);
 
-        let count = 0;
+        let upvotes = 0;
+        let downvotes = 0;
         ratingData.map((rating) => {
           if (rating.type == true) {
-            count++;
+            upvotes++;
           } else {
-            count--;
+            downvotes++;
           }
         });
 
         if (error) {
           console.log(error);
-          return { ...post, likes: 0 };
+          return { ...post, upvotes: 0, downvotes: 0 };
         }
 
-        return { ...post, likes: count };
+        return { ...post, upvotes: upvotes, downvotes: downvotes };
       })
     );
 
@@ -283,24 +284,34 @@ export default function ProfilePage({ params }) {
     return countComments;
   }
 
+  async function updatePosts(postId) {
+    setPosts(
+      posts.map((post) => {
+        if (post.id_post == postId) {
+          return { ...post, rating: true };
+        } else {
+          return post;
+        }
+      })
+    );
+  }
+
   async function handleProfileUpdate() {
     const profile = await getUserProfile();
     setProfile(profile);
   }
 
   async function handlePosts() {
-    const posts = await getPosts(profile.id_profile, profileSession.id_profile);
+    const posts = await fetchPosts(
+      profile.id_profile,
+      profileSession.id_profile
+    );
     setPosts(posts);
   }
 
   async function handleProfileBadges() {
     const badges = await getBadges(profile);
     setBadges(badges);
-  }
-
-  async function handlePostRating() {
-    const posts = await getPosts(profile.id_profile, profileSession.id_profile);
-    setPosts(posts);
   }
 
   supabase
@@ -323,7 +334,7 @@ export default function ProfilePage({ params }) {
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "rating_post" },
-      handlePostRating
+      handlePosts
     )
     .subscribe();
 
@@ -480,11 +491,7 @@ export default function ProfilePage({ params }) {
                                   className="text text-sm hover:bg-accentBackground"
                                   onClick={async () => {
                                     await handlePostDelete(post.id_post);
-                                    const newPosts = await getPosts(
-                                      profile.id_profile,
-                                      profileSession.id_profile
-                                    );
-                                    setPosts(newPosts);
+                                    setPosts(posts.filter((p) => p != post));
                                   }}
                                 >
                                   <FontAwesomeIcon
@@ -543,49 +550,48 @@ export default function ProfilePage({ params }) {
                 <div className="flex items-center flex-row w-full mt-3 space-x-2">
                   {post.profile.username != "DANAMEME" && (
                     <div className="flex items-center">
-                      <Icon
-                        path={
-                          post.rating == true
-                            ? mdiArrowUpBold
-                            : mdiArrowUpBoldOutline
-                        }
-                        size={1.22}
-                        className="text text-2xl hover:cursor-pointer"
-                        onClick={async () => {
-                          await handleVote(
-                            post.id_post,
-                            true,
-                            profileSession.id_profile
-                          );
-                          const posts = await getPosts(
-                            profile.id_profile,
-                            profileSession.id_profile
-                          );
-                          setPosts(posts);
-                        }}
-                      />
-                      <p className="text text-base mx-0.5">{post.likes}</p>
-                      <Icon
-                        path={
-                          post.rating == false
-                            ? mdiArrowDownBold
-                            : mdiArrowDownBoldOutline
-                        }
-                        size={1.22}
-                        className="text text-2xl hover:cursor-pointer"
-                        onClick={async () => {
-                          await handleVote(
-                            post.id_post,
-                            false,
-                            profileSession.id_profile
-                          );
-                          const posts = await getPosts(
-                            profile.id_profile,
-                            profileSession.id_profile
-                          );
-                          setPosts(posts);
-                        }}
-                      />
+                      <div className="flex flex-row items-center">
+                        <Icon
+                          path={
+                            post.rating == true
+                              ? mdiArrowUpBold
+                              : mdiArrowUpBoldOutline
+                          }
+                          size={1.22}
+                          className="text text-2xl hover:cursor-pointer"
+                          onClick={async () => {
+                            await handleVote(
+                              post.id_post,
+                              true,
+                              profileSession.id_profile
+                            );
+                            updatePosts(post.id_post);
+                          }}
+                        />
+                        <p className="text text-base me-0.5">{post.upvotes}</p>
+                      </div>
+                      <div className="flex flex-row items-center">
+                        <Icon
+                          path={
+                            post.rating == false
+                              ? mdiArrowDownBold
+                              : mdiArrowDownBoldOutline
+                          }
+                          size={1.22}
+                          className="text text-2xl hover:cursor-pointer"
+                          onClick={async () => {
+                            await handleVote(
+                              post.id_post,
+                              false,
+                              profileSession.id_profile
+                            );
+                            updatePosts(post.id_post);
+                          }}
+                        />
+                        <p className="text text-base me-0.5">
+                          {post.downvotes}
+                        </p>
+                      </div>
                     </div>
                   )}
                   <div className="flex items-center">
