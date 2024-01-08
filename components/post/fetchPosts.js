@@ -21,21 +21,22 @@ export async function fetchPosts(profileId) {
         .select("*")
         .eq("post_id", post.id_post);
 
-      let count = 0;
+      let upvotes = 0;
+      let downvotes = 0;
       ratingData.map((rating) => {
         if (rating.type == true) {
-          count++;
+          upvotes++;
         } else {
-          count--;
+          downvotes++;
         }
       });
 
       if (error) {
         console.log(error);
-        return { ...post, likes: 0 };
+        return { ...post, upvotes: 0, downvotes: 0 };
       }
 
-      return { ...post, likes: count };
+      return { ...post, upvotes: upvotes, downvotes: downvotes };
     })
   );
 

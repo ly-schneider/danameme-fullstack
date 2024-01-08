@@ -12,7 +12,7 @@ export default function NotificationButton({ id_profile }) {
   const [notifications, setNotifications] = useState([]);
 
   function handleClick() {
-    router.push("/notification/");
+    router.push("/notifications/");
   }
 
   useEffect(() => {

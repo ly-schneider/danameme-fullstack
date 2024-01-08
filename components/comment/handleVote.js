@@ -12,7 +12,7 @@ export async function handleCommentVote(commentId, type, profileId) {
     return;
   }
 
-  const { data: postUser, error: postUserError } = await supabase
+  const { data: commentUser, error: postUserError } = await supabase
     .from("comment")
     .select("profile_id")
     .eq("id_comment", commentId);
@@ -25,7 +25,7 @@ export async function handleCommentVote(commentId, type, profileId) {
   const { data: userKarma, error: userKarmaError } = await supabase
     .from("profile")
     .select("karma")
-    .eq("id_profile", postUser[0].profile_id);
+    .eq("id_profile", commentUser[0].profile_id);
 
   if (userKarmaError) {
     console.log(userKarmaError);
@@ -45,20 +45,22 @@ export async function handleCommentVote(commentId, type, profileId) {
       return;
     }
 
-    const { error: notificationError } = await supabase
-      .from("notification")
-      .insert({
-        toprofile_id: postUser[0].profile_id,
-        fromprofile_id: profileId,
-        text: `hat deinem Kommentar ein ${
-          type ? "Upvote" : "Downvote"
-        } gegeben`,
-        comment_id: commentId,
-      });
+    if (profileId != commentUser[0].profile_id) {
+      const { error: notificationError } = await supabase
+        .from("notification")
+        .insert({
+          toprofile_id: commentUser[0].profile_id,
+          fromprofile_id: profileId,
+          text: `hat deinem Kommentar ein ${
+            type ? "Upvote" : "Downvote"
+          } gegeben`,
+          comment_id: commentId,
+        });
 
-    if (notificationError) {
-      console.log(notificationError);
-      return;
+      if (notificationError) {
+        console.log(notificationError);
+        return;
+      }
     }
 
     if (type) {
@@ -78,15 +80,17 @@ export async function handleCommentVote(commentId, type, profileId) {
         return;
       }
 
-      const { error: notificationError } = await supabase
-        .from("notification")
-        .delete()
-        .eq("comment_id", commentId)
-        .eq("fromprofile_id", profileId);
+      if (profileId != commentUser[0].profile_id) {
+        const { error: notificationError } = await supabase
+          .from("notification")
+          .delete()
+          .eq("comment_id", commentId)
+          .eq("fromprofile_id", profileId);
 
-      if (notificationError) {
-        console.log(notificationError);
-        return;
+        if (notificationError) {
+          console.log(notificationError);
+          return;
+        }
       }
 
       if (type) {
@@ -105,50 +109,52 @@ export async function handleCommentVote(commentId, type, profileId) {
         return;
       }
 
-      const { data: notificationData, error: notificationErrorData } =
-        await supabase
-          .from("notification")
-          .select("id_notification")
-          .eq("comment_id", commentId)
-          .eq("fromprofile_id", profileId);
+      if (profileId != commentUser[0].profile_id) {
+        const { data: notificationData, error: notificationErrorData } =
+          await supabase
+            .from("notification")
+            .select("id_notification")
+            .eq("comment_id", commentId)
+            .eq("fromprofile_id", profileId);
 
-      if (notificationErrorData) {
-        console.log(notificationErrorData);
-        return;
-      }
+        if (notificationErrorData) {
+          console.log(notificationErrorData);
+          return;
+        }
 
-      if (notificationData.length == 0) {
+        if (notificationData.length == 0) {
+          const { error: notificationError } = await supabase
+            .from("notification")
+            .insert({
+              toprofile_id: commentUser[0].profile_id,
+              fromprofile_id: profileId,
+              text: `hat deinem Kommentar ein ${
+                type ? "Upvote" : "Downvote"
+              } gegeben`,
+              comment_id: commentId,
+            });
+
+          if (notificationError) {
+            console.log(notificationError);
+            return;
+          }
+          return;
+        }
+
         const { error: notificationError } = await supabase
           .from("notification")
-          .insert({
-            toprofile_id: postUser[0].profile_id,
-            fromprofile_id: profileId,
+          .update({
             text: `hat deinem Kommentar ein ${
               type ? "Upvote" : "Downvote"
             } gegeben`,
-            comment_id: commentId,
-          });
+          })
+          .eq("comment_id", commentId)
+          .eq("fromprofile_id", profileId);
 
         if (notificationError) {
           console.log(notificationError);
           return;
         }
-        return;
-      }
-
-      const { error: notificationError } = await supabase
-        .from("notification")
-        .update({
-          text: `hat deinem Kommentar ein ${
-            type ? "Upvote" : "Downvote"
-          } gegeben`,
-        })
-        .eq("comment_id", commentId)
-        .eq("fromprofile_id", profileId);
-
-      if (notificationError) {
-        console.log(notificationError);
-        return;
       }
 
       if (type) {
@@ -163,11 +169,11 @@ export async function handleCommentVote(commentId, type, profileId) {
     karma = 0;
   }
 
-  if (profileId != postUser[0].profile_id) {
+  if (profileId != commentUser[0].profile_id) {
     const { error: updateKarmaError } = await supabase
       .from("profile")
       .update({ karma: karma })
-      .eq("id_profile", postUser[0].profile_id);
+      .eq("id_profile", commentUser[0].profile_id);
 
     if (updateKarmaError) {
       console.log(updateKarmaError);

@@ -269,44 +269,51 @@ export default function Home() {
             </div>
             {post.asset && (
               <div className="w-full mt-3">
-                <LazyImage
-                  src={post.asset}
-                  alt={post.title ? post.title : "Post"}
-                />
+                <Link href={`/post/${generateTitle(post)}`} passHref>
+                  <LazyImage
+                    src={post.asset}
+                    alt={post.title ? post.title : "Post"}
+                  />
+                </Link>
               </div>
             )}
             <div className="flex items-center flex-row w-full mt-3 space-x-2">
               {post.profile.username != "DANAMEME" && (
                 <div className="flex items-center">
-                  <Icon
-                    path={
-                      post.rating == true
-                        ? mdiArrowUpBold
-                        : mdiArrowUpBoldOutline
-                    }
-                    size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
-                    onClick={async () => {
-                      await handleVote(post.id_post, true, profileId);
-                      const posts = await fetchPosts(profileId);
-                      setPosts(posts);
-                    }}
-                  />
-                  <p className="text text-base mx-0.5">{post.likes}</p>
-                  <Icon
-                    path={
-                      post.rating == false
-                        ? mdiArrowDownBold
-                        : mdiArrowDownBoldOutline
-                    }
-                    size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
-                    onClick={async () => {
-                      await handleVote(post.id_post, false, profileId);
-                      const posts = await fetchPosts(profileId);
-                      setPosts(posts);
-                    }}
-                  />
+                  <div className="flex flex-row items-center">
+                    <Icon
+                      path={
+                        post.rating == true
+                          ? mdiArrowUpBold
+                          : mdiArrowUpBoldOutline
+                      }
+                      size={1.22}
+                      className="text text-2xl hover:cursor-pointer"
+                      onClick={async () => {
+                        await handleVote(post.id_post, true, profileId);
+                        const newPosts = await fetchPosts(profileId);
+                        setPosts(newPosts);
+                      }}
+                    />
+                    <p className="text text-base me-0.5">{post.upvotes}</p>
+                  </div>
+                  <div className="flex flex-row items-center">
+                    <Icon
+                      path={
+                        post.rating == false
+                          ? mdiArrowDownBold
+                          : mdiArrowDownBoldOutline
+                      }
+                      size={1.22}
+                      className="text text-2xl hover:cursor-pointer"
+                      onClick={async () => {
+                        await handleVote(post.id_post, false, profileId);
+                        const newPosts = await fetchPosts(profileId);
+                        setPosts(newPosts);
+                      }}
+                    />
+                    <p className="text text-base me-0.5">{post.downvotes}</p>
+                  </div>
                 </div>
               )}
               <div className="flex items-center">
