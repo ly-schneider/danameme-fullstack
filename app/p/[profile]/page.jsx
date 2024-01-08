@@ -12,6 +12,7 @@ import { generateTitle } from "@/components/post/generateTitle";
 import { handlePostDelete } from "@/components/post/handleDelete";
 import { handlePostReport } from "@/components/post/handleReport";
 import { handleVote } from "@/components/post/handleVote";
+import renderContent from "@/components/post/renderContent";
 import supabase from "@/components/supabase";
 import {
   faFlag,
@@ -523,11 +524,7 @@ export default function ProfilePage({ params }) {
                 <div className="w-full mt-3">
                   <Link href={`/post/${generateTitle(post)}`}>
                     <h1 className="title text-2xl font-bold">{post.title}</h1>
-                    {post.content && (
-                      <p className="text text-base whitespace-pre-line">
-                        {post.content}
-                      </p>
-                    )}
+                    {post.content && renderContent(post.content)}
                   </Link>
                 </div>
                 {post.asset && (

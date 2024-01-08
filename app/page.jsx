@@ -42,6 +42,7 @@ import supabase from "@/components/supabase";
 import { checkBan } from "@/components/auth/checkBan";
 import { calcTime } from "@/components/other/calcTime";
 import LazyImage from "@/components/post/lazyImage";
+import renderContent from "@/components/post/renderContent";
 
 export default function Home() {
   const router = useRouter();
@@ -262,7 +263,7 @@ export default function Home() {
                 <h1 className="title text-2xl font-bold">{post.title}</h1>
                 {post.content && (
                   <p className="text text-base whitespace-pre-line">
-                    {post.content}
+                    {post.content && renderContent(post.content)}
                   </p>
                 )}
               </Link>

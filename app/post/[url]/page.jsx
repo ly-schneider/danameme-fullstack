@@ -44,6 +44,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { calcTime } from "@/components/other/calcTime";
+import renderContent from "@/components/post/renderContent";
 
 export default function PostPage({ params }) {
   const router = useRouter();
@@ -623,11 +624,7 @@ export default function PostPage({ params }) {
             </div>
             <div className="w-full mt-3">
               <h1 className="title text-2xl font-bold">{post.title}</h1>
-              {post.content && (
-                <p className="text text-base whitespace-pre-line">
-                  {post.content}
-                </p>
-              )}
+              {post.content && renderContent(post.content)}
             </div>
             {post.asset && (
               <div className="w-full mt-3">
