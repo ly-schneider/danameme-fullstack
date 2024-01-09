@@ -7,9 +7,12 @@ import { getSession } from "@/components/auth/getSession";
 import { calcTime } from "@/components/other/calcTime";
 import supabase from "@/components/supabase";
 import { faPlusSquare } from "@fortawesome/free-regular-svg-icons";
+import { faRotateRight, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+const pica = require("pica")();
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -28,6 +31,8 @@ export default function CreatePostPage() {
   const [banned, setBanned] = useState(false);
   const [banCreating, setBanCreating] = useState(false);
   const [banData, setBanData] = useState([]);
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function getData() {
@@ -70,6 +75,7 @@ export default function CreatePostPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    setLoading(true);
 
     let titleInput = null;
     if (title.length != 0) {
@@ -86,50 +92,78 @@ export default function CreatePostPage() {
       return false;
     }
 
-    let fileUrl = { publicUrl: null };
     if (file) {
-      const { error } = await supabase.storage
-        .from("post-images")
-        .upload(profile.username + "-" + file.name, file, {
-          cacheControl: "3600",
-          upsert: false,
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+
+      img.onload = async function () {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        let newWidth = img.width;
+        if (img.width > 750) {
+          newWidth = 750;
+        }
+
+        const newHeight = (img.height / img.width) * newWidth;
+
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+        canvas.toBlob(async function (blob) {
+          const resizedImage = new File([blob], file.name, {
+            type: file.type,
+            lastModified: Date.now(),
+          });
+
+          uploadImage(resizedImage);
+        });
+      };
+
+      async function uploadImage(file) {
+        const { error: uploadImageError } = await supabase.storage
+          .from("post-images")
+          .upload(profile.username + "-" + file.name, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadImageError) {
+          console.log(uploadImageError);
+          if (uploadImageError.statusCode == "409") {
+            setErrorImage(
+              "Ein Bild mit diesem Namen existiert bereits. Bitte bennene dein Bild um."
+            );
+          } else {
+            setErrorImage(
+              "Beim Hochladen des Bildes ist ein Fehler aufgetreten."
+            );
+          }
+          return;
+        }
+
+        const { data: url } = supabase.storage
+          .from("post-images")
+          .getPublicUrl(profile.username + "-" + file.name);
+
+        const { error: createPostError } = await supabase.from("post").insert({
+          title: titleInput,
+          content: textInput,
+          profile_id: profile.id_profile,
+          asset: url.publicUrl,
         });
 
-      if (error) {
-        console.log(error);
-        if (error.statusCode == "409") {
-          setErrorImage(
-            "Ein Bild mit diesem Namen existiert bereits. Bitte bennene dein Bild um."
-          );
-        } else {
-          setErrorImage(
-            "Beim Hochladen des Bildes ist ein Fehler aufgetreten."
-          );
+        if (createPostError) {
+          console.log(createPostError);
+          setErrorImage("Beim erstellen des Posts ist ein Fehler aufgetreten.");
+          return;
         }
-        return;
+
+        router.push("/");
       }
-
-      const { data: url } = supabase.storage
-        .from("post-images")
-        .getPublicUrl(profile.username + "-" + file.name);
-
-      fileUrl = url;
     }
-
-    const { error } = await supabase.from("post").insert({
-      title: titleInput,
-      content: textInput,
-      profile_id: profile.id_profile,
-      asset: fileUrl.publicUrl,
-    });
-
-    if (error) {
-      console.log(error);
-      setErrorImage("Beim erstellen des Posts ist ein Fehler aufgetreten.");
-      return;
-    }
-
-    router.push("/");
   }
 
   return (
@@ -259,7 +293,11 @@ export default function CreatePostPage() {
                     </label>
                   </div>
                   <button className="btn-primary text text-sm" type="submit">
-                    Post
+                    {loading ? (
+                      <FontAwesomeIcon icon={faSpinner} spin />
+                    ) : (
+                      "Post"
+                    )}
                   </button>
                 </div>
                 <p className="mt-2 text-xs text" id="fileName">

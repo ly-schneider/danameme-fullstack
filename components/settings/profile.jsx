@@ -165,37 +165,107 @@ export default function ProfileSettings({ profile }) {
   }
 
   async function handleUpdateProfileimage(file) {
-    const { error } = await supabase.storage
-      .from("profile-images")
-      .upload(profile.username + "-profileimage.jpg", file, {
-        upsert: true,
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+
+    img.onload = async function () {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const newWidth = 175;
+      const newHeight = (img.height / img.width) * newWidth;
+
+      canvas.width = newWidth;
+      canvas.height = newHeight;
+
+      ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+      canvas.toBlob(async function (blob) {
+        const { data: dataCountChanged } = await supabase
+          .from("profile")
+          .select("profileImageChanged")
+          .eq("id_profile", profile.id_profile);
+
+        const count = dataCountChanged[0].profileImageChanged;
+
+        const { error } = await supabase.storage
+          .from("profile-images")
+          .upload(
+            profile.username + "-profileimage" + `-${count + 1}` + ".jpg",
+            blob,
+            {
+              upsert: true,
+            }
+          );
+
+        if (error) {
+          console.log(error);
+          setErrorProfileimage(
+            "Beim Hochladen des Bildes ist ein Fehler aufgetreten."
+          );
+          return;
+        }
+
+        const { data: url } = supabase.storage
+          .from("profile-images")
+          .getPublicUrl(
+            profile.username + "-profileimage" + `-${count + 1}` + ".jpg"
+          );
+
+        const { error: updateError } = await supabase
+          .from("profile")
+          .update({ profileimage: url.publicUrl })
+          .eq("id_profile", profile.id_profile);
+
+        if (updateError) {
+          console.log(updateError);
+          setErrorProfileimage("Ein Fehler ist aufgetreten.");
+          return;
+        }
+
+        const { error: updateCountError } = await supabase
+          .from("profile")
+          .update({
+            profileImageChanged: count + 1,
+          })
+          .eq("id_profile", profile.id_profile);
+
+        if (updateCountError) {
+          console.log(updateCountError);
+          setErrorProfileimage("Ein Fehler ist aufgetreten.");
+          return;
+        }
+
+        setSuccessProfileimage("Profilbild erfolgreich aktualisiert!");
+
+        if (count == 0) {
+          const { error: imageDeleteError } = await supabase.storage
+            .from("profile-images")
+            .remove(profile.username + "-profileimage.jpg");
+
+          if (imageDeleteError) {
+            console.log(imageDeleteError);
+            setErrorProfileimage(
+              "Ein Fehler ist aufgetreten mit dem löschen des alten Profilbilds."
+            );
+            return;
+          }
+        } else {
+          const { error: imageDeleteError } = await supabase.storage
+            .from("profile-images")
+            .remove(profile.username + "-profileimage" + `-${count}` + ".jpg");
+
+          if (imageDeleteError) {
+            console.log(imageDeleteError);
+            setErrorProfileimage(
+              "Ein Fehler ist aufgetreten mit dem löschen des alten Profilbilds."
+            );
+            return;
+          }
+        }
+        location.reload();
       });
-
-    if (error) {
-      console.log(error);
-      setErrorProfileimage(
-        "Beim Hochladen des Bildes ist ein Fehler aufgetreten."
-      );
-      return;
-    }
-
-    const { data: url } = supabase.storage
-      .from("profile-images")
-      .getPublicUrl(profile.username + "-profileimage.jpg");
-
-    const { error: updateError } = await supabase
-      .from("profile")
-      .update({ profileimage: url.publicUrl })
-      .eq("id_profile", profile.id_profile);
-
-    if (updateError) {
-      console.log(updateError);
-      setErrorProfileimage("Ein Fehler ist aufgetreten.");
-      return;
-    }
-
-    setSuccessProfileimage("Profilbild erfolgreich aktualisiert!");
-    location.reload();
+    };
   }
 
   function handleFileChange(event) {
