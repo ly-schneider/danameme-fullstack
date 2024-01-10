@@ -70,6 +70,11 @@ export default function Fourth({ formData, setFormData, page, setPage }) {
       formError = true;
     }
 
+    if (username.length > 15) {
+      setErrorUsername("Der Username darf maximal 15 Zeichen lang sein.");
+      return;
+    }
+
     if (/[\u00C4\u00E4\u00D6\u00F6\u00DC\u00FC\u00DF]/.test(username)) {
       setErrorUsername("Benutzername darf keine Umlaute enthalten!");
       formError = true;

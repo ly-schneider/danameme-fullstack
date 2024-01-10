@@ -644,7 +644,7 @@ export default function ProfilePage({ params }) {
               </p>
             </div>
           ) : (
-            <div className="mt-3">
+            <div className="mx-6 sm:mx-0 mt-3">
               <div className="flex flex-row items-center justify-between">
                 <div className="flex items-center">
                   <div className="rounded-full bg-zinc-700 w-24 h-24 flex items-center justify-center animate-pulse"></div>
@@ -658,6 +658,9 @@ export default function ProfilePage({ params }) {
               </div>
               <div className="w-full mt-6">
                 <hr className="border-[3px] border-zinc-700 w-28 rounded-md animate-pulse" />
+              </div>
+              <div className="w-full mt-6">
+                <hr className="border-[6px] border-zinc-700 w-24 rounded-md animate-pulse" />
               </div>
               <div className="w-full flex flex-row gap-4 flex-wrap mt-6">
                 <hr className="border-[12px] border-zinc-700 w-28 rounded-md animate-pulse" />
