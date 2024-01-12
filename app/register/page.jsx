@@ -81,7 +81,10 @@ export default function RegisterPage() {
   return (
     <div className="mx-12 sm:mx-20 mt-8">
       <h1 className="title text-center font-bold">Registrierung</h1>
-      {conditionalComponent()}
+      {/* {conditionalComponent()} */}
+      <div className="flex flex-col items-center w-full mt-8">
+        <h1 className="title font-extrabold text-error text-center">Die Registrierung ist temporär abgeschaltet</h1>
+      </div>
     </div>
   );
 }
