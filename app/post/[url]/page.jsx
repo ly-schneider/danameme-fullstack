@@ -444,7 +444,12 @@ export default function PostPage({ params }) {
                         : mdiArrowUpBoldOutline
                     }
                     size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
+                    className={
+                      "text text-2xl hover:cursor-pointer" +
+                      (profile.confirmed
+                        ? ""
+                        : " text-muted pointer-events-none")
+                    }
                     onClick={async () => {
                       await handleCommentVote(
                         comment.id_comment,
@@ -468,7 +473,12 @@ export default function PostPage({ params }) {
                         : mdiArrowDownBoldOutline
                     }
                     size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
+                    className={
+                      "text text-2xl hover:cursor-pointer" +
+                      (profile.confirmed
+                        ? ""
+                        : " text-muted pointer-events-none")
+                    }
                     onClick={async () => {
                       await handleCommentVote(
                         comment.id_comment,
@@ -487,8 +497,8 @@ export default function PostPage({ params }) {
               </div>
               <div
                 className={
-                  (commentBanned
-                    ? "pointer-events-none"
+                  (commentBanned || !profile.confirmed
+                    ? "pointer-events-none text-muted"
                     : "hover:cursor-pointer") + " flex items-center"
                 }
                 onClick={handleToggleReplyForm}
@@ -642,7 +652,12 @@ export default function PostPage({ params }) {
                           : mdiArrowUpBoldOutline
                       }
                       size={1.22}
-                      className="text text-2xl hover:cursor-pointer"
+                      className={
+                        "text text-2xl hover:cursor-pointer" +
+                        (profile.confirmed
+                          ? ""
+                          : " text-muted pointer-events-none")
+                      }
                       onClick={async () => {
                         await handleVote(
                           post.id_post,
@@ -663,7 +678,12 @@ export default function PostPage({ params }) {
                           : mdiArrowDownBoldOutline
                       }
                       size={1.22}
-                      className="text text-2xl hover:cursor-pointer"
+                      className={
+                        "text text-2xl hover:cursor-pointer" +
+                        (profile.confirmed
+                          ? ""
+                          : " text-muted pointer-events-none")
+                      }
                       onClick={async () => {
                         await handleVote(
                           post.id_post,
@@ -721,49 +741,62 @@ export default function PostPage({ params }) {
                     </p>
                   </div>
                 ) : (
-                  <div className="">
-                    <p className="text text-muted">
-                      Kommentiere als{" "}
-                      <span className="text-accent">{profile.username}</span>
-                    </p>
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      className="min-h-[45px] max-h-[200px] w-full h-24 mt-2 bg-background border-primary border-[3px] input"
-                    />
-                    <div className="flex items-center flex-row w-full justify-end mt-3">
-                      <button
-                        className={
-                          commentText.length > 0
-                            ? "btn-primary border-[3px] border-primary"
-                            : "btn-secondary text-muted"
-                        }
-                        onClick={async () => {
-                          const status = await addComment(
-                            post.profile_id,
-                            post.id_post,
-                            commentText,
-                            profile.id_profile
-                          );
-                          setCommentText("");
-                          if (!status) {
-                            setError("Ein Fehler ist aufgetreten!");
-                            setTimeout(() => {
-                              setError("");
-                            }, 3000);
-                            return;
-                          }
-                          const newComments = await fetchComments(
-                            post.id_post,
-                            profile.id_profile
-                          );
-                          setComments(newComments);
-                        }}
-                      >
-                        Kommentieren
-                      </button>
-                    </div>
-                  </div>
+                  <>
+                    {profile.confirmed ? (
+                      <div className="">
+                        <p className="text text-muted">
+                          Kommentiere als{" "}
+                          <span className="text-accent">
+                            {profile.username}
+                          </span>
+                        </p>
+                        <textarea
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          className="min-h-[45px] max-h-[200px] w-full h-24 mt-2 bg-background border-primary border-[3px] input"
+                        />
+                        <div className="flex items-center flex-row w-full justify-end mt-3">
+                          <button
+                            className={
+                              commentText.length > 0
+                                ? "btn-primary border-[3px] border-primary"
+                                : "btn-secondary text-muted"
+                            }
+                            onClick={async () => {
+                              const status = await addComment(
+                                post.profile_id,
+                                post.id_post,
+                                commentText,
+                                profile.id_profile
+                              );
+                              setCommentText("");
+                              if (!status) {
+                                setError("Ein Fehler ist aufgetreten!");
+                                setTimeout(() => {
+                                  setError("");
+                                }, 3000);
+                                return;
+                              }
+                              const newComments = await fetchComments(
+                                post.id_post,
+                                profile.id_profile
+                              );
+                              setComments(newComments);
+                            }}
+                          >
+                            Kommentieren
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col w-full">
+                        <h1 className="text text-muted text-base font-bold">
+                          Du kannst noch keine Kommentare erfassen, da dein
+                          Profil noch nicht verifiziert ist!
+                        </h1>
+                      </div>
+                    )}
+                  </>
                 )}
                 {comments.length == 0 && (
                   <div className="flex flex-col items-center w-full">

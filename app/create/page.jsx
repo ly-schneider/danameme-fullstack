@@ -201,121 +201,135 @@ export default function CreatePostPage() {
               </p>
             </div>
           ) : (
-            <div className="mx-12 sm:mx-20 mt-8">
-              <div className="flex items-center">
-                <img
-                  src={profile.profileimage}
-                  className="w-16 h-16 rounded-full me-4 object-cover border-[3px] border-accent"
-                />
-                <h1 className="title font-bold">{profile.username}</h1>
-              </div>
-              <form onSubmit={(e) => handleSubmit(e)} className="mt-8">
-                <div>
-                  <label
-                    className={
-                      "text text-sm ms-1.5 px-3 py-1 rounded-t-form" +
-                      (errorTitle != ""
-                        ? " bg-error opacity-50"
-                        : " bg-primary ")
-                    }
-                    htmlFor="titel"
-                  >
-                    Titel
-                  </label>
-                  {errorTitle != "" && (
-                    <div className="bg-error font-bold rounded-t-div px-3 py-2 text-text text text-sm">
-                      {errorTitle}
-                    </div>
-                  )}
-                  <input
-                    className={
-                      "input w-full" +
-                      (errorTitle != ""
-                        ? " border-error rounded-b-form rounded-t-none"
-                        : "")
-                    }
-                    type="text"
-                    id="titel"
-                    autoComplete="off"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
+            <>
+              {profile.confirmed == false ? (
+                <div className="flex flex-col items-center w-full mt-8">
+                  <h1 className="title text-center text-lg font-extrabold text-text">
+                    Du kannst noch nichts posten! Bitte warte bis dein Profil
+                    verifiziert wurde.
+                  </h1>
                 </div>
-                <div className="mt-5">
-                  <label
-                    className={
-                      "text text-sm ms-1.5 px-3 py-1 rounded-t-form" +
-                      (errorText != ""
-                        ? " bg-error opacity-50"
-                        : " bg-primary ")
-                    }
-                    htmlFor="text"
-                  >
-                    Text
-                  </label>
-                  {errorText != "" && (
-                    <div className="bg-error font-bold rounded-t-div px-3 py-2 text-text text text-sm">
-                      {errorText}
-                    </div>
-                  )}
-                  <textarea
-                    className={
-                      "min-h-[45px] input w-full" +
-                      (errorText != ""
-                        ? " border-error rounded-b-form rounded-t-none"
-                        : "")
-                    }
-                    rows={5}
-                    id="text"
-                    type="text"
-                    autoComplete="off"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                  />
-                </div>
-                <div className="flex justify-between mt-5">
-                  <div className="flex flex-row items-center">
-                    <label
-                      htmlFor="fileInput"
-                      className="inline-block cursor-pointer px-5 py-2 btn-secondary text-sm"
-                    >
-                      <FontAwesomeIcon
-                        icon={faPlusSquare}
-                        className="h-3 w-3 me-1 mb-[1px]"
-                      />
-                      {file ? "Bild ändern" : "Bild hinzufügen"}
+              ) : (
+                <div className="mx-12 sm:mx-20 mt-8">
+                  <div className="flex items-center">
+                    <img
+                      src={profile.profileimage}
+                      className="w-16 h-16 rounded-full me-4 object-cover border-[3px] border-accent"
+                    />
+                    <h1 className="title font-bold">{profile.username}</h1>
+                  </div>
+                  <form onSubmit={(e) => handleSubmit(e)} className="mt-8">
+                    <div>
+                      <label
+                        className={
+                          "text text-sm ms-1.5 px-3 py-1 rounded-t-form" +
+                          (errorTitle != ""
+                            ? " bg-error opacity-50"
+                            : " bg-primary ")
+                        }
+                        htmlFor="titel"
+                      >
+                        Titel
+                      </label>
+                      {errorTitle != "" && (
+                        <div className="bg-error font-bold rounded-t-div px-3 py-2 text-text text text-sm">
+                          {errorTitle}
+                        </div>
+                      )}
                       <input
-                        type="file"
-                        id="fileInput"
-                        onChange={handleFileChange}
-                        style={{ display: "none" }}
+                        className={
+                          "input w-full" +
+                          (errorTitle != ""
+                            ? " border-error rounded-b-form rounded-t-none"
+                            : "")
+                        }
+                        type="text"
+                        id="titel"
+                        autoComplete="off"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
                       />
-                    </label>
-                  </div>
-                  <button className="btn-primary text text-sm" type="submit">
-                    {loading ? (
-                      <FontAwesomeIcon icon={faSpinner} spin />
-                    ) : (
-                      "Post"
+                    </div>
+                    <div className="mt-5">
+                      <label
+                        className={
+                          "text text-sm ms-1.5 px-3 py-1 rounded-t-form" +
+                          (errorText != ""
+                            ? " bg-error opacity-50"
+                            : " bg-primary ")
+                        }
+                        htmlFor="text"
+                      >
+                        Text
+                      </label>
+                      {errorText != "" && (
+                        <div className="bg-error font-bold rounded-t-div px-3 py-2 text-text text text-sm">
+                          {errorText}
+                        </div>
+                      )}
+                      <textarea
+                        className={
+                          "min-h-[45px] input w-full" +
+                          (errorText != ""
+                            ? " border-error rounded-b-form rounded-t-none"
+                            : "")
+                        }
+                        rows={5}
+                        id="text"
+                        type="text"
+                        autoComplete="off"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-5">
+                      <div className="flex flex-row items-center">
+                        <label
+                          htmlFor="fileInput"
+                          className="inline-block cursor-pointer px-5 py-2 btn-secondary text-sm"
+                        >
+                          <FontAwesomeIcon
+                            icon={faPlusSquare}
+                            className="h-3 w-3 me-1 mb-[1px]"
+                          />
+                          {file ? "Bild ändern" : "Bild hinzufügen"}
+                          <input
+                            type="file"
+                            id="fileInput"
+                            onChange={handleFileChange}
+                            style={{ display: "none" }}
+                          />
+                        </label>
+                      </div>
+                      <button
+                        className="btn-primary text text-sm"
+                        type="submit"
+                      >
+                        {loading ? (
+                          <FontAwesomeIcon icon={faSpinner} spin />
+                        ) : (
+                          "Post"
+                        )}
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs text" id="fileName">
+                      {file ? file.name : ""}
+                    </p>
+                    {errorImage != "" && (
+                      <div className="bg-error font-bold mt-5 rounded-div px-3 py-2 text-text text text-sm">
+                        {errorImage}
+                      </div>
                     )}
-                  </button>
+                    <div className="mt-5">
+                      <img
+                        className="rounded-image"
+                        src={file ? URL.createObjectURL(file) : ""}
+                      />
+                    </div>
+                  </form>
                 </div>
-                <p className="mt-2 text-xs text" id="fileName">
-                  {file ? file.name : ""}
-                </p>
-                {errorImage != "" && (
-                  <div className="bg-error font-bold mt-5 rounded-div px-3 py-2 text-text text text-sm">
-                    {errorImage}
-                  </div>
-                )}
-                <div className="mt-5">
-                  <img
-                    className="rounded-image"
-                    src={file ? URL.createObjectURL(file) : ""}
-                  />
-                </div>
-              </form>
-            </div>
+              )}
+            </>
           )}
         </>
       )}
