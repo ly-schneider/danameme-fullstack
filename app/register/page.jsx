@@ -4,6 +4,7 @@ import Fifth from "@/components/register/fifth";
 import First from "@/components/register/first";
 import Fourth from "@/components/register/fourth";
 import Second from "@/components/register/second";
+import Sixth from "@/components/register/sixth";
 import Third from "@/components/register/third";
 import { useState } from "react";
 
@@ -60,6 +61,15 @@ export default function RegisterPage() {
       case 5:
         return (
           <Fifth
+            formData={formData}
+            setFormData={setFormData}
+            page={page}
+            setPage={setPage}
+          />
+        );
+      case 6:
+        return (
+          <Sixth
             formData={formData}
             setFormData={setFormData}
             page={page}

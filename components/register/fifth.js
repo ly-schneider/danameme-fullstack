@@ -122,11 +122,12 @@ export default function Fifth({ formData, setFormData, page, setPage }) {
     });
 
     if (error) {
-      setError("Es gab einen Fehler bei der Anmeldung!");
+      setError("Es gab einen Fehler bei der Anmeldung! " + error.message);
+      console.log(error);
       return false;
     }
 
-    location.href = "/";
+    setPage(6);
   }
 
   return (
