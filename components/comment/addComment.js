@@ -38,5 +38,36 @@ export async function addComment(profileIdPost, postId, text, profileId) {
     return;
   }
 
+  const regex = /@([a-zA-Z0-9_]+)/g;
+  const matches = text.match(regex);
+
+  if (matches) {
+    const usernames = matches.map((match) => match.replace("@", ""));
+
+    usernames.forEach(async (username) => {
+      const { data: profileData } = await supabase
+        .from("profile")
+        .select("id_profile")
+        .eq("username", username);
+
+      if (profileData.length > 0) {
+        const { error: createNotificationError } = await supabase
+          .from("notification")
+          .insert({
+            toprofile_id: profileData[0].id_profile,
+            fromprofile_id: profileId,
+            text: "hat dich in einem Kommentar erwähnt",
+            seen: false,
+            comment_id: commentId[0].id_comment,
+          });
+
+        if (createNotificationError) {
+          console.log(createNotificationError);
+          return;
+        }
+      }
+    });
+  }
+
   return true;
 }

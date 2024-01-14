@@ -48,6 +48,7 @@ export default function Home() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const [profileId, setProfileId] = useState(null);
+  const [profileConfirmed, setProfileConfirmed] = useState(false);
   const [success, setSuccess] = useState("");
 
   const [banned, setBanned] = useState(false);
@@ -64,6 +65,7 @@ export default function Home() {
           const profile = await getProfile(account.id_account);
           if (profile) {
             setProfileId(profile.id_profile);
+            setProfileConfirmed(profile.confirmed);
             const banData = await checkBan(account.id_account);
             let banCond = false;
             if (banData.length > 0) {
@@ -261,10 +263,12 @@ export default function Home() {
             <div className="w-full mt-3">
               <Link href={`/post/${generateTitle(post)}`}>
                 <h1 className="title text-2xl font-bold">{post.title}</h1>
-                {post.content && (
-                  <p className="text text-base whitespace-pre-line">
-                    {post.content && renderContent(post.content)}
-                  </p>
+                {post.content ? (
+                  <div
+                    dangerouslySetInnerHTML={renderContent(post.content)}
+                  ></div>
+                ) : (
+                  <></>
                 )}
               </Link>
             </div>
@@ -289,7 +293,12 @@ export default function Home() {
                           : mdiArrowUpBoldOutline
                       }
                       size={1.22}
-                      className="text text-2xl hover:cursor-pointer"
+                      className={
+                        "text text-2xl hover:cursor-pointer" +
+                        (profileConfirmed
+                          ? ""
+                          : " text-muted pointer-events-none")
+                      }
                       onClick={async () => {
                         await handleVote(post.id_post, true, profileId);
                         const newPosts = await fetchPosts(profileId);
@@ -306,7 +315,12 @@ export default function Home() {
                           : mdiArrowDownBoldOutline
                       }
                       size={1.22}
-                      className="text text-2xl hover:cursor-pointer"
+                      className={
+                        "text text-2xl hover:cursor-pointer" +
+                        (profileConfirmed
+                          ? ""
+                          : " text-muted pointer-events-none")
+                      }
                       onClick={async () => {
                         await handleVote(post.id_post, false, profileId);
                         const newPosts = await fetchPosts(profileId);

@@ -45,6 +45,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { calcTime } from "@/components/other/calcTime";
 import renderContent from "@/components/post/renderContent";
+import renderContentComment from "@/components/comment/renderContent";
 
 export default function PostPage({ params }) {
   const router = useRouter();
@@ -55,6 +56,7 @@ export default function PostPage({ params }) {
   const [profile, setProfile] = useState(null);
 
   const [commentText, setCommentText] = useState("");
+  const [taggingRecommandations, setTaggingRecommandations] = useState([]);
 
   const [success, setSuccess] = useState("");
 
@@ -192,6 +194,57 @@ export default function PostPage({ params }) {
     return checkRated[0];
   }
 
+  useEffect(() => {
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = commentText.match(regex);
+
+    if (matches) {
+      const usernames = matches.map((match) => match.replace("@", ""));
+
+      usernames.forEach(async (username) => {
+        const { data: profile } = await supabase
+          .from("profile")
+          .select("username, profileimage")
+          .like("username", `${username}%`);
+
+        if (profile.length > 0) {
+          if (username == profile[0].username) {
+            setTaggingRecommandations([]);
+            return;
+          }
+          profile.forEach((profile) => {
+            if (
+              !taggingRecommandations.some(
+                (existingProfile) =>
+                  existingProfile.username === profile.username
+              )
+            ) {
+              setTaggingRecommandations((oldArray) => [...oldArray, profile]);
+            }
+          });
+        }
+      });
+    } else {
+      setTaggingRecommandations([]);
+    }
+  }, [commentText]);
+
+  async function completeTagging(tag) {
+    // Replaces uncompleted username with completed username
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = commentText.match(regex);
+
+    let modifiedText = commentText;
+    matches.forEach((match) => {
+      if (tag.username.includes(match.replace("@", ""))) {
+        modifiedText = modifiedText.replace(match, "@" + tag.username + " ");
+      }
+    });
+
+    setCommentText(modifiedText);
+    setTaggingRecommandations([]);
+  }
+
   async function handleRatingPost() {
     const post = await fetchPost(profile.id_profile);
     setPost(post);
@@ -226,7 +279,8 @@ export default function PostPage({ params }) {
     .subscribe();
 
   function ReplyForm({ onReplySubmit }) {
-    const [replyText, setReplyText] = useState();
+    const [replyText, setReplyText] = useState("");
+    const [taggingRecommandations, setTaggingRecommandations] = useState([]);
 
     const handleInputChange = (e) => {
       setReplyText(e.target.value);
@@ -241,6 +295,57 @@ export default function PostPage({ params }) {
       onReplySubmit(false);
     };
 
+    useEffect(() => {
+      const regex = /@([a-zA-Z0-9_]+)/g;
+      const matches = replyText.match(regex);
+
+      if (matches) {
+        const usernames = matches.map((match) => match.replace("@", ""));
+
+        usernames.forEach(async (username) => {
+          const { data: profile } = await supabase
+            .from("profile")
+            .select("username, profileimage")
+            .like("username", `${username}%`);
+
+          if (profile.length > 0) {
+            if (username == profile[0].username) {
+              setTaggingRecommandations([]);
+              return;
+            }
+            profile.forEach((profile) => {
+              if (
+                !taggingRecommandations.some(
+                  (existingProfile) =>
+                    existingProfile.username === profile.username
+                )
+              ) {
+                setTaggingRecommandations((oldArray) => [...oldArray, profile]);
+              }
+            });
+          }
+        });
+      } else {
+        setTaggingRecommandations([]);
+      }
+    }, [replyText]);
+
+    async function completeTagging(tag) {
+      // Replaces uncompleted username with completed username
+      const regex = /@([a-zA-Z0-9_]+)/g;
+      const matches = replyText.match(regex);
+
+      let modifiedText = replyText;
+      matches.forEach((match) => {
+        if (tag.username.includes(match.replace("@", ""))) {
+          modifiedText = modifiedText.replace(match, "@" + tag.username + " ");
+        }
+      });
+
+      setReplyText(modifiedText);
+      setTaggingRecommandations([]);
+    }
+
     return (
       <div className="ms-14 mt-6">
         <div className="flex items-center">
@@ -254,8 +359,26 @@ export default function PostPage({ params }) {
           <textarea
             className="min-h-[45px] max-h-[200px] w-full h-24 mt-2 bg-background border-primary border-[3px] input"
             onChange={handleInputChange}
+            value={replyText}
           />
-          <div className="flex items-center flex-row w-full justify-between mt-3">
+          {taggingRecommandations.length > 0 && (
+            <div className="flex justify-start mt-3 gap-4 flex-wrap">
+              {taggingRecommandations.map((tag) => (
+                <div
+                  className="flex flex-row items-center hover:cursor-pointer"
+                  key={tag.username}
+                  onClick={() => completeTagging(tag)}
+                >
+                  <img
+                    src={tag.profileimage}
+                    className="w-7 h-7 rounded-full me-2 object-cover"
+                  />
+                  <p className="text text-sm text-text">{tag.username}</p>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex items-center flex-row w-full justify-between mt-4">
             <button className="btn-secondary" onClick={handleCancel}>
               Abbrechen
             </button>
@@ -433,7 +556,9 @@ export default function PostPage({ params }) {
           </div>
         ) : (
           <>
-            <p className="text ms-14 whitespace-pre-line">{comment.text}</p>
+            <div
+              dangerouslySetInnerHTML={renderContentComment(comment.text)}
+            ></div>
             <div className="flex items-center flex-row w-full mt-3 space-x-2 ms-14">
               <div className="flex items-center">
                 <div className="flex flex-row items-center">
@@ -444,7 +569,12 @@ export default function PostPage({ params }) {
                         : mdiArrowUpBoldOutline
                     }
                     size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
+                    className={
+                      "text text-2xl hover:cursor-pointer" +
+                      (profile.confirmed
+                        ? ""
+                        : " text-muted pointer-events-none")
+                    }
                     onClick={async () => {
                       await handleCommentVote(
                         comment.id_comment,
@@ -468,7 +598,12 @@ export default function PostPage({ params }) {
                         : mdiArrowDownBoldOutline
                     }
                     size={1.22}
-                    className="text text-2xl hover:cursor-pointer"
+                    className={
+                      "text text-2xl hover:cursor-pointer" +
+                      (profile.confirmed
+                        ? ""
+                        : " text-muted pointer-events-none")
+                    }
                     onClick={async () => {
                       await handleCommentVote(
                         comment.id_comment,
@@ -487,8 +622,8 @@ export default function PostPage({ params }) {
               </div>
               <div
                 className={
-                  (commentBanned
-                    ? "pointer-events-none"
+                  (commentBanned || !profile.confirmed
+                    ? "pointer-events-none text-muted"
                     : "hover:cursor-pointer") + " flex items-center"
                 }
                 onClick={handleToggleReplyForm}
@@ -624,7 +759,13 @@ export default function PostPage({ params }) {
             </div>
             <div className="w-full mt-3">
               <h1 className="title text-2xl font-bold">{post.title}</h1>
-              {post.content && renderContent(post.content)}
+              {post.content ? (
+                <div
+                  dangerouslySetInnerHTML={renderContent(post.content)}
+                ></div>
+              ) : (
+                <></>
+              )}
             </div>
             {post.asset && (
               <div className="w-full mt-3">
@@ -642,7 +783,12 @@ export default function PostPage({ params }) {
                           : mdiArrowUpBoldOutline
                       }
                       size={1.22}
-                      className="text text-2xl hover:cursor-pointer"
+                      className={
+                        "text text-2xl hover:cursor-pointer" +
+                        (profile.confirmed
+                          ? ""
+                          : " text-muted pointer-events-none")
+                      }
                       onClick={async () => {
                         await handleVote(
                           post.id_post,
@@ -663,7 +809,12 @@ export default function PostPage({ params }) {
                           : mdiArrowDownBoldOutline
                       }
                       size={1.22}
-                      className="text text-2xl hover:cursor-pointer"
+                      className={
+                        "text text-2xl hover:cursor-pointer" +
+                        (profile.confirmed
+                          ? ""
+                          : " text-muted pointer-events-none")
+                      }
                       onClick={async () => {
                         await handleVote(
                           post.id_post,
@@ -721,49 +872,81 @@ export default function PostPage({ params }) {
                     </p>
                   </div>
                 ) : (
-                  <div className="">
-                    <p className="text text-muted">
-                      Kommentiere als{" "}
-                      <span className="text-accent">{profile.username}</span>
-                    </p>
-                    <textarea
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                      className="min-h-[45px] max-h-[200px] w-full h-24 mt-2 bg-background border-primary border-[3px] input"
-                    />
-                    <div className="flex items-center flex-row w-full justify-end mt-3">
-                      <button
-                        className={
-                          commentText.length > 0
-                            ? "btn-primary border-[3px] border-primary"
-                            : "btn-secondary text-muted"
-                        }
-                        onClick={async () => {
-                          const status = await addComment(
-                            post.profile_id,
-                            post.id_post,
-                            commentText,
-                            profile.id_profile
-                          );
-                          setCommentText("");
-                          if (!status) {
-                            setError("Ein Fehler ist aufgetreten!");
-                            setTimeout(() => {
-                              setError("");
-                            }, 3000);
-                            return;
-                          }
-                          const newComments = await fetchComments(
-                            post.id_post,
-                            profile.id_profile
-                          );
-                          setComments(newComments);
-                        }}
-                      >
-                        Kommentieren
-                      </button>
-                    </div>
-                  </div>
+                  <>
+                    {profile.confirmed ? (
+                      <div className="">
+                        <p className="text text-muted">
+                          Kommentiere als{" "}
+                          <span className="text-accent">
+                            {profile.username}
+                          </span>
+                        </p>
+                        <textarea
+                          value={commentText}
+                          onChange={(e) => setCommentText(e.target.value)}
+                          className="min-h-[45px] max-h-[200px] w-full h-24 mt-2 bg-background border-primary border-[3px] input"
+                        />
+                        {taggingRecommandations.length > 0 && (
+                          <div className="flex justify-start mt-3 gap-4 flex-wrap">
+                            {taggingRecommandations.map((tag) => (
+                              <div
+                                className="flex flex-row items-center hover:cursor-pointer"
+                                key={tag.username}
+                                onClick={() => completeTagging(tag)}
+                              >
+                                <img
+                                  src={tag.profileimage}
+                                  className="w-7 h-7 rounded-full me-2 object-cover"
+                                />
+                                <p className="text text-sm text-text">
+                                  {tag.username}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="flex items-center flex-row w-full justify-end mt-3">
+                          <button
+                            className={
+                              commentText.length > 0
+                                ? "btn-primary border-[3px] border-primary"
+                                : "btn-secondary text-muted"
+                            }
+                            onClick={async () => {
+                              const status = await addComment(
+                                post.profile_id,
+                                post.id_post,
+                                commentText,
+                                profile.id_profile
+                              );
+                              setCommentText("");
+                              if (!status) {
+                                setError("Ein Fehler ist aufgetreten!");
+                                setTimeout(() => {
+                                  setError("");
+                                }, 3000);
+                                return;
+                              }
+                              const newComments = await fetchComments(
+                                post.id_post,
+                                profile.id_profile
+                              );
+                              setComments(newComments);
+                            }}
+                          >
+                            Kommentieren
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col w-full">
+                        <h1 className="text text-muted text-base font-bold">
+                          Du kannst noch keine Kommentare erfassen, da dein
+                          Profil noch nicht verifiziert ist!
+                        </h1>
+                      </div>
+                    )}
+                  </>
                 )}
                 {comments.length == 0 && (
                   <div className="flex flex-col items-center w-full">

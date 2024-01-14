@@ -352,6 +352,9 @@ export default function ProfilePage({ params }) {
               <h1 className="text-text font-bold text-3xl font-poppins ms-4">
                 {profile.username}
               </h1>
+              <span className="ms-3 text-muted text">
+                {!profileSession.confirmed && <>(Unverifiziert)</>}
+              </span>
             </div>
             {profileSession.id_profile != profile.id_profile && (
               <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
@@ -524,7 +527,13 @@ export default function ProfilePage({ params }) {
                 <div className="w-full mt-3">
                   <Link href={`/post/${generateTitle(post)}`}>
                     <h1 className="title text-2xl font-bold">{post.title}</h1>
-                    {post.content && renderContent(post.content)}
+                    {post.content ? (
+                      <div
+                        dangerouslySetInnerHTML={renderContent(post.content)}
+                      ></div>
+                    ) : (
+                      <></>
+                    )}
                   </Link>
                 </div>
                 {post.asset && (
@@ -543,7 +552,12 @@ export default function ProfilePage({ params }) {
                               : mdiArrowUpBoldOutline
                           }
                           size={1.22}
-                          className="text text-2xl hover:cursor-pointer"
+                          className={
+                            "text text-2xl hover:cursor-pointer" +
+                            (profileSession.confirmed
+                              ? ""
+                              : " pointer-events-none text-muted")
+                          }
                           onClick={async () => {
                             await handleVote(
                               post.id_post,
@@ -567,7 +581,12 @@ export default function ProfilePage({ params }) {
                               : mdiArrowDownBoldOutline
                           }
                           size={1.22}
-                          className="text text-2xl hover:cursor-pointer"
+                          className={
+                            "text text-2xl hover:cursor-pointer" +
+                            (profileSession.confirmed
+                              ? ""
+                              : " pointer-events-none text-muted")
+                          }
                           onClick={async () => {
                             await handleVote(
                               post.id_post,

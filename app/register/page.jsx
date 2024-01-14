@@ -4,6 +4,7 @@ import Fifth from "@/components/register/fifth";
 import First from "@/components/register/first";
 import Fourth from "@/components/register/fourth";
 import Second from "@/components/register/second";
+import Sixth from "@/components/register/sixth";
 import Third from "@/components/register/third";
 import { useState } from "react";
 
@@ -66,6 +67,15 @@ export default function RegisterPage() {
             setPage={setPage}
           />
         );
+      case 6:
+        return (
+          <Sixth
+            formData={formData}
+            setFormData={setFormData}
+            page={page}
+            setPage={setPage}
+          />
+        );
       default:
         return (
           <First
@@ -81,10 +91,7 @@ export default function RegisterPage() {
   return (
     <div className="mx-12 sm:mx-20 mt-8">
       <h1 className="title text-center font-bold">Registrierung</h1>
-      {/* {conditionalComponent()} */}
-      <div className="flex flex-col items-center w-full mt-8">
-        <h1 className="title font-extrabold text-error text-center">Die Registrierung ist temporär abgeschaltet</h1>
-      </div>
+      {conditionalComponent()}
     </div>
   );
 }
