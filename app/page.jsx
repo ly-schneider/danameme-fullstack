@@ -263,10 +263,12 @@ export default function Home() {
             <div className="w-full mt-3">
               <Link href={`/post/${generateTitle(post)}`}>
                 <h1 className="title text-2xl font-bold">{post.title}</h1>
-                {post.content && (
-                  <p className="text text-base whitespace-pre-line">
-                    {post.content && renderContent(post.content)}
-                  </p>
+                {post.content ? (
+                  <div
+                    dangerouslySetInnerHTML={renderContent(post.content)}
+                  ></div>
+                ) : (
+                  <></>
                 )}
               </Link>
             </div>

@@ -27,6 +27,8 @@ export default function EditPost({ params }) {
   const [file, setFile] = useState("");
   const [errorImage, setErrorImage] = useState("");
 
+  const [taggingRecommandations, setTaggingRecommandations] = useState([]);
+
   useEffect(() => {
     async function getData() {
       const session = await getSession();
@@ -91,6 +93,57 @@ export default function EditPost({ params }) {
     }
 
     return postsData[0];
+  }
+
+  useEffect(() => {
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = text.match(regex);
+
+    if (matches) {
+      const usernames = matches.map((match) => match.replace("@", ""));
+
+      usernames.forEach(async (username) => {
+        const { data: profile } = await supabase
+          .from("profile")
+          .select("username, profileimage")
+          .like("username", `${username}%`);
+
+        if (profile.length > 0) {
+          if (username == profile[0].username) {
+            setTaggingRecommandations([]);
+            return;
+          }
+          profile.forEach((profile) => {
+            if (
+              !taggingRecommandations.some(
+                (existingProfile) =>
+                  existingProfile.username === profile.username
+              )
+            ) {
+              setTaggingRecommandations((oldArray) => [...oldArray, profile]);
+            }
+          });
+        }
+      });
+    } else {
+      setTaggingRecommandations([]);
+    }
+  }, [text]);
+
+  async function completeTagging(tag) {
+    // Replaces uncompleted username with completed username
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = text.match(regex);
+
+    let modifiedText = text;
+    matches.forEach((match) => {
+      if (tag.username.includes(match.replace("@", ""))) {
+        modifiedText = modifiedText.replace(match, "@" + tag.username + " ");
+      }
+    });
+
+    setText(modifiedText);
+    setTaggingRecommandations([]);
   }
 
   const handleFileChange = (event) => {
@@ -182,6 +235,37 @@ export default function EditPost({ params }) {
       return;
     }
 
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = textInput.match(regex);
+
+    if (matches) {
+      const usernames = matches.map((match) => match.replace("@", ""));
+
+      usernames.forEach(async (username) => {
+        const { data: profileData } = await supabase
+          .from("profile")
+          .select("id_profile")
+          .eq("username", username);
+
+        if (profileData.length > 0) {
+          const { error: createNotificationError } = await supabase
+            .from("notification")
+            .insert({
+              toprofile_id: profileData[0].id_profile,
+              fromprofile_id: profile.id_profile,
+              text: "hat dich in einem Post erwähnt.",
+              seen: false,
+              post_id: postId,
+            });
+
+          if (createNotificationError) {
+            console.log(createNotificationError);
+            return;
+          }
+        }
+      });
+    }
+
     router.push("/");
   }
 
@@ -254,6 +338,23 @@ export default function EditPost({ params }) {
             onChange={(e) => setText(e.target.value)}
           />
         </div>
+        {taggingRecommandations.length > 0 && (
+          <div className="flex justify-start mt-3 gap-4 flex-wrap">
+            {taggingRecommandations.map((tag) => (
+              <div
+                className="flex flex-row items-center hover:cursor-pointer"
+                key={tag.username}
+                onClick={() => completeTagging(tag)}
+              >
+                <img
+                  src={tag.profileimage}
+                  className="w-7 h-7 rounded-full me-2 object-cover"
+                />
+                <p className="text text-sm text-text">{tag.username}</p>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex justify-between mt-5">
           <div className="flex flex-row items-center">
             <label

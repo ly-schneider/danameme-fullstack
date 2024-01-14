@@ -527,7 +527,13 @@ export default function ProfilePage({ params }) {
                 <div className="w-full mt-3">
                   <Link href={`/post/${generateTitle(post)}`}>
                     <h1 className="title text-2xl font-bold">{post.title}</h1>
-                    {post.content && renderContent(post.content)}
+                    {post.content ? (
+                      <div
+                        dangerouslySetInnerHTML={renderContent(post.content)}
+                      ></div>
+                    ) : (
+                      <></>
+                    )}
                   </Link>
                 </div>
                 {post.asset && (

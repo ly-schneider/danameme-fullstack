@@ -5,6 +5,7 @@ import { getAccount } from "@/components/auth/getAccount";
 import { getProfile } from "@/components/auth/getProfile";
 import { getSession } from "@/components/auth/getSession";
 import { calcTime } from "@/components/other/calcTime";
+import { generateTitle } from "@/components/post/generateTitle";
 import supabase from "@/components/supabase";
 import { faPlusSquare } from "@fortawesome/free-regular-svg-icons";
 import { faRotateRight, faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -33,6 +34,8 @@ export default function CreatePostPage() {
   const [banData, setBanData] = useState([]);
 
   const [loading, setLoading] = useState(false);
+
+  const [taggingRecommandations, setTaggingRecommandations] = useState([]);
 
   useEffect(() => {
     async function getData() {
@@ -73,6 +76,57 @@ export default function CreatePostPage() {
     }
   };
 
+  useEffect(() => {
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = text.match(regex);
+
+    if (matches) {
+      const usernames = matches.map((match) => match.replace("@", ""));
+
+      usernames.forEach(async (username) => {
+        const { data: profile } = await supabase
+          .from("profile")
+          .select("username, profileimage")
+          .like("username", `${username}%`);
+
+        if (profile.length > 0) {
+          if (username == profile[0].username) {
+            setTaggingRecommandations([]);
+            return;
+          }
+          profile.forEach((profile) => {
+            if (
+              !taggingRecommandations.some(
+                (existingProfile) =>
+                  existingProfile.username === profile.username
+              )
+            ) {
+              setTaggingRecommandations((oldArray) => [...oldArray, profile]);
+            }
+          });
+        }
+      });
+    } else {
+      setTaggingRecommandations([]);
+    }
+  }, [text]);
+
+  async function completeTagging(tag) {
+    // Replaces uncompleted username with completed username
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = text.match(regex);
+
+    let modifiedText = text;
+    matches.forEach((match) => {
+      if (tag.username.includes(match.replace("@", ""))) {
+        modifiedText = modifiedText.replace(match, "@" + tag.username + " ");
+      }
+    });
+
+    setText(modifiedText);
+    setTaggingRecommandations([]);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
@@ -92,6 +146,7 @@ export default function CreatePostPage() {
       return false;
     }
 
+    let url = { publicUrl: null };
     if (file) {
       const img = new Image();
       img.src = URL.createObjectURL(file);
@@ -143,27 +198,76 @@ export default function CreatePostPage() {
           }
           return;
         }
-
-        const { data: url } = supabase.storage
-          .from("post-images")
-          .getPublicUrl(profile.username + "-" + file.name);
-
-        const { error: createPostError } = await supabase.from("post").insert({
-          title: titleInput,
-          content: textInput,
-          profile_id: profile.id_profile,
-          asset: url.publicUrl,
-        });
-
-        if (createPostError) {
-          console.log(createPostError);
-          setErrorImage("Beim erstellen des Posts ist ein Fehler aufgetreten.");
-          return;
-        }
-
-        router.push("/");
       }
+
+      const { data: urlData } = supabase.storage
+        .from("post-images")
+        .getPublicUrl(profile.username + "-" + file.name);
+
+      if (url == null) {
+        setErrorImage("Beim Hochladen des Bildes ist ein Fehler aufgetreten.");
+        return;
+      }
+
+      url.publicUrl = urlData.publicUrl;
     }
+
+    const { error: createPostError } = await supabase.from("post").insert({
+      title: titleInput,
+      content: textInput,
+      profile_id: profile.id_profile,
+      asset: url.publicUrl,
+    });
+
+    if (createPostError) {
+      console.log(createPostError);
+      setErrorImage("Beim erstellen des Posts ist ein Fehler aufgetreten.");
+      return;
+    }
+
+    const regex = /@([a-zA-Z0-9_]+)/g;
+    const matches = textInput.match(regex);
+
+    if (matches) {
+      const usernames = matches.map((match) => match.replace("@", ""));
+
+      usernames.forEach(async (username) => {
+        const { data: profileData } = await supabase
+          .from("profile")
+          .select("id_profile")
+          .eq("username", username);
+
+        if (profileData.length > 0) {
+          const { error: createNotificationError } = await supabase
+            .from("notification")
+            .insert({
+              toprofile_id: profileData[0].id_profile,
+              fromprofile_id: profile.id_profile,
+              text: "hat dich in einem Post erwähnt",
+              seen: false,
+            });
+
+          if (createNotificationError) {
+            console.log(createNotificationError);
+            return;
+          }
+        }
+      });
+    }
+
+    const { data: latestPost, error: latestPostError } = await supabase
+      .from("post")
+      .select("*")
+      .order("createdat", { ascending: false })
+      .limit(1);
+
+    if (latestPostError) {
+      console.log(latestPostError);
+      router.push("/");
+      return;
+    }
+
+    router.push("/post/post-" + latestPost[0].id_post);
   }
 
   return (
@@ -282,6 +386,25 @@ export default function CreatePostPage() {
                         onChange={(e) => setText(e.target.value)}
                       />
                     </div>
+                    {taggingRecommandations.length > 0 && (
+                      <div className="flex justify-start mt-3 gap-4 flex-wrap">
+                        {taggingRecommandations.map((tag) => (
+                          <div
+                            className="flex flex-row items-center hover:cursor-pointer"
+                            key={tag.username}
+                            onClick={() => completeTagging(tag)}
+                          >
+                            <img
+                              src={tag.profileimage}
+                              className="w-7 h-7 rounded-full me-2 object-cover"
+                            />
+                            <p className="text text-sm text-text">
+                              {tag.username}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex justify-between mt-5">
                       <div className="flex flex-row items-center">
                         <label

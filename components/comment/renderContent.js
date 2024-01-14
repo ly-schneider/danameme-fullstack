@@ -1,4 +1,4 @@
-export default function renderContent(text) {
+export default function renderContentComment(text) {
   const linkRegex = /(https?:\/\/[^\s]+)/g;
   const mentionRegex = /@([^\s]+)/g;
 
@@ -11,7 +11,7 @@ export default function renderContent(text) {
     '<a href="/p/$1" class="font-bold" target="_blank">@$1</a>'
   );
 
-  const finalHTML = `<p class="text text-base whitespace-pre-line">${textWithMentions}</p>`;
+  const finalHTML = `<p class="text ms-14 whitespace-pre-line">${textWithMentions}</p>`;
 
   // Use dangerouslySetInnerHTML to render HTML content in React (use with caution)
   return { __html: finalHTML };
