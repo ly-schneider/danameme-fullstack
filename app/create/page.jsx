@@ -226,7 +226,8 @@ export default function CreatePostPage() {
     }
 
     const regex = /@([a-zA-Z0-9_]+)/g;
-    const matches = textInput.match(regex);
+    let matches = [];
+    if (textInput) matches = textInput.match(regex);
 
     if (matches) {
       const usernames = matches.map((match) => match.replace("@", ""));
@@ -260,6 +261,33 @@ export default function CreatePostPage() {
       .select("*")
       .order("createdat", { ascending: false })
       .limit(1);
+
+    const { data: followers, error: followersError } = await supabase
+      .from("follower")
+      .select("follower_id")
+      .eq("profile_id", profile.id_profile);
+
+    if (followersError) {
+      console.log(followersError);
+      return;
+    }
+
+    followers.forEach(async (follower) => {
+      const { error: createNotificationError } = await supabase
+        .from("notification")
+        .insert({
+          toprofile_id: follower.follower_id,
+          fromprofile_id: profile.id_profile,
+          text: "hat einen neuen Post erstellt",
+          seen: false,
+          post_id: latestPost[0].id_post,
+        });
+
+      if (createNotificationError) {
+        console.log(createNotificationError);
+        return;
+      }
+    });
 
     if (latestPostError) {
       console.log(latestPostError);
