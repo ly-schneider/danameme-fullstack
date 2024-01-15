@@ -129,7 +129,7 @@ export default function ProfilePage({ params }) {
     const { data, error } = await supabase
       .from("profile")
       .select(
-        "karma, profileimage, biography, userCount, username, id_profile, account_id"
+        "karma, profileimage, biography, userCount, username, confirmed, id_profile, account_id"
       )
       .eq("username", params.profile)
       .single();
@@ -385,7 +385,7 @@ export default function ProfilePage({ params }) {
                 {profile.username}
               </h1>
               <span className="ms-3 text-muted text">
-                {!profileSession.confirmed && <>(Unverifiziert)</>}
+                {profile.confirmed != true && <>(Unverifiziert)</>}
               </span>
             </div>
             {profileSession.id_profile != profile.id_profile && (
@@ -428,40 +428,43 @@ export default function ProfilePage({ params }) {
               <p className="text-muted text text-sm">Beigetreten {joined}</p>
             </div>
           )}
-          <div className="flex items-center w-full space-x-3">
-            <div className="flex items-center mt-1">
+          <div className="flex items-center w-full space-x-3 mt-2">
+            <div className="flex items-center">
               <h1 className="title font-semibold text-lg">
                 {profile.followingCount} Follower
               </h1>
-              <button
-                className="btn-secondary text text-xs font-semibold ms-3 hover:bg-primary transition-all duration-300"
-                onClick={async () => {
-                  setLoadingFollow(true);
-                  const status = await followProfile(
-                    profile.id_profile,
-                    profileSession.id_profile,
-                    profile.following
-                  );
-                  if (status == true) {
-                    const profile = await getUserProfile(
-                      profileSession.id_profile
-                    );
-                    setProfile(profile);
-                    setLoadingFollow(false);
-                  } else {
-                    setLoadingFollow(false);
-                  }
-                }}
-              >
-                {loadingFollow ? (
-                  <FontAwesomeIcon icon={faSpinner} spin />
-                ) : (
-                  <>{profile.following == true ? "Entfolgen" : "Folgen"}</>
+              {profileSession.id_profile != profile.id_profile &&
+                profile.confirmed == true && (
+                  <button
+                    className="btn-secondary text text-xs font-semibold ms-3 hover:bg-primary transition-all duration-300"
+                    onClick={async () => {
+                      setLoadingFollow(true);
+                      const status = await followProfile(
+                        profile.id_profile,
+                        profileSession.id_profile,
+                        profile.following
+                      );
+                      if (status == true) {
+                        const profile = await getUserProfile(
+                          profileSession.id_profile
+                        );
+                        setProfile(profile);
+                        setLoadingFollow(false);
+                      } else {
+                        setLoadingFollow(false);
+                      }
+                    }}
+                  >
+                    {loadingFollow ? (
+                      <FontAwesomeIcon icon={faSpinner} spin />
+                    ) : (
+                      <>{profile.following == true ? "Entfolgen" : "Folgen"}</>
+                    )}
+                  </button>
                 )}
-              </button>
             </div>
             {profile.username != "DANAMEME" && (
-              <div className="mt-1 flex items-center">
+              <div className="flex items-center">
                 <span className="text-white">&#x2022;</span>
                 <h1 className="title font-semibold text-lg ms-3">
                   {profile.karma} Karma
