@@ -1,6 +1,7 @@
 "use client";
 
 import { checkBan } from "@/components/auth/checkBan";
+import followProfile from "@/components/auth/followProfile";
 import { getAccount } from "@/components/auth/getAccount";
 import { getProfile } from "@/components/auth/getProfile";
 import { getSession } from "@/components/auth/getSession";
@@ -48,6 +49,8 @@ export default function ProfilePage({ params }) {
   const [badges, setBadges] = useState([]);
   const [posts, setPosts] = useState([]);
   const [joined, setJoined] = useState("");
+
+  const [loadingFollow, setLoadingFollow] = useState(false);
 
   const [success, setSuccess] = useState("");
 
@@ -97,7 +100,7 @@ export default function ProfilePage({ params }) {
         return false;
       }
 
-      const profile = await getUserProfile();
+      const profile = await getUserProfile(profileSession.id_profile);
       setProfile(profile);
 
       if (profile == false) {
@@ -122,7 +125,7 @@ export default function ProfilePage({ params }) {
     loadData();
   }, []);
 
-  async function getUserProfile() {
+  async function getUserProfile(profileSessionId) {
     const { data, error } = await supabase
       .from("profile")
       .select(
@@ -134,6 +137,35 @@ export default function ProfilePage({ params }) {
     if (error) {
       console.log(error);
       return false;
+    }
+
+    const { data: following, error: followingError } = await supabase
+      .from("follower")
+      .select("*")
+      .eq("profile_id", data.id_profile)
+      .eq("follower_id", profileSessionId);
+
+    if (followingError) {
+      console.log(followingError);
+      return false;
+    }
+
+    if (following.length == 0) {
+      data.following = false;
+    } else {
+      data.following = true;
+    }
+
+    const { data: followingCount, error: followingCountError } = await supabase
+      .from("follower")
+      .select("*")
+      .eq("profile_id", data.id_profile);
+
+    if (followingCountError) {
+      console.log(followingCountError);
+      return false;
+    } else {
+      data.followingCount = followingCount.length;
     }
 
     return data;
@@ -286,7 +318,7 @@ export default function ProfilePage({ params }) {
   }
 
   async function handleProfileUpdate() {
-    const profile = await getUserProfile();
+    const profile = await getUserProfile(profileSession.id_profile);
     setProfile(profile);
   }
 
@@ -392,17 +424,51 @@ export default function ProfilePage({ params }) {
             )}
           </div>
           {profile.username != "DANAMEME" && (
-            <>
-              <div className="w-full mt-3">
-                <p className="text-muted text text-sm">Beigetreten {joined}</p>
-              </div>
-              <div className="w-full mt-1">
-                <h1 className="title font-semibold text-lg">
+            <div className="w-full mt-3">
+              <p className="text-muted text text-sm">Beigetreten {joined}</p>
+            </div>
+          )}
+          <div className="flex items-center w-full space-x-3">
+            <div className="flex items-center mt-1">
+              <h1 className="title font-semibold text-lg">
+                {profile.followingCount} Follower
+              </h1>
+              <button
+                className="btn-secondary text text-xs font-semibold ms-3 hover:bg-primary transition-all duration-300"
+                onClick={async () => {
+                  setLoadingFollow(true);
+                  const status = await followProfile(
+                    profile.id_profile,
+                    profileSession.id_profile,
+                    profile.following
+                  );
+                  if (status == true) {
+                    const profile = await getUserProfile(
+                      profileSession.id_profile
+                    );
+                    setProfile(profile);
+                    setLoadingFollow(false);
+                  } else {
+                    setLoadingFollow(false);
+                  }
+                }}
+              >
+                {loadingFollow ? (
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                ) : (
+                  <>{profile.following == true ? "Entfolgen" : "Folgen"}</>
+                )}
+              </button>
+            </div>
+            {profile.username != "DANAMEME" && (
+              <div className="mt-1 flex items-center">
+                <span className="text-white">&#x2022;</span>
+                <h1 className="title font-semibold text-lg ms-3">
                   {profile.karma} Karma
                 </h1>
               </div>
-            </>
-          )}
+            )}
+          </div>
           <div className="flex flex-wrap gap-4 mt-3">
             {Object.keys(badges).map((badge) => {
               const item = badges[badge];
