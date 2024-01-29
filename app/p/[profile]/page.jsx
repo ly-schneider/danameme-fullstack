@@ -430,9 +430,12 @@ export default function ProfilePage({ params }) {
           )}
           <div className="flex items-center w-full space-x-3 mt-2">
             <div className="flex items-center">
-              <h1 className="title font-semibold text-lg">
+              <a
+                href={"/p/" + profile.username + "/follower"}
+                className="title font-semibold text-lg"
+              >
                 {profile.followingCount} Follower
-              </h1>
+              </a>
               {profileSession.id_profile != profile.id_profile &&
                 profile.confirmed == true && (
                   <button
