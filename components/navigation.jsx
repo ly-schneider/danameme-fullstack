@@ -11,6 +11,7 @@ import { getSession } from "./auth/getSession";
 import { getAccount } from "./auth/getAccount";
 import { getProfile } from "./auth/getProfile";
 import NotificationButton from "./buttons/notificationButton";
+import SearchButton from "./buttons/searchButton";
 
 export default function Navigation() {
   const router = useRouter();
@@ -55,6 +56,7 @@ export default function Navigation() {
         <div className="flex space-x-2 md:space-x-4">
           {profile.length != 0 && (
             <>
+              <SearchButton selected={pathname == "/search"} />
               <NotificationButton id_profile={profile.id_profile} />
               <AddPostButton selected={pathname == "/create"} />
             </>
