@@ -134,7 +134,7 @@ export default function FollowerPage({ params }) {
             </div>
           </div>
           <hr className="seperator mt-3" />
-          <div className="flex flex-col mt-4">
+          <div className="flex flex-col mt-4 space-y-4">
             {followers.map((user) => (
               <div key={user.id_profile}>
                 <Link href={`/p/${user.profile.username}`}>
@@ -153,7 +153,6 @@ export default function FollowerPage({ params }) {
                     </div>
                   </div>
                 </Link>
-                <hr className="border-muted border-opacity-20 mt-4" />
               </div>
             ))}
           </div>
