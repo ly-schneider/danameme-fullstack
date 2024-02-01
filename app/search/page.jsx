@@ -61,7 +61,6 @@ export default function NotificationPage() {
       return false;
     }
 
-    console.log(profiles)
     setProfiles(profiles);
   }
 
