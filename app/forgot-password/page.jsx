@@ -32,16 +32,11 @@ export default function ForgotPasswordPage() {
     if (!formError) {
       setWaiting(true);
 
-      let redirectUrl = window.location.hostname;
-      if (redirectUrl == "localhost") {
-        redirectUrl =
-          window.location.protocol +
-          "//" +
-          window.location.host +
-          "/update-password/";
-      } else {
-        redirectUrl = redirectUrl + "/update-password/";
-      }
+      let redirectUrl =
+        window.location.protocol +
+        "//" +
+        window.location.host +
+        "/update-password/";
 
       console.log(redirectUrl);
 
