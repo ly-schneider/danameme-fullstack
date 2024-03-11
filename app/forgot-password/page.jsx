@@ -38,8 +38,6 @@ export default function ForgotPasswordPage() {
         window.location.host +
         "/update-password/";
 
-      console.log(redirectUrl);
-
       const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
       });
