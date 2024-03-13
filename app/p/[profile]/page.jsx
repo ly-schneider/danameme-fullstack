@@ -14,6 +14,7 @@ import { handlePostDelete } from "@/components/post/handleDelete";
 import { handlePostReport } from "@/components/post/handleReport";
 import { handleVote } from "@/components/post/handleVote";
 import renderContent from "@/components/post/renderContent";
+import ShowPost from "@/components/post/showPost";
 import supabase from "@/components/supabase";
 import {
   faFlag,
@@ -501,213 +502,15 @@ export default function ProfilePage({ params }) {
           <hr className="seperator" />
           <div className="mt-8 space-y-16">
             {posts.map((post) => (
-              <div key={post.id_post}>
-                <div className="flex flex-row items-center justify-between">
-                  <div className="flex items-center">
-                    <img
-                      src={post.profile.profileimage}
-                      className="rounded-full border-[3px] border-accent h-14 w-14 object-cover"
-                    />
-                    <h1 className="text-text font-bold text-xl font-poppins ms-2 sm:ms-4">
-                      {post.profile.username}
-                    </h1>
-                  </div>
-                  <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
-                    {post.edited && (
-                      <p className="text-muted sm:w-1/2 w-full text-end text text-xs sm:text-sm">
-                        (Bearbeitet)
-                      </p>
-                    )}
-                    <div className="flex w-full items-center">
-                      <p className="text-muted w-full text text-xs sm:text-sm">
-                        {calcTimeDifference(post.createdat)}
-                      </p>
-                      {post.profile.username != "DANAMEME" && (
-                        <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
-                          <Dropdown
-                            dismissOnClick={false}
-                            label=""
-                            renderTrigger={() => (
-                              <FontAwesomeIcon
-                                icon={faEllipsisH}
-                                className="ms-4 text-muted text-2xl hover:cursor-pointer"
-                              />
-                            )}
-                          >
-                            {profileSession.id_profile ==
-                            post.profile.id_profile ? (
-                              <>
-                                <Dropdown.Item
-                                  className="text text-sm hover:bg-accentBackground"
-                                  onClick={() =>
-                                    router.push(
-                                      `/post/${generateTitle(post)}/edit`
-                                    )
-                                  }
-                                >
-                                  <FontAwesomeIcon
-                                    icon={faPen}
-                                    className="me-1.5"
-                                  />
-                                  Bearbeiten
-                                </Dropdown.Item>
-                                <Dropdown.Item
-                                  className="text text-sm hover:bg-accentBackground"
-                                  onClick={async () => {
-                                    await handlePostDelete(post.id_post);
-                                    setPosts(posts.filter((p) => p != post));
-                                  }}
-                                >
-                                  <FontAwesomeIcon
-                                    icon={faTrashCan}
-                                    className="me-1.5"
-                                  />
-                                  Löschen
-                                </Dropdown.Item>
-                              </>
-                            ) : (
-                              <Dropdown.Item
-                                className="text text-sm hover:bg-accentBackground"
-                                onClick={async () => {
-                                  const status = await handlePostReport(
-                                    post.id_post,
-                                    profileSession.id_profile
-                                  );
-                                  if (status == true) {
-                                    setSuccess(
-                                      "Beitrag wurde erfolgreich gemeldet!"
-                                    );
-                                    setTimeout(() => {
-                                      setSuccess("");
-                                    }, 3000);
-                                  }
-                                }}
-                              >
-                                <FontAwesomeIcon
-                                  icon={faFlag}
-                                  className="me-1.5"
-                                />
-                                Report
-                              </Dropdown.Item>
-                            )}
-                          </Dropdown>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="w-full mt-3">
-                  <Link href={`/post/${generateTitle(post)}`}>
-                    <h1 className="title text-2xl font-bold">{post.title}</h1>
-                    {post.content ? (
-                      <div
-                        dangerouslySetInnerHTML={renderContent(post.content)}
-                      ></div>
-                    ) : (
-                      <></>
-                    )}
-                  </Link>
-                </div>
-                {post.asset && (
-                  <div className="w-full mt-3">
-                    <img src={post.asset} className="w-full rounded-image" />
-                  </div>
-                )}
-                <div className="flex items-center flex-row w-full mt-3 space-x-2">
-                  {post.profile.username != "DANAMEME" && (
-                    <div className="flex items-center">
-                      <div className="flex flex-row items-center">
-                        <Icon
-                          path={
-                            post.rating == true
-                              ? mdiArrowUpBold
-                              : mdiArrowUpBoldOutline
-                          }
-                          size={1.22}
-                          className={
-                            "text text-2xl hover:cursor-pointer" +
-                            (profileSession.confirmed
-                              ? ""
-                              : " pointer-events-none text-muted")
-                          }
-                          onClick={async () => {
-                            await handleVote(
-                              post.id_post,
-                              true,
-                              profileSession.id_profile
-                            );
-                            const posts = await fetchPosts(
-                              profile.id_profile,
-                              profileSession.id_profile
-                            );
-                            setPosts(posts);
-                          }}
-                        />
-                        <p className="text text-base me-0.5">{post.upvotes}</p>
-                      </div>
-                      <div className="flex flex-row items-center">
-                        <Icon
-                          path={
-                            post.rating == false
-                              ? mdiArrowDownBold
-                              : mdiArrowDownBoldOutline
-                          }
-                          size={1.22}
-                          className={
-                            "text text-2xl hover:cursor-pointer" +
-                            (profileSession.confirmed
-                              ? ""
-                              : " pointer-events-none text-muted")
-                          }
-                          onClick={async () => {
-                            await handleVote(
-                              post.id_post,
-                              false,
-                              profileSession.id_profile
-                            );
-                            const posts = await fetchPosts(
-                              profile.id_profile,
-                              profileSession.id_profile
-                            );
-                            setPosts(posts);
-                          }}
-                        />
-                        <p className="text text-base me-0.5">
-                          {post.downvotes}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                  <div className="flex items-center">
-                    <Link
-                      href={`/post/${generateTitle(post)}`}
-                      className="flex"
-                    >
-                      <FontAwesomeIcon
-                        icon={faComment}
-                        className="text text-2xl me-1"
-                      />
-                      <p className="text text-base">{post.comments}</p>
-                    </Link>
-                  </div>
-                  <div>
-                    <FontAwesomeIcon
-                      icon={faPaperPlane}
-                      className="text text-2xl hover:cursor-pointer"
-                      onClick={() => {
-                        const url = window.location.origin;
-                        navigator.clipboard.writeText(
-                          `${url}/post/${generateTitle(post)}`
-                        );
-                        setSuccess("Link wurde kopiert!");
-                        setTimeout(() => {
-                          setSuccess("");
-                        }, 3000);
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
+              <ShowPost
+                key={post.id_post}
+                router={router}
+                setSuccess={setSuccess}
+                setPosts={setPosts}
+                profileId={profileSession.id_profile}
+                post={post}
+                profileConfirmed={profileSession.confirmed}
+              />
             ))}
             {posts.length == 0 && (
               <div className="flex flex-col items-center w-full">

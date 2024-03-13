@@ -1,48 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faArrowCircleUp,
-  faArrowUp,
-  faCheckCircle,
-  faEllipsisH,
-  faMapPin,
-  faPen,
-  faXmark,
-} from "@fortawesome/free-solid-svg-icons";
-import {
-  faCircleUp,
-  faComment,
-  faFlag,
-  faPaperPlane,
-  faTrashCan,
-} from "@fortawesome/free-regular-svg-icons";
-import Icon from "@mdi/react";
-import {
-  mdiArrowDownBold,
-  mdiArrowDownBoldOutline,
-  mdiArrowUpBold,
-  mdiArrowUpBoldOutline,
-} from "@mdi/js";
-import { Dropdown, Toast } from "flowbite-react";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { faCircleUp } from "@fortawesome/free-regular-svg-icons";
+import { Toast } from "flowbite-react";
 import { getSession } from "@/components/auth/getSession";
 import { getAccount } from "@/components/auth/getAccount";
 import { getProfile } from "@/components/auth/getProfile";
 import { fetchPosts } from "@/components/post/fetchPosts";
-import { calcTimeDifference } from "@/components/post/calcTimeDifference";
-import { handleVote } from "@/components/post/handleVote";
-import { handlePostDelete } from "@/components/post/handleDelete";
-import { handlePostReport } from "@/components/post/handleReport";
-import { generateTitle } from "@/components/post/generateTitle";
 import { useRouter } from "next/navigation";
 import supabase from "@/components/supabase";
 import { checkBan } from "@/components/auth/checkBan";
 import { calcTime } from "@/components/other/calcTime";
-import LazyImage from "@/components/post/lazyImage";
-import renderContent from "@/components/post/renderContent";
+import ShowPost from "@/components/post/showPost";
 
 export default function Home() {
   const router = useRouter();
@@ -155,209 +126,15 @@ export default function Home() {
       )}
       <div className="space-y-16 mx-6 sm:mx-0 mt-6">
         {posts.map((post) => (
-          <div key={post.id_post}>
-            <div className="flex flex-row items-center justify-between">
-              <div className="flex items-center">
-                <Link href={`/p/${post.profile.username}`}>
-                  <img
-                    src={post.profile.profileimage}
-                    className="rounded-full border-[3px] border-accent h-14 w-14 object-cover"
-                  />
-                </Link>
-                <Link href={`/p/${post.profile.username}`} passHref>
-                  <h1 className="text-text font-bold text-xl font-poppins ms-2 sm:ms-4">
-                    {post.profile.username}
-                  </h1>
-                </Link>
-              </div>
-              <div className="flex flex-col sm:flex-row w-auto justify-end items-center space-x-3">
-                {post.edited && (
-                  <p className="text-muted sm:w-1/2 w-full text-end text text-xs sm:text-sm">
-                    (Bearbeitet)
-                  </p>
-                )}
-                <div className="flex w-full items-center">
-                  <p className="text-muted w-full text text-xs sm:text-sm">
-                    {calcTimeDifference(post.createdat)}
-                  </p>
-                  {post.profile.username != "DANAMEME" && (
-                    <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
-                      <Dropdown
-                        dismissOnClick={false}
-                        label=""
-                        renderTrigger={() => (
-                          <FontAwesomeIcon
-                            icon={faEllipsisH}
-                            className="ms-2 sm:ms-4 text-muted text-2xl hover:cursor-pointer"
-                          />
-                        )}
-                      >
-                        {profileId == post.profile.id_profile ? (
-                          <>
-                            <Dropdown.Item
-                              className="text text-sm hover:bg-accentBackground"
-                              onClick={() =>
-                                router.push(`/post/${generateTitle(post)}/edit`)
-                              }
-                            >
-                              <FontAwesomeIcon
-                                icon={faPen}
-                                className="me-1.5"
-                              />
-                              Bearbeiten
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                              className="text text-sm hover:bg-accentBackground"
-                              onClick={async () => {
-                                await handlePostDelete(post.id_post);
-                                const newPosts = await fetchPosts(profileId);
-                                setPosts(newPosts);
-                              }}
-                            >
-                              <FontAwesomeIcon
-                                icon={faTrashCan}
-                                className="me-1.5"
-                              />
-                              Löschen
-                            </Dropdown.Item>
-                          </>
-                        ) : (
-                          <Dropdown.Item
-                            className="text text-sm hover:bg-accentBackground"
-                            onClick={async () => {
-                              const status = await handlePostReport(
-                                post.id_post,
-                                profileId
-                              );
-                              if (status == true) {
-                                setSuccess(
-                                  "Beitrag wurde erfolgreich gemeldet!"
-                                );
-                                setTimeout(() => {
-                                  setSuccess("");
-                                }, 3000);
-                              }
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faFlag} className="me-1.5" />
-                            Report
-                          </Dropdown.Item>
-                        )}
-                      </Dropdown>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            {post.pinned && (
-              <div className="flex flex-row items-center mt-3">
-                <div className="bg-primary flex px-5 py-2 rounded-badge">
-                  <FontAwesomeIcon
-                    icon={faMapPin}
-                    className="text text-xl me-2"
-                  />
-                  <p className="text text-sm ms-1 font-bold">Fixiert</p>
-                </div>
-              </div>
-            )}
-            <div className="w-full mt-3">
-              <Link href={`/post/${generateTitle(post)}`}>
-                <h1 className="title text-2xl font-bold">{post.title}</h1>
-                {post.content ? (
-                  <div
-                    dangerouslySetInnerHTML={renderContent(post.content)}
-                  ></div>
-                ) : (
-                  <></>
-                )}
-              </Link>
-            </div>
-            {post.asset && (
-              <div className="w-full mt-3">
-                <Link href={`/post/${generateTitle(post)}`} passHref>
-                  <LazyImage
-                    src={post.asset}
-                    alt={post.title ? post.title : "Post"}
-                  />
-                </Link>
-              </div>
-            )}
-            <div className="flex items-center flex-row w-full mt-3 space-x-2">
-              {post.profile.username != "DANAMEME" && (
-                <div className="flex items-center">
-                  <div className="flex flex-row items-center">
-                    <Icon
-                      path={
-                        post.rating == true
-                          ? mdiArrowUpBold
-                          : mdiArrowUpBoldOutline
-                      }
-                      size={1.22}
-                      className={
-                        "text text-2xl hover:cursor-pointer" +
-                        (profileConfirmed
-                          ? ""
-                          : " text-muted pointer-events-none")
-                      }
-                      onClick={async () => {
-                        await handleVote(post.id_post, true, profileId);
-                        const newPosts = await fetchPosts(profileId);
-                        setPosts(newPosts);
-                      }}
-                    />
-                    <p className="text text-base me-0.5">{post.upvotes}</p>
-                  </div>
-                  <div className="flex flex-row items-center">
-                    <Icon
-                      path={
-                        post.rating == false
-                          ? mdiArrowDownBold
-                          : mdiArrowDownBoldOutline
-                      }
-                      size={1.22}
-                      className={
-                        "text text-2xl hover:cursor-pointer" +
-                        (profileConfirmed
-                          ? ""
-                          : " text-muted pointer-events-none")
-                      }
-                      onClick={async () => {
-                        await handleVote(post.id_post, false, profileId);
-                        const newPosts = await fetchPosts(profileId);
-                        setPosts(newPosts);
-                      }}
-                    />
-                    <p className="text text-base me-0.5">{post.downvotes}</p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center">
-                <Link href={`/post/${generateTitle(post)}`} className="flex">
-                  <FontAwesomeIcon
-                    icon={faComment}
-                    className="text text-2xl me-1"
-                  />
-                  <p className="text text-base">{post.comments}</p>
-                </Link>
-              </div>
-              <div>
-                <FontAwesomeIcon
-                  icon={faPaperPlane}
-                  className="text text-2xl hover:cursor-pointer"
-                  onClick={() => {
-                    const url = window.location.origin;
-                    navigator.clipboard.writeText(
-                      `${url}/post/${generateTitle(post)}`
-                    );
-                    setSuccess("Link wurde kopiert!");
-                    setTimeout(() => {
-                      setSuccess("");
-                    }, 3000);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <ShowPost
+            key={post.id_post}
+            router={router}
+            setSuccess={setSuccess}
+            setPosts={setPosts}
+            profileId={profileId}
+            post={post}
+            profileConfirmed={profileConfirmed}
+          />
         ))}
         {banned ? (
           <div className="flex flex-col items-center w-full mt-8">
