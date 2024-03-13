@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="w-full md:w-1/3">
           <h1 className="title">DANAMEME</h1>
           <p className="text-muted text-lato text-sm font-semibold">
-            © Copyright 2023 - Levyn Schneider
+            © Copyright 2023-2024 - Levyn Schneider
           </p>
         </div>
         <div className="flex text-text font-lato font-semibold w-full md:w-1/3 justify-start md:justify-center space-x-8">
@@ -41,6 +41,9 @@ export default function Footer() {
             </Link>
             <Link href="/users" className="hover:underline">
               <li>Alle Benutzer</li>
+            </Link>
+            <Link href="/meme-of-the-month" className="hover:underline">
+              <li>Meme Of The Month Archiv</li>
             </Link>
           </ul>
         </div>
