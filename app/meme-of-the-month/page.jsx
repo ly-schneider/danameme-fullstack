@@ -61,7 +61,7 @@ export default function MotmPage() {
             <hr className="border-2" />
             <div className="flex flex-col space-y-12 mt-8">
               {posts[year].map((motm) => (
-                <div>
+                <div key={motm.id_motm}>
                   <h2 className="title text-3xl mb-4">
                     {new Date(motm.month).toLocaleDateString("de-DE", {
                       month: "long",
