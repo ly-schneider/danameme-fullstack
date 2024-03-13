@@ -53,7 +53,7 @@ export default function MotmPage() {
 
   return (
     <div className="mt-8 mx-5 sm:mx-0">
-      <h1 className="title">Meme of the Month Archiv</h1>
+      <h1 className="title">Meme Of The Month Archiv</h1>
       <div className="flex flex-col space-y-5 mt-8">
         {Object.keys(posts).map((year) => (
           <div key={year}>
