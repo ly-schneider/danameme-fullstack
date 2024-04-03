@@ -16,6 +16,7 @@ import { fetchPosts } from "@/components/post/fetchPosts";
 import { generateTitle } from "@/components/post/generateTitle";
 import { handlePostReport } from "@/components/post/handleReport";
 import LazyImage from "@/components/post/lazyImage";
+import renderContent from "@/components/post/renderContent";
 
 export default function MotmPage() {
   const [posts, setPosts] = useState([]);
