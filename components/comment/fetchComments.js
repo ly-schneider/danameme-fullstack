@@ -1,6 +1,6 @@
 import supabase from "../supabase";
 
-export async function fetchComments(postId, profileId) {
+export async function fetchComments(postId, profileId = null) {
   const { data: commentData, error: commentError } = await supabase
     .from("comment")
     .select(
@@ -41,6 +41,10 @@ export async function fetchComments(postId, profileId) {
 
   const checkRated = await Promise.all(
     calcLikes.map(async (comment) => {
+      if (profileId == null) {
+        return { ...comment, rating: null };
+      }
+
       let { data: ratingData, error } = await supabase
         .from("rating_comment")
         .select("*")

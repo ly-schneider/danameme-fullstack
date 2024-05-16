@@ -67,41 +67,39 @@ export default function ProfilePage({ params }) {
 
   useEffect(() => {
     async function loadData() {
+      let profileSession = null;
       const session = await getSession();
-      if (session == false) {
-        setProfileSession(false);
-        return false;
+      if (session != false) {
+        const accountSession = await getAccount(session.session.user.email);
+        if (accountSession == false) {
+          setProfileSession(false);
+          return false;
+        }
+
+        profileSession = await getProfile(accountSession.id_account);
+        if (profileSession == false) {
+          setProfileSession(false);
+          return false;
+        }
+        setProfileSession(profileSession);
+
+        const banData = await checkBan(accountSession.id_account);
+        let banCond = false;
+        if (banData.length > 0) {
+          banData.forEach((ban) => {
+            if (ban.type == "account") {
+              setBanned(true);
+              setBanData(ban);
+              banCond = true;
+            }
+          });
+        }
+        if (banCond) {
+          return false;
+        }
       }
 
-      const accountSession = await getAccount(session.session.user.email);
-      if (accountSession == false) {
-        setProfileSession(false);
-        return false;
-      }
-
-      const profileSession = await getProfile(accountSession.id_account);
-      if (profileSession == false) {
-        setProfileSession(false);
-        return false;
-      }
-      setProfileSession(profileSession);
-
-      const banData = await checkBan(accountSession.id_account);
-      let banCond = false;
-      if (banData.length > 0) {
-        banData.forEach((ban) => {
-          if (ban.type == "account") {
-            setBanned(true);
-            setBanData(ban);
-            banCond = true;
-          }
-        });
-      }
-      if (banCond) {
-        return false;
-      }
-
-      const profile = await getUserProfile(profileSession.id_profile);
+      const profile = await getUserProfile(profileSession?.id_profile);
       setProfile(profile);
 
       if (profile == false) {
@@ -117,7 +115,7 @@ export default function ProfilePage({ params }) {
 
       const posts = await fetchPosts(
         profile.id_profile,
-        profileSession.id_profile
+        profileSession?.id_profile
       );
       setPosts(posts);
 
@@ -140,21 +138,25 @@ export default function ProfilePage({ params }) {
       return false;
     }
 
-    const { data: following, error: followingError } = await supabase
-      .from("follower")
-      .select("*")
-      .eq("profile_id", data.id_profile)
-      .eq("follower_id", profileSessionId);
-
-    if (followingError) {
-      console.log(followingError);
-      return false;
-    }
-
-    if (following.length == 0) {
+    if (profileSessionId == null) {
       data.following = false;
     } else {
-      data.following = true;
+      const { data: following, error: followingError } = await supabase
+        .from("follower")
+        .select("*")
+        .eq("profile_id", data.id_profile)
+        .eq("follower_id", profileSessionId);
+
+      if (followingError) {
+        console.log(followingError);
+        return false;
+      }
+
+      if (following.length == 0) {
+        data.following = false;
+      } else {
+        data.following = true;
+      }
     }
 
     const { data: followingCount, error: followingCountError } = await supabase
@@ -294,6 +296,10 @@ export default function ProfilePage({ params }) {
           return { ...post, comments: 0 };
         }
 
+        if (profileIdSession == null) {
+          return { ...post, comments: commentData.length, rating: null };
+        }
+
         let { data: ratingData, error: ratingError } = await supabase
           .from("rating_post")
           .select("*")
@@ -389,7 +395,7 @@ export default function ProfilePage({ params }) {
                 {profile.confirmed != true && <>(Unverifiziert)</>}
               </span>
             </div>
-            {profileSession.id_profile != profile.id_profile && (
+            {profileSession?.id_profile != profile.id_profile && (
               <div className="[&>div]:bg-background [&>div]:border-[3px] [&>div]:border-primary [&>div]:rounded-md flex items-center">
                 <Dropdown
                   dismissOnClick={false}
@@ -401,25 +407,27 @@ export default function ProfilePage({ params }) {
                     />
                   )}
                 >
-                  <Dropdown.Item
-                    className="text text-sm hover:bg-accentBackground"
-                    onClick={async () => {
-                      const status = await handleProfileReport(
-                        profile.id_profile,
-                        profileSession.id_profile
-                      );
+                  {profileSession != null && (
+                    <Dropdown.Item
+                      className="text text-sm hover:bg-accentBackground"
+                      onClick={async () => {
+                        const status = await handleProfileReport(
+                          profile.id_profile,
+                          profileSession.id_profile
+                        );
 
-                      if (status == true) {
-                        setSuccess("Profil wurde erfolgreich gemeldet!");
-                        setTimeout(() => {
-                          setSuccess("");
-                        }, 3000);
-                      }
-                    }}
-                  >
-                    <FontAwesomeIcon icon={faFlag} className="me-1.5" />
-                    Report
-                  </Dropdown.Item>
+                        if (status == true) {
+                          setSuccess("Profil wurde erfolgreich gemeldet!");
+                          setTimeout(() => {
+                            setSuccess("");
+                          }, 3000);
+                        }
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faFlag} className="me-1.5" />
+                      Report
+                    </Dropdown.Item>
+                  )}
                 </Dropdown>
               </div>
             )}
@@ -437,35 +445,41 @@ export default function ProfilePage({ params }) {
               >
                 {profile.followingCount} Follower
               </a>
-              {profileSession.id_profile != profile.id_profile &&
-                profile.confirmed == true && (
-                  <button
-                    className="btn-secondary text text-xs font-semibold ms-3 hover:bg-primary transition-all duration-300"
-                    onClick={async () => {
-                      setLoadingFollow(true);
-                      const status = await followProfile(
-                        profile.id_profile,
-                        profileSession.id_profile,
-                        profile.following
-                      );
-                      if (status == true) {
-                        const profile = await getUserProfile(
-                          profileSession.id_profile
-                        );
-                        setProfile(profile);
-                        setLoadingFollow(false);
-                      } else {
-                        setLoadingFollow(false);
-                      }
-                    }}
-                  >
-                    {loadingFollow ? (
-                      <FontAwesomeIcon icon={faSpinner} spin />
-                    ) : (
-                      <>{profile.following == true ? "Entfolgen" : "Folgen"}</>
+              {profileSession != null && (
+                <>
+                  {profileSession.id_profile != profile.id_profile &&
+                    profile.confirmed == true && (
+                      <button
+                        className="btn-secondary text text-xs font-semibold ms-3 hover:bg-primary transition-all duration-300"
+                        onClick={async () => {
+                          setLoadingFollow(true);
+                          const status = await followProfile(
+                            profile.id_profile,
+                            profileSession.id_profile,
+                            profile.following
+                          );
+                          if (status == true) {
+                            const profile = await getUserProfile(
+                              profileSession.id_profile
+                            );
+                            setProfile(profile);
+                            setLoadingFollow(false);
+                          } else {
+                            setLoadingFollow(false);
+                          }
+                        }}
+                      >
+                        {loadingFollow ? (
+                          <FontAwesomeIcon icon={faSpinner} spin />
+                        ) : (
+                          <>
+                            {profile.following == true ? "Entfolgen" : "Folgen"}
+                          </>
+                        )}
+                      </button>
                     )}
-                  </button>
-                )}
+                </>
+              )}
             </div>
             {profile.username != "DANAMEME" && (
               <div className="flex items-center">
@@ -507,9 +521,9 @@ export default function ProfilePage({ params }) {
                 router={router}
                 setSuccess={setSuccess}
                 setPosts={setPosts}
-                profileId={profileSession.id_profile}
+                profileId={profileSession?.id_profile}
                 post={post}
-                profileConfirmed={profileSession.confirmed}
+                profileConfirmed={profileSession?.confirmed}
               />
             ))}
             {posts.length == 0 && (

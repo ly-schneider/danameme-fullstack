@@ -55,7 +55,8 @@ export default function Home() {
           }
         }
       } else {
-        router.push("/login");
+        const posts = await fetchPosts();
+        setPosts(posts);
       }
     }
     getData();

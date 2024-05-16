@@ -1,6 +1,6 @@
 import supabase from "../supabase";
 
-export async function fetchPosts(profileId) {
+export async function fetchPosts(profileId = null) {
   const { data: postsData, error: postsError } = await supabase
     .from("post")
     .select(
@@ -50,6 +50,10 @@ export async function fetchPosts(profileId) {
       if (error) {
         console.log(error);
         return { ...post, comments: 0 };
+      }
+
+      if (profileId == null) {
+        return { ...post, comments: commentData.length, rating: null };
       }
 
       let { data: ratingData, error: ratingError } = await supabase
