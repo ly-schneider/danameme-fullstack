@@ -12,6 +12,7 @@ import { getAccount } from "./auth/getAccount";
 import { getProfile } from "./auth/getProfile";
 import NotificationButton from "./buttons/notificationButton";
 import SearchButton from "./buttons/searchButton";
+import LoginButton from "./buttons/loginButton";
 
 export default function Navigation() {
   const router = useRouter();
@@ -31,11 +32,14 @@ export default function Navigation() {
           }
         }
       } else {
+        // 1. Check if user is on the index page
+        // 2. Check if the pathname starts with /post/
+        // 3. Check if the pathname starts with /p/
+        // If none of the above are true, redirect the user to the login page
         if (
-          pathname != "/login" &&
-          pathname != "/register" &&
-          pathname != "/forgot-password" &&
-          pathname != "/update-password"
+          pathname != "/" &&
+          !pathname.startsWith("/post/") &&
+          !pathname.startsWith("/p/")
         ) {
           router.push("/login");
         }
@@ -53,12 +57,14 @@ export default function Navigation() {
           </Link>
         </div>
         <div className="flex space-x-2 md:space-x-4">
-          {profile.length != 0 && (
+          {profile.length != 0 ? (
             <>
               <SearchButton selected={pathname == "/search"} />
               <NotificationButton id_profile={profile.id_profile} />
               <AddPostButton selected={pathname == "/create"} />
             </>
+          ) : (
+            <LoginButton selected={pathname == "/login"} />
           )}
           <HomeButton selected={pathname == "/"} />
           {profile.length != 0 && <ProfileButton />}

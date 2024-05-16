@@ -107,12 +107,23 @@ export default function PostPage({ params }) {
             }
           }
         }
+      } else {
+        const post = await fetchPost();
+        if (post == null) {
+          setPost([]);
+        } else {
+          setPost(post);
+        }
+        if (post != null) {
+          const comments = await fetchComments(post.id_post);
+          setComments(comments);
+        }
       }
     }
     getData();
   }, []);
 
-  async function fetchPost(profileId) {
+  async function fetchPost(profileId = null) {
     let id = params.url.split("-");
     id = id[id.length - 1];
 
@@ -168,6 +179,10 @@ export default function PostPage({ params }) {
         if (error) {
           console.log(error);
           return { ...post, comments: 0 };
+        }
+
+        if (profileId == null) {
+          return { ...post, comments: commentData.length, rating: null };
         }
 
         let { data: ratingData, error: ratingError } = await supabase
@@ -571,7 +586,7 @@ export default function PostPage({ params }) {
                     size={1.22}
                     className={
                       "text text-2xl hover:cursor-pointer" +
-                      (profile.confirmed
+                      (profile?.confirmed
                         ? ""
                         : " text-muted pointer-events-none")
                     }
@@ -600,7 +615,7 @@ export default function PostPage({ params }) {
                     size={1.22}
                     className={
                       "text text-2xl hover:cursor-pointer" +
-                      (profile.confirmed
+                      (profile?.confirmed
                         ? ""
                         : " text-muted pointer-events-none")
                     }
@@ -622,7 +637,7 @@ export default function PostPage({ params }) {
               </div>
               <div
                 className={
-                  (commentBanned || !profile.confirmed
+                  (commentBanned || !profile?.confirmed
                     ? "pointer-events-none text-muted"
                     : "hover:cursor-pointer") + " flex items-center"
                 }
@@ -714,42 +729,61 @@ export default function PostPage({ params }) {
                         renderTrigger={() => (
                           <FontAwesomeIcon
                             icon={faEllipsisH}
-                            className="ms-4 text-muted text-2xl hover:cursor-pointer"
+                            className="ms-2 sm:ms-4 text-muted text-2xl hover:cursor-pointer"
                           />
                         )}
                       >
-                        {profile.id_profile == post.profile.id_profile ? (
-                          <Dropdown.Item
-                            className="text text-sm hover:bg-accentBackground"
-                            onClick={async () => {
-                              await handlePostDelete(post.id_post);
-                              router.push("/");
-                            }}
-                          >
-                            <FontAwesomeIcon
-                              icon={faTrashCan}
-                              className="me-1.5"
-                            />
-                            Delete
-                          </Dropdown.Item>
+                        {profile?.id_profile == post.profile.id_profile ? (
+                          <>
+                            <Dropdown.Item
+                              className="text text-sm hover:bg-accentBackground"
+                              onClick={() =>
+                                router.push(`/post/${generateTitle(post)}/edit`)
+                              }
+                            >
+                              <FontAwesomeIcon
+                                icon={faPen}
+                                className="me-1.5"
+                              />
+                              Bearbeiten
+                            </Dropdown.Item>
+                            <Dropdown.Item
+                              className="text text-sm hover:bg-accentBackground"
+                              onClick={async () => {
+                                await handlePostDelete(post.id_post);
+                                router.push("/");
+                              }}
+                            >
+                              <FontAwesomeIcon
+                                icon={faTrashCan}
+                                className="me-1.5"
+                              />
+                              Delete
+                            </Dropdown.Item>
+                          </>
                         ) : (
-                          <Dropdown.Item
-                            className="text text-sm hover:bg-accentBackground"
-                            onClick={async () => {
-                              handlePostReport(
-                                post.id_post,
-                                profile.id_profile
-                              );
+                          profile?.confirmed && (
+                            <Dropdown.Item
+                              className="text text-sm hover:bg-accentBackground"
+                              onClick={async () => {
+                                handlePostReport(
+                                  post.id_post,
+                                  profile.id_profile
+                                );
 
-                              setSuccess("Beitrag wurde gemeldet!");
-                              setTimeout(() => {
-                                setSuccess("");
-                              }, 3000);
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faFlag} className="me-1.5" />
-                            Report
-                          </Dropdown.Item>
+                                setSuccess("Beitrag wurde gemeldet!");
+                                setTimeout(() => {
+                                  setSuccess("");
+                                }, 3000);
+                              }}
+                            >
+                              <FontAwesomeIcon
+                                icon={faFlag}
+                                className="me-1.5"
+                              />
+                              Report
+                            </Dropdown.Item>
+                          )
                         )}
                       </Dropdown>
                     </div>
@@ -785,7 +819,7 @@ export default function PostPage({ params }) {
                       size={1.22}
                       className={
                         "text text-2xl hover:cursor-pointer" +
-                        (profile.confirmed
+                        (profile?.confirmed
                           ? ""
                           : " text-muted pointer-events-none")
                       }
@@ -793,7 +827,7 @@ export default function PostPage({ params }) {
                         await handleVote(
                           post.id_post,
                           true,
-                          profile.id_profile
+                          profile?.id_profile
                         );
                         const newPost = await fetchPost(profile.id_profile);
                         setPost(newPost);
@@ -811,7 +845,7 @@ export default function PostPage({ params }) {
                       size={1.22}
                       className={
                         "text text-2xl hover:cursor-pointer" +
-                        (profile.confirmed
+                        (profile?.confirmed
                           ? ""
                           : " text-muted pointer-events-none")
                       }
@@ -819,7 +853,7 @@ export default function PostPage({ params }) {
                         await handleVote(
                           post.id_post,
                           false,
-                          profile.id_profile
+                          profile?.id_profile
                         );
                         const newPost = await fetchPost(profile.id_profile);
                         setPost(newPost);
@@ -873,7 +907,7 @@ export default function PostPage({ params }) {
                   </div>
                 ) : (
                   <>
-                    {profile.confirmed ? (
+                    {profile?.confirmed ? (
                       <div className="">
                         <p className="text text-muted">
                           Kommentiere als{" "}
@@ -938,11 +972,22 @@ export default function PostPage({ params }) {
                           </button>
                         </div>
                       </div>
+                    ) : profile != null ? (
+                      <>
+                        {profile?.confirmed && (
+                          <div className="flex flex-col w-full">
+                            <h1 className="text text-muted text-base font-bold">
+                              Du kannst noch keine Kommentare erfassen, da dein
+                              Profil noch nicht verifiziert ist!
+                            </h1>
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className="flex flex-col w-full">
                         <h1 className="text text-muted text-base font-bold">
-                          Du kannst noch keine Kommentare erfassen, da dein
-                          Profil noch nicht verifiziert ist!
+                          Du musst dich anmelden, um Kommentare erfassen zu
+                          können!
                         </h1>
                       </div>
                     )}

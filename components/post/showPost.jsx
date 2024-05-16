@@ -98,24 +98,26 @@ export default function ShowPost({
                       </Dropdown.Item>
                     </>
                   ) : (
-                    <Dropdown.Item
-                      className="text text-sm hover:bg-accentBackground"
-                      onClick={async () => {
-                        const status = await handlePostReport(
-                          post.id_post,
-                          profileId
-                        );
-                        if (status == true) {
-                          setSuccess("Beitrag wurde erfolgreich gemeldet!");
-                          setTimeout(() => {
-                            setSuccess("");
-                          }, 3000);
-                        }
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faFlag} className="me-1.5" />
-                      Report
-                    </Dropdown.Item>
+                    profileConfirmed == true && (
+                      <Dropdown.Item
+                        className="text text-sm hover:bg-accentBackground"
+                        onClick={async () => {
+                          const status = await handlePostReport(
+                            post.id_post,
+                            profileId
+                          );
+                          if (status == true) {
+                            setSuccess("Beitrag wurde erfolgreich gemeldet!");
+                            setTimeout(() => {
+                              setSuccess("");
+                            }, 3000);
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faFlag} className="me-1.5" />
+                        Report
+                      </Dropdown.Item>
+                    )
                   )}
                 </Dropdown>
               </div>
